@@ -225,20 +225,26 @@ function setupCommandButtons() {
 
 // Music toggle functionality
 function setupMusicToggle() {
+    const suitSchematic = document.querySelector('.suit-schematic');
+    
     musicToggle.addEventListener('click', () => {
         if (isMusicPlaying) {
             backgroundMusic.pause();
             musicToggle.textContent = 'Music: OFF';
             musicToggle.classList.remove('active');
             isMusicPlaying = false;
-            addTelemetryEntry('Background audio disabled');
+            // Stop dancing animation
+            suitSchematic.classList.remove('dancing');
+            addTelemetryEntry('Background audio disabled - Dance mode OFF');
         } else {
             // Try to play music
             backgroundMusic.play().then(() => {
                 musicToggle.textContent = 'Music: ON';
                 musicToggle.classList.add('active');
                 isMusicPlaying = true;
-                addTelemetryEntry('Background audio enabled');
+                // Start dancing animation
+                suitSchematic.classList.add('dancing');
+                addTelemetryEntry('Background audio enabled - IRON MAN DANCE MODE ACTIVATED');
             }).catch((error) => {
                 // Handle autoplay restrictions
                 console.log('Audio autoplay prevented:', error);
@@ -254,6 +260,7 @@ function setupMusicToggle() {
         isMusicPlaying = false;
         musicToggle.textContent = 'Music: OFF';
         musicToggle.classList.remove('active');
+        suitSchematic.classList.remove('dancing');
     });
     
     backgroundMusic.addEventListener('error', (e) => {
