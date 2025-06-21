@@ -329,6 +329,13 @@ body {
     stroke-width: 1;
 }
 
+.eye-slit {
+    fill: var(--accent-gold);
+    stroke: var(--accent-gold);
+    stroke-width: 1;
+    filter: drop-shadow(0 0 3px var(--accent-gold));
+}
+
 .reactor {
     fill: var(--accent-gold);
     animation: reactor-pulse 1.5s ease-in-out infinite alternate;

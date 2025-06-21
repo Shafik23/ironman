@@ -107,10 +107,17 @@
                     <svg class="suit-schematic" viewBox="0 0 400 600">
                         <!-- Helmet -->
                         <g class="schematic-part" data-part="helmet">
-                            <circle cx="200" cy="80" r="45" class="part-outline"/>
-                            <circle cx="185" cy="70" r="3" class="part-detail"/>
-                            <circle cx="215" cy="70" r="3" class="part-detail"/>
-                            <path d="M175 90 Q200 100 225 90" class="part-detail"/>
+                            <!-- Main helmet trapezoid shape -->
+                            <path d="M170 45 L230 45 L240 100 L160 100 Z" class="part-outline"/>
+                            <!-- Eye slits -->
+                            <rect x="180" y="65" width="12" height="6" rx="3" class="part-detail eye-slit"/>
+                            <rect x="208" y="65" width="12" height="6" rx="3" class="part-detail eye-slit"/>
+                            <!-- Mouth/ventilation grille -->
+                            <rect x="185" y="85" width="30" height="3" rx="1" class="part-detail"/>
+                            <rect x="185" y="90" width="30" height="2" rx="1" class="part-detail"/>
+                            <!-- Side panels -->
+                            <path d="M160 100 L155 85 L165 75 L170 90" class="part-detail"/>
+                            <path d="M240 100 L245 85 L235 75 L230 90" class="part-detail"/>
                         </g>
                         
                         <!-- Chest/Arc Reactor -->
@@ -220,9 +227,8 @@
 
     <!-- Audio element for background music -->
     <audio id="backgroundMusic" loop preload="auto">
-        <source src="https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3" type="audio/mpeg">
-        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" type="audio/mp4">
-        <!-- Epic background music for Ironman interface -->
+        <source src="music.mp3" type="audio/mpeg">
+        <!-- Local music file for Ironman interface -->
     </audio>
 
     <script src="script.js"></script>
