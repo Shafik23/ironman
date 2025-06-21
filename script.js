@@ -70,6 +70,9 @@ function initializeApp() {
     setupMusicToggle();
     startTelemetryUpdates();
     
+    // Initialize Arc Reactor with default power level
+    updateArcReactor(powerSlider.value);
+    
     console.log('Ironman Suit Designer GUI initialized');
 }
 
@@ -166,6 +169,7 @@ function setupConfigurationSliders() {
     powerSlider.addEventListener('input', (e) => {
         powerValue.textContent = e.target.value + '%';
         updateProgressBars();
+        updateArcReactor(e.target.value);
         addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
     });
     
@@ -190,34 +194,132 @@ function setupConfigurationSliders() {
 function updateProgressBars() {
     const powerLevel = parseInt(powerSlider.value);
     const progressBars = document.querySelectorAll('.progress-fill');
+    const statusTexts = document.querySelectorAll('.status-row span:last-child');
     
-    // Simulate system load changes based on power level
-    if (progressBars.length >= 4) {
-        progressBars[0].style.width = Math.min(powerLevel + 10, 100) + '%'; // CPU Load
-        progressBars[1].style.width = Math.min(powerLevel * 0.6, 100) + '%'; // Memory
-        progressBars[2].style.width = Math.max(powerLevel - 5, 10) + '%'; // Power
-        progressBars[3].style.width = Math.min(powerLevel + 5, 100) + '%'; // Integrity
+    // Calculate values based on power level
+    const cpuLoad = Math.min(powerLevel + 10, 100);
+    const memory = Math.min(powerLevel * 0.6, 100);
+    const power = powerLevel; // Direct match with Power Output slider
+    const integrity = Math.min(powerLevel + 5, 100);
+    
+    const values = [cpuLoad, memory, power, integrity];
+    
+    // Update both bars and text values
+    if (progressBars.length >= 4 && statusTexts.length >= 4) {
+        for (let i = 0; i < 4; i++) {
+            progressBars[i].style.width = values[i] + '%';
+            statusTexts[i].textContent = Math.round(values[i]) + '%';
+        }
     }
 }
 
 // Update suit zoom based on slider value
 function updateSuitZoom(zoomValue) {
     const suitSchematic = document.querySelector('.suit-schematic');
-    const baseViewBox = { x: 40, y: 40, width: 320, height: 380 };
     
-    // Calculate zoom factor (100% = 1.0, 50% = 2.0, 150% = 0.67)
-    const zoomFactor = 100 / zoomValue;
+    // Suit boundaries: left edge ~85, right edge ~315, top ~45, bottom ~415
+    const suitBounds = { 
+        left: 85, 
+        right: 315, 
+        top: 45, 
+        bottom: 415 
+    };
     
-    // Calculate new viewBox dimensions
-    const newWidth = baseViewBox.width * zoomFactor;
-    const newHeight = baseViewBox.height * zoomFactor;
+    const suitWidth = suitBounds.right - suitBounds.left;
+    const suitHeight = suitBounds.bottom - suitBounds.top;
+    const suitCenterX = (suitBounds.left + suitBounds.right) / 2;
+    const suitCenterY = (suitBounds.top + suitBounds.bottom) / 2;
     
-    // Calculate centering offset
-    const offsetX = baseViewBox.x - (newWidth - baseViewBox.width) / 2;
-    const offsetY = baseViewBox.y - (newHeight - baseViewBox.height) / 2;
+    // Calculate zoom factor (100% = 1.0, higher = more zoomed in)
+    const zoomFactor = zoomValue / 100;
+    
+    // Calculate viewBox dimensions based on zoom
+    const viewWidth = suitWidth / zoomFactor;
+    const viewHeight = suitHeight / zoomFactor;
+    
+    // Center the viewBox on the suit
+    const viewX = suitCenterX - viewWidth / 2;
+    const viewY = suitCenterY - viewHeight / 2;
     
     // Update the viewBox
-    suitSchematic.setAttribute('viewBox', `${offsetX} ${offsetY} ${newWidth} ${newHeight}`);
+    suitSchematic.setAttribute('viewBox', `${viewX} ${viewY} ${viewWidth} ${viewHeight}`);
+}
+
+// Update Arc Reactor appearance and tooltip based on power level
+function updateArcReactor(powerLevel) {
+    const reactor = document.querySelector('.reactor');
+    const powerInt = parseInt(powerLevel);
+    
+    // Remove all power level classes to use dynamic styling
+    reactor.classList.remove('power-max', 'power-high', 'power-medium', 'power-low', 'power-critical');
+    
+    // Calculate smooth color transition based on power level
+    const { color, glowIntensity } = calculateReactorColor(powerInt);
+    
+    // Apply dynamic styles that override CSS animations
+    reactor.style.fill = color;
+    reactor.style.filter = `drop-shadow(0 0 ${glowIntensity}px ${color})`;
+    
+    // Create pulsing animation with CSS custom properties
+    reactor.style.animation = 'none'; // Stop existing animation
+    reactor.style.setProperty('--reactor-color', color);
+    reactor.style.setProperty('--reactor-glow', `${glowIntensity}px`);
+    reactor.style.animation = 'reactor-pulse-dynamic 1.5s ease-in-out infinite alternate';
+    
+    // Update tooltip content
+    updateReactorTooltip(powerInt);
+}
+
+// Calculate smooth color transition for reactor
+function calculateReactorColor(powerLevel) {
+    let r, g, b, glowIntensity;
+    
+    if (powerLevel <= 25) {
+        // Dark red to red (0-25%)
+        const factor = powerLevel / 25;
+        r = Math.round(139 + (116 * factor)); // 139 to 255
+        g = Math.round(0 + (68 * factor));    // 0 to 68
+        b = 0;
+        glowIntensity = 3 + (5 * factor);     // 3 to 8
+    } else if (powerLevel <= 50) {
+        // Red to orange (25-50%)
+        const factor = (powerLevel - 25) / 25;
+        r = 255;
+        g = Math.round(68 + (60 * factor));   // 68 to 128
+        b = 0;
+        glowIntensity = 8 + (4 * factor);     // 8 to 12
+    } else if (powerLevel <= 75) {
+        // Orange to gold (50-75%)
+        const factor = (powerLevel - 50) / 25;
+        r = 255;
+        g = Math.round(128 + (87 * factor));  // 128 to 215
+        b = Math.round(0 + (0 * factor));     // 0 to 0
+        glowIntensity = 12 + (6 * factor);    // 12 to 18
+    } else {
+        // Gold to bright yellow/white (75-100%)
+        const factor = (powerLevel - 75) / 25;
+        r = 255;
+        g = Math.round(215 + (40 * factor));  // 215 to 255
+        b = Math.round(0 + (255 * factor));   // 0 to 255
+        glowIntensity = 18 + (12 * factor);   // 18 to 30
+    }
+    
+    const color = `rgb(${r}, ${g}, ${b})`;
+    return { color, glowIntensity };
+}
+
+// Continue updateArcReactor function - update tooltip content
+function updateReactorTooltip(powerInt) {
+    const powerOutput = (0.25 + (powerInt * 0.0475)).toFixed(1); // Scale from 0.25 TW to 5.0 TW
+    const efficiency = Math.max(40, Math.min(99.9, 40 + (powerInt * 0.599))).toFixed(1); // Scale from 40% to 99.9%
+    const temperature = Math.max(1000, Math.min(5000, 1000 + (powerInt * 40))).toFixed(0); // Scale from 1000°C to 5000°C
+    
+    let status = 'NOMINAL';
+    if (powerInt >= 90) status = 'MAXIMUM POWER';
+    else if (powerInt >= 70) status = 'HIGH OUTPUT';
+    else if (powerInt < 30) status = 'CRITICAL LOW';
+    
+    tooltipContent['chest'] = `ARC REACTOR<br>• Power Output: ${powerOutput} TW<br>• Efficiency: ${efficiency}%<br>• Core Temperature: ${temperature}°C<br>• Status: ${status}`;
 }
 
 // Command buttons functionality
@@ -326,28 +428,9 @@ function startTelemetryUpdates() {
         addTelemetryEntry(randomMessage);
     }, 8000); // Update every 8 seconds
     
-    // System status updates
-    setInterval(() => {
-        updateSystemMetrics();
-    }, 5000); // Update every 5 seconds
+    // System status updates - removed random updates to keep values synchronized with sliders
 }
 
-// Update system metrics randomly
-function updateSystemMetrics() {
-    const progressBars = document.querySelectorAll('.progress-fill');
-    const statusTexts = document.querySelectorAll('.status-row span:last-child');
-    
-    progressBars.forEach((bar, index) => {
-        if (index < statusTexts.length) {
-            const currentValue = parseInt(statusTexts[index].textContent);
-            const variation = Math.floor(Math.random() * 6) - 3; // -3 to +3
-            const newValue = Math.max(10, Math.min(100, currentValue + variation));
-            
-            bar.style.width = newValue + '%';
-            statusTexts[index].textContent = newValue + '%';
-        }
-    });
-}
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {

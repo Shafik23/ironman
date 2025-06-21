@@ -274,6 +274,12 @@ body {
     font-size: 0.8rem;
 }
 
+.status-row span:last-child {
+    width: 40px;
+    text-align: right;
+    display: inline-block;
+}
+
 .progress-bar {
     flex: 1;
     height: 8px;
@@ -299,14 +305,13 @@ body {
     position: relative;
     background: radial-gradient(circle at center, var(--bg-lighter) 0%, var(--bg-panel) 100%);
     border-radius: 8px;
-    margin: 5px 0;
+    margin: 10px 0;
     min-height: 0;
 }
 
 .suit-schematic {
     width: 100%;
     height: 100%;
-    max-height: 700px;
     filter: drop-shadow(0 0 10px var(--primary-cyan));
 }
 
@@ -339,6 +344,31 @@ body {
 .reactor {
     fill: var(--accent-gold);
     animation: reactor-pulse 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-max {
+    fill: #ffff00;
+    animation: reactor-pulse-max 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-high {
+    fill: var(--accent-gold);
+    animation: reactor-pulse-high 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-medium {
+    fill: #ff8000;
+    animation: reactor-pulse-medium 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-low {
+    fill: #ff4444;
+    animation: reactor-pulse-low 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-critical {
+    fill: #8b0000;
+    animation: reactor-pulse-critical 1.5s ease-in-out infinite alternate;
 }
 
 .repulsor {
@@ -447,10 +477,12 @@ body {
 }
 
 .config-value {
-    flex: 0 0 40px;
+    flex: 0 0 50px;
     font-size: 0.8rem;
     color: var(--primary-cyan);
     text-align: right;
+    width: 50px;
+    display: inline-block;
 }
 
 .config-select {
@@ -528,6 +560,70 @@ body {
     to {
         fill: #ffff00;
         filter: drop-shadow(0 0 15px #ffff00);
+    }
+}
+
+@keyframes reactor-pulse-max {
+    from {
+        fill: #ffff00;
+        filter: drop-shadow(0 0 15px #ffff00);
+    }
+    to {
+        fill: #ffffff;
+        filter: drop-shadow(0 0 25px #ffff00);
+    }
+}
+
+@keyframes reactor-pulse-high {
+    from {
+        fill: var(--accent-gold);
+        filter: drop-shadow(0 0 8px var(--accent-gold));
+    }
+    to {
+        fill: #ffff00;
+        filter: drop-shadow(0 0 18px var(--accent-gold));
+    }
+}
+
+@keyframes reactor-pulse-medium {
+    from {
+        fill: #ff8000;
+        filter: drop-shadow(0 0 5px #ff8000);
+    }
+    to {
+        fill: #ffa500;
+        filter: drop-shadow(0 0 12px #ff8000);
+    }
+}
+
+@keyframes reactor-pulse-low {
+    from {
+        fill: #ff4444;
+        filter: drop-shadow(0 0 3px #ff4444);
+    }
+    to {
+        fill: #ff6666;
+        filter: drop-shadow(0 0 8px #ff4444);
+    }
+}
+
+@keyframes reactor-pulse-critical {
+    from {
+        fill: #8b0000;
+        filter: drop-shadow(0 0 2px #8b0000);
+    }
+    to {
+        fill: #a52a2a;
+        filter: drop-shadow(0 0 5px #8b0000);
+    }
+}
+
+@keyframes reactor-pulse-dynamic {
+    from {
+        filter: drop-shadow(0 0 var(--reactor-glow) var(--reactor-color));
+    }
+    to {
+        filter: drop-shadow(0 0 calc(var(--reactor-glow) * 1.5) var(--reactor-color));
     }
 }
 
