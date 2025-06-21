@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRONMAN SUIT DESIGNER - MK-VII PROTOTYPE</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Scan lines overlay effect -->
+    <div class="scan-lines"></div>
+    
+    <!-- Main container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">IRONMAN SUIT DESIGNER</h1>
+            <div class="subtitle">MK-VII PROTOTYPE CONFIGURATION SYSTEM</div>
+            <div class="status-bar">
+                <span class="status-item">STATUS: ONLINE</span>
+                <span class="status-item">POWER: 99%</span>
+                <span class="status-item">SYSTEM: NOMINAL</span>
+            </div>
+        </header>
+
+        <!-- Main content panels -->
+        <div class="main-content">
+            <!-- Left Panel: Component Selection & System Status -->
+            <div class="panel left-panel">
+                <div class="panel-header">SYSTEM MODULES</div>
+                
+                <!-- Music Toggle Button -->
+                <button id="musicToggle" class="music-toggle">Music: OFF</button>
+                
+                <div class="component-list">
+                    <div class="component-item" data-component="helmet">
+                        <div class="component-icon">◊</div>
+                        <div class="component-name">HELMET SYSTEMS</div>
+                        <div class="component-status online">ONLINE</div>
+                    </div>
+                    <div class="component-item" data-component="chest">
+                        <div class="component-icon">◈</div>
+                        <div class="component-name">ARC REACTOR</div>
+                        <div class="component-status online">ONLINE</div>
+                    </div>
+                    <div class="component-item" data-component="arms">
+                        <div class="component-icon">▣</div>
+                        <div class="component-name">ARM SERVOS</div>
+                        <div class="component-status online">ONLINE</div>
+                    </div>
+                    <div class="component-item" data-component="legs">
+                        <div class="component-icon">▢</div>
+                        <div class="component-name">LEG ACTUATORS</div>
+                        <div class="component-status warning">CALIBRATING</div>
+                    </div>
+                    <div class="component-item" data-component="repulsors">
+                        <div class="component-icon">◉</div>
+                        <div class="component-name">REPULSORS</div>
+                        <div class="component-status online">ONLINE</div>
+                    </div>
+                    <div class="component-item" data-component="thrusters">
+                        <div class="component-icon">▲</div>
+                        <div class="component-name">FLIGHT SYSTEMS</div>
+                        <div class="component-status error">OFFLINE</div>
+                    </div>
+                </div>
+
+                <div class="system-status">
+                    <div class="panel-header">SYSTEM STATUS</div>
+                    <div class="status-grid">
+                        <div class="status-row">
+                            <span>CPU LOAD:</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 67%;"></div>
+                            </div>
+                            <span>67%</span>
+                        </div>
+                        <div class="status-row">
+                            <span>MEMORY:</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 43%;"></div>
+                            </div>
+                            <span>43%</span>
+                        </div>
+                        <div class="status-row">
+                            <span>POWER:</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 99%;"></div>
+                            </div>
+                            <span>99%</span>
+                        </div>
+                        <div class="status-row">
+                            <span>INTEGRITY:</span>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 85%;"></div>
+                            </div>
+                            <span>85%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Main Suit Schematic -->
+            <div class="panel center-panel">
+                <div class="panel-header">SUIT SCHEMATIC - MK-VII</div>
+                <div class="schematic-container">
+                    <svg class="suit-schematic" viewBox="0 0 400 600">
+                        <!-- Helmet -->
+                        <g class="schematic-part" data-part="helmet">
+                            <circle cx="200" cy="80" r="45" class="part-outline"/>
+                            <circle cx="185" cy="70" r="3" class="part-detail"/>
+                            <circle cx="215" cy="70" r="3" class="part-detail"/>
+                            <path d="M175 90 Q200 100 225 90" class="part-detail"/>
+                        </g>
+                        
+                        <!-- Chest/Arc Reactor -->
+                        <g class="schematic-part" data-part="chest">
+                            <rect x="160" y="130" width="80" height="100" rx="10" class="part-outline"/>
+                            <circle cx="200" cy="160" r="15" class="part-detail reactor"/>
+                            <circle cx="200" cy="160" r="10" class="part-detail"/>
+                            <circle cx="200" cy="160" r="5" class="part-detail"/>
+                        </g>
+                        
+                        <!-- Arms -->
+                        <g class="schematic-part" data-part="arms">
+                            <!-- Left arm -->
+                            <rect x="100" y="140" width="50" height="20" rx="10" class="part-outline"/>
+                            <rect x="85" y="170" width="20" height="60" rx="10" class="part-outline"/>
+                            <circle cx="95" cy="240" r="8" class="part-detail"/>
+                            
+                            <!-- Right arm -->
+                            <rect x="250" y="140" width="50" height="20" rx="10" class="part-outline"/>
+                            <rect x="295" y="170" width="20" height="60" rx="10" class="part-outline"/>
+                            <circle cx="305" cy="240" r="8" class="part-detail"/>
+                        </g>
+                        
+                        <!-- Repulsors -->
+                        <g class="schematic-part" data-part="repulsors">
+                            <circle cx="95" cy="240" r="12" class="part-outline repulsor"/>
+                            <circle cx="305" cy="240" r="12" class="part-outline repulsor"/>
+                        </g>
+                        
+                        <!-- Legs -->
+                        <g class="schematic-part" data-part="legs">
+                            <!-- Left leg -->
+                            <rect x="170" y="240" width="25" height="80" rx="12" class="part-outline"/>
+                            <rect x="165" y="330" width="35" height="60" rx="15" class="part-outline"/>
+                            
+                            <!-- Right leg -->
+                            <rect x="205" y="240" width="25" height="80" rx="12" class="part-outline"/>
+                            <rect x="200" y="330" width="35" height="60" rx="15" class="part-outline"/>
+                        </g>
+                        
+                        <!-- Thrusters -->
+                        <g class="schematic-part" data-part="thrusters">
+                            <rect x="170" y="400" width="10" height="15" class="part-outline thruster"/>
+                            <rect x="185" y="400" width="10" height="15" class="part-outline thruster"/>
+                            <rect x="205" y="400" width="10" height="15" class="part-outline thruster"/>
+                            <rect x="220" y="400" width="10" height="15" class="part-outline thruster"/>
+                        </g>
+                    </svg>
+                    
+                    <!-- Tooltip -->
+                    <div id="tooltip" class="tooltip"></div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Telemetry & Customization -->
+            <div class="panel right-panel">
+                <div class="panel-header">TELEMETRY DATA</div>
+                <div class="telemetry-log" id="telemetryLog">
+                    <div class="log-entry">[09:42:15] Arc reactor output: 3.2 TW</div>
+                    <div class="log-entry">[09:42:10] Flight systems calibration complete</div>
+                    <div class="log-entry">[09:42:05] Repulsor array alignment: 99.7%</div>
+                    <div class="log-entry">[09:42:00] Helmet HUD initialization complete</div>
+                    <div class="log-entry">[09:41:55] All systems nominal</div>
+                </div>
+
+                <div class="customization-panel">
+                    <div class="panel-header">CONFIGURATION</div>
+                    
+                    <div class="config-group">
+                        <label class="config-label">POWER OUTPUT</label>
+                        <input type="range" class="config-slider" id="powerSlider" min="0" max="100" value="85">
+                        <span class="config-value" id="powerValue">85%</span>
+                    </div>
+                    
+                    <div class="config-group">
+                        <label class="config-label">SENSITIVITY</label>
+                        <input type="range" class="config-slider" id="sensitivitySlider" min="0" max="100" value="70">
+                        <span class="config-value" id="sensitivityValue">70%</span>
+                    </div>
+                    
+                    <div class="config-group">
+                        <label class="config-label">TARGETING</label>
+                        <input type="range" class="config-slider" id="targetingSlider" min="0" max="100" value="92">
+                        <span class="config-value" id="targetingValue">92%</span>
+                    </div>
+                    
+                    <div class="config-group">
+                        <label class="config-label">FLIGHT MODE</label>
+                        <select class="config-select">
+                            <option>STABILIZED</option>
+                            <option>AGGRESSIVE</option>
+                            <option>STEALTH</option>
+                            <option>MAXIMUM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="command-panel">
+                    <div class="panel-header">COMMANDS</div>
+                    <button class="command-btn primary">INITIALIZE SYSTEMS</button>
+                    <button class="command-btn secondary">RUN DIAGNOSTICS</button>
+                    <button class="command-btn danger">EMERGENCY SHUTDOWN</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audio element for background music -->
+    <audio id="backgroundMusic" loop preload="auto">
+        <source src="https://commondatastorage.googleapis.com/codeskulptor-demos/DDR_assets/Kangaroo_MusiQue_-_The_Neverwritten_Role_Playing_Game.mp3" type="audio/mpeg">
+        <source src="https://commondatastorage.googleapis.com/codeskulptor-assets/week7-brrring.m4a" type="audio/mp4">
+        <!-- Epic background music for Ironman interface -->
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
