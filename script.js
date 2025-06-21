@@ -10,9 +10,11 @@ const backgroundMusic = document.getElementById('backgroundMusic');
 const powerSlider = document.getElementById('powerSlider');
 const sensitivitySlider = document.getElementById('sensitivitySlider');
 const targetingSlider = document.getElementById('targetingSlider');
+const zoomSlider = document.getElementById('zoomSlider');
 const powerValue = document.getElementById('powerValue');
 const sensitivityValue = document.getElementById('sensitivityValue');
 const targetingValue = document.getElementById('targetingValue');
+const zoomValue = document.getElementById('zoomValue');
 
 // Command buttons
 const commandButtons = document.querySelectorAll('.command-btn');
@@ -176,6 +178,12 @@ function setupConfigurationSliders() {
         targetingValue.textContent = e.target.value + '%';
         addTelemetryEntry(`Targeting precision set to ${e.target.value}%`);
     });
+    
+    zoomSlider.addEventListener('input', (e) => {
+        zoomValue.textContent = e.target.value + '%';
+        updateSuitZoom(e.target.value);
+        addTelemetryEntry(`Suit schematic zoom adjusted to ${e.target.value}%`);
+    });
 }
 
 // Update progress bars based on configuration
@@ -190,6 +198,26 @@ function updateProgressBars() {
         progressBars[2].style.width = Math.max(powerLevel - 5, 10) + '%'; // Power
         progressBars[3].style.width = Math.min(powerLevel + 5, 100) + '%'; // Integrity
     }
+}
+
+// Update suit zoom based on slider value
+function updateSuitZoom(zoomValue) {
+    const suitSchematic = document.querySelector('.suit-schematic');
+    const baseViewBox = { x: 40, y: 40, width: 320, height: 380 };
+    
+    // Calculate zoom factor (100% = 1.0, 50% = 2.0, 150% = 0.67)
+    const zoomFactor = 100 / zoomValue;
+    
+    // Calculate new viewBox dimensions
+    const newWidth = baseViewBox.width * zoomFactor;
+    const newHeight = baseViewBox.height * zoomFactor;
+    
+    // Calculate centering offset
+    const offsetX = baseViewBox.x - (newWidth - baseViewBox.width) / 2;
+    const offsetY = baseViewBox.y - (newHeight - baseViewBox.height) / 2;
+    
+    // Update the viewBox
+    suitSchematic.setAttribute('viewBox', `${offsetX} ${offsetY} ${newWidth} ${newHeight}`);
 }
 
 // Command buttons functionality
