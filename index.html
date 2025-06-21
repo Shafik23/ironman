@@ -131,31 +131,45 @@
                         <!-- Arms -->
                         <g class="schematic-part" data-part="arms">
                             <!-- Left arm -->
-                            <rect x="100" y="140" width="50" height="20" rx="10" class="part-outline"/>
-                            <rect x="85" y="170" width="20" height="60" rx="10" class="part-outline"/>
-                            <circle cx="95" cy="240" r="8" class="part-detail"/>
+                            <!-- Upper arm (trapezoid shoulder to elbow) -->
+                            <path d="M100 140 L150 140 L145 160 L105 160 Z" class="part-outline"/>
+                            <!-- Forearm (tapered rectangle) -->
+                            <path d="M85 170 L105 170 L100 230 L90 230 Z" class="part-outline"/>
+                            <!-- Wrist armor segment -->
+                            <rect x="87" y="232" width="16" height="8" rx="2" class="part-detail"/>
                             
                             <!-- Right arm -->
-                            <rect x="250" y="140" width="50" height="20" rx="10" class="part-outline"/>
-                            <rect x="295" y="170" width="20" height="60" rx="10" class="part-outline"/>
-                            <circle cx="305" cy="240" r="8" class="part-detail"/>
+                            <!-- Upper arm (trapezoid shoulder to elbow) -->
+                            <path d="M250 140 L300 140 L295 160 L255 160 Z" class="part-outline"/>
+                            <!-- Forearm (tapered rectangle) -->
+                            <path d="M295 170 L315 170 L310 230 L300 230 Z" class="part-outline"/>
+                            <!-- Wrist armor segment -->
+                            <rect x="297" y="232" width="16" height="8" rx="2" class="part-detail"/>
                         </g>
                         
                         <!-- Repulsors -->
                         <g class="schematic-part" data-part="repulsors">
-                            <circle cx="95" cy="240" r="12" class="part-outline repulsor"/>
-                            <circle cx="305" cy="240" r="12" class="part-outline repulsor"/>
+                            <circle cx="95" cy="242" r="12" class="part-outline repulsor"/>
+                            <circle cx="305" cy="242" r="12" class="part-outline repulsor"/>
                         </g>
                         
                         <!-- Legs -->
                         <g class="schematic-part" data-part="legs">
                             <!-- Left leg -->
-                            <rect x="170" y="240" width="25" height="80" rx="12" class="part-outline"/>
-                            <rect x="165" y="330" width="35" height="60" rx="15" class="part-outline"/>
+                            <!-- Thigh armor (trapezoid) -->
+                            <path d="M170 240 L195 240 L190 320 L175 320 Z" class="part-outline"/>
+                            <!-- Shin armor (inverted trapezoid) -->
+                            <path d="M165 330 L200 330 L195 390 L170 390 Z" class="part-outline"/>
+                            <!-- Knee joint -->
+                            <rect x="175" y="318" width="15" height="8" rx="2" class="part-detail"/>
                             
                             <!-- Right leg -->
-                            <rect x="205" y="240" width="25" height="80" rx="12" class="part-outline"/>
-                            <rect x="200" y="330" width="35" height="60" rx="15" class="part-outline"/>
+                            <!-- Thigh armor (trapezoid) -->
+                            <path d="M205 240 L230 240 L225 320 L210 320 Z" class="part-outline"/>
+                            <!-- Shin armor (inverted trapezoid) -->
+                            <path d="M200 330 L235 330 L230 390 L205 390 Z" class="part-outline"/>
+                            <!-- Knee joint -->
+                            <rect x="210" y="318" width="15" height="8" rx="2" class="part-detail"/>
                         </g>
                         
                         <!-- Thrusters -->
