@@ -137,6 +137,8 @@
                             <path d="M85 170 L105 170 L100 230 L90 230 Z" class="part-outline"/>
                             <!-- Wrist armor segment -->
                             <rect x="87" y="232" width="16" height="8" rx="2" class="part-detail"/>
+                            <!-- Left repulsor (attached to left arm) -->
+                            <circle cx="95" cy="242" r="12" class="part-outline repulsor"/>
                             
                             <!-- Right arm -->
                             <!-- Upper arm (trapezoid shoulder to elbow) -->
@@ -145,12 +147,14 @@
                             <path d="M295 170 L315 170 L310 230 L300 230 Z" class="part-outline"/>
                             <!-- Wrist armor segment -->
                             <rect x="297" y="232" width="16" height="8" rx="2" class="part-detail"/>
+                            <!-- Right repulsor (attached to right arm) -->
+                            <circle cx="305" cy="242" r="12" class="part-outline repulsor"/>
                         </g>
                         
-                        <!-- Repulsors -->
+                        <!-- Repulsors (invisible interaction layer) -->
                         <g class="schematic-part" data-part="repulsors">
-                            <circle cx="95" cy="242" r="12" class="part-outline repulsor"/>
-                            <circle cx="305" cy="242" r="12" class="part-outline repulsor"/>
+                            <circle cx="95" cy="242" r="12" class="part-outline" style="fill:none;stroke:none;pointer-events:all;"/>
+                            <circle cx="305" cy="242" r="12" class="part-outline" style="fill:none;stroke:none;pointer-events:all;"/>
                         </g>
                         
                         <!-- Legs -->

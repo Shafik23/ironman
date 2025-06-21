@@ -619,6 +619,7 @@ body {
     100% { transform: translateY(0px); }
 }
 
+
 /* Dancing classes - applied when music is playing */
 .dancing .schematic-part[data-part="arms"] {
     animation: arm-dance-left 2.5s ease-in-out infinite;
@@ -637,6 +638,7 @@ body {
 .dancing .schematic-part[data-part="helmet"] {
     animation: body-groove 1.8s ease-in-out infinite;
 }
+
 
 /* Responsive design */
 @media (max-width: 1200px) {
