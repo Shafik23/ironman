@@ -230,8 +230,8 @@ function updateSuitZoom(zoomValue) {
     const suitCenterX = (suitBounds.left + suitBounds.right) / 2;
     const suitCenterY = (suitBounds.top + suitBounds.bottom) / 2;
     
-    // Calculate zoom factor (100% = 1.0, higher = more zoomed in)
-    const zoomFactor = zoomValue / 100;
+    // Calculate zoom factor (100% = 0.8 for more zoomed out default, higher = more zoomed in)
+    const zoomFactor = (zoomValue / 100) * 0.8;
     
     // Calculate viewBox dimensions based on zoom
     const viewWidth = suitWidth / zoomFactor;
@@ -334,23 +334,104 @@ function setupCommandButtons() {
                 e.target.style.transform = '';
             }, 150);
             
-            // Add telemetry entry based on button clicked
+            // Add telemetry entry and execute commands based on button clicked
             switch(buttonText) {
                 case 'INITIALIZE SYSTEMS':
-                    addTelemetryEntry('System initialization sequence started');
-                    setTimeout(() => addTelemetryEntry('All systems initialized successfully'), 2000);
+                    executeInitializeSystems();
                     break;
                 case 'RUN DIAGNOSTICS':
-                    addTelemetryEntry('Comprehensive diagnostics running...');
-                    setTimeout(() => addTelemetryEntry('Diagnostics complete - All systems nominal'), 3000);
+                    executeRunDiagnostics();
                     break;
                 case 'EMERGENCY SHUTDOWN':
-                    addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
-                    setTimeout(() => addTelemetryEntry('Non-critical systems powered down'), 1500);
+                    executeEmergencyShutdown();
                     break;
             }
         });
     });
+}
+
+// Command execution functions
+function executeInitializeSystems() {
+    addTelemetryEntry('System initialization sequence started');
+    addTelemetryEntry('Setting power output to optimal levels...');
+    
+    // Set Power Output to 70%
+    powerSlider.value = 70;
+    powerValue.textContent = '70%';
+    updateProgressBars();
+    updateArcReactor(70);
+    
+    // Set Zoom to 100%
+    zoomSlider.value = 100;
+    zoomValue.textContent = '100%';
+    updateSuitZoom(100);
+    
+    setTimeout(() => {
+        addTelemetryEntry('Power output stabilized at 70%');
+        addTelemetryEntry('Zoom calibration complete');
+        addTelemetryEntry('All systems initialized successfully');
+    }, 2000);
+}
+
+function executeRunDiagnostics() {
+    addTelemetryEntry('Comprehensive diagnostics initiated');
+    addTelemetryEntry('Scanning all system components...');
+    
+    // Get current system status elements
+    const progressBars = document.querySelectorAll('.progress-fill');
+    const statusTexts = document.querySelectorAll('.status-row span:last-child');
+    const suitSchematic = document.querySelector('.suit-schematic');
+    
+    // Store original values for CPU and Memory
+    const originalCpuWidth = progressBars[0].style.width;
+    const originalMemoryWidth = progressBars[1].style.width;
+    const originalCpuText = statusTexts[0].textContent;
+    const originalMemoryText = statusTexts[1].textContent;
+    
+    // Boost CPU and Memory to 100%
+    progressBars[0].style.width = '100%';
+    progressBars[1].style.width = '100%';
+    statusTexts[0].textContent = '100%';
+    statusTexts[1].textContent = '100%';
+    
+    // Add diagnostic animation to body
+    suitSchematic.classList.add('diagnostic-scan');
+    
+    addTelemetryEntry('CPU and Memory boosted for intensive scanning');
+    addTelemetryEntry('Deep system analysis in progress...');
+    
+    // End diagnostics after 25 seconds
+    setTimeout(() => {
+        // Restore original CPU and Memory values
+        progressBars[0].style.width = originalCpuWidth;
+        progressBars[1].style.width = originalMemoryWidth;
+        statusTexts[0].textContent = originalCpuText;
+        statusTexts[1].textContent = originalMemoryText;
+        
+        // Remove diagnostic animation
+        suitSchematic.classList.remove('diagnostic-scan');
+        
+        addTelemetryEntry('Diagnostic scan complete');
+        addTelemetryEntry('CPU and Memory restored to normal levels');
+        addTelemetryEntry('All systems nominal - No issues detected');
+    }, 25000);
+}
+
+function executeEmergencyShutdown() {
+    addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
+    addTelemetryEntry('Initiating emergency power down sequence...');
+    
+    // Set Power Output to 0%
+    powerSlider.value = 0;
+    powerValue.textContent = '0%';
+    updateProgressBars();
+    updateArcReactor(0);
+    
+    setTimeout(() => {
+        addTelemetryEntry('Power output reduced to minimum safe levels');
+        addTelemetryEntry('Non-critical systems powered down');
+        addTelemetryEntry('Emergency shutdown complete - Manual restart required');
+    }, 1500);
 }
 
 // Music toggle functionality

@@ -194,15 +194,13 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Telemetry & Customization -->
+            <!-- Right Panel: Commands & Configuration & Telemetry -->
             <div class="panel right-panel">
-                <div class="panel-header">TELEMETRY DATA</div>
-                <div class="telemetry-log" id="telemetryLog">
-                    <div class="log-entry">[09:42:15] Arc reactor output: 3.2 TW</div>
-                    <div class="log-entry">[09:42:10] Flight systems calibration complete</div>
-                    <div class="log-entry">[09:42:05] Repulsor array alignment: 99.7%</div>
-                    <div class="log-entry">[09:42:00] Helmet HUD initialization complete</div>
-                    <div class="log-entry">[09:41:55] All systems nominal</div>
+                <div class="command-panel">
+                    <div class="panel-header">COMMANDS</div>
+                    <button class="command-btn primary">INITIALIZE SYSTEMS</button>
+                    <button class="command-btn secondary">RUN DIAGNOSTICS</button>
+                    <button class="command-btn danger">EMERGENCY SHUTDOWN</button>
                 </div>
 
                 <div class="customization-panel">
@@ -234,11 +232,13 @@
 
                 </div>
 
-                <div class="command-panel">
-                    <div class="panel-header">COMMANDS</div>
-                    <button class="command-btn primary">INITIALIZE SYSTEMS</button>
-                    <button class="command-btn secondary">RUN DIAGNOSTICS</button>
-                    <button class="command-btn danger">EMERGENCY SHUTDOWN</button>
+                <div class="panel-header">TELEMETRY DATA</div>
+                <div class="telemetry-log" id="telemetryLog">
+                    <div class="log-entry">[09:42:15] Arc reactor output: 3.2 TW</div>
+                    <div class="log-entry">[09:42:10] Flight systems calibration complete</div>
+                    <div class="log-entry">[09:42:05] Repulsor array alignment: 99.7%</div>
+                    <div class="log-entry">[09:42:00] Helmet HUD initialization complete</div>
+                    <div class="log-entry">[09:41:55] All systems nominal</div>
                 </div>
             </div>
         </div>

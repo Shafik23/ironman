@@ -735,6 +735,22 @@ body {
     animation: body-groove 1.8s ease-in-out infinite;
 }
 
+/* Diagnostic scan animation */
+.diagnostic-scan .schematic-part {
+    animation: diagnostic-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes diagnostic-pulse {
+    from {
+        filter: drop-shadow(0 0 5px var(--primary-cyan));
+        transform: scale(1);
+    }
+    to {
+        filter: drop-shadow(0 0 15px var(--accent-gold));
+        transform: scale(1.02);
+    }
+}
+
 
 /* Responsive design */
 @media (max-width: 1200px) {
