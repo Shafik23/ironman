@@ -39,24 +39,6 @@ const tooltipContent = {
     'thrusters': 'FLIGHT SYSTEMS<br>• Thrust Output: 3000 lbf<br>• Max Speed: Mach 3.2<br>• Altitude Ceiling: 50,000ft<br>• Status: OFFLINE'
 };
 
-// Telemetry messages for random updates
-const telemetryMessages = [
-    'Arc reactor stabilization complete',
-    'Repulsor array recalibration in progress',
-    'Flight system diagnostics passed',
-    'Helmet HUD refresh rate optimized',
-    'Servo motor response time improved',
-    'Power distribution rebalanced',
-    'Targeting system accuracy enhanced',
-    'Life support systems nominal',
-    'Communication array signal boosted',
-    'Structural integrity verified',
-    'Thermal regulation optimized',
-    'Emergency protocols updated',
-    'Navigation system calibrated',
-    'Weapons systems armed',
-    'Defensive countermeasures ready'
-];
 
 // Music state
 let isMusicPlaying = false;
@@ -427,6 +409,16 @@ function executeEmergencyShutdown() {
     updateProgressBars();
     updateArcReactor(0);
     
+    // Stop music and dancing animation
+    if (isMusicPlaying) {
+        backgroundMusic.pause();
+        musicToggle.textContent = 'Music: OFF';
+        musicToggle.classList.remove('active');
+        isMusicPlaying = false;
+        document.querySelector('.suit-schematic').classList.remove('dancing');
+        addTelemetryEntry('Background audio systems disabled');
+    }
+    
     setTimeout(() => {
         addTelemetryEntry('Power output reduced to minimum safe levels');
         addTelemetryEntry('Non-critical systems powered down');
@@ -504,12 +496,7 @@ function addTelemetryEntry(message) {
 
 // Auto-updating telemetry
 function startTelemetryUpdates() {
-    setInterval(() => {
-        const randomMessage = telemetryMessages[Math.floor(Math.random() * telemetryMessages.length)];
-        addTelemetryEntry(randomMessage);
-    }, 8000); // Update every 8 seconds
-    
-    // System status updates - removed random updates to keep values synchronized with sliders
+    // Removed random telemetry messages - telemetry now only shows user-triggered events
 }
 
 
