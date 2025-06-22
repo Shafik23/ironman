@@ -1,5 +1,5 @@
 #!/bin/bash
-set -eu pipefail
+set -e
 
 # Check if a commit message is provided
 if [ -z "$1" ]; then
