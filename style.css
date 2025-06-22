@@ -745,11 +745,9 @@ body {
 @keyframes diagnostic-pulse {
     from {
         filter: drop-shadow(0 0 5px var(--suit-cyan));
-        transform: scale(1);
     }
     to {
         filter: drop-shadow(0 0 15px var(--accent-gold));
-        transform: scale(1.02);
     }
 }
 
