@@ -9,11 +9,9 @@ const backgroundMusic = document.getElementById('backgroundMusic');
 // Configuration sliders
 const powerSlider = document.getElementById('powerSlider');
 const colorSlider = document.getElementById('colorSlider');
-const targetingSlider = document.getElementById('targetingSlider');
 const zoomSlider = document.getElementById('zoomSlider');
 const powerValue = document.getElementById('powerValue');
 const colorValue = document.getElementById('colorValue');
-const targetingValue = document.getElementById('targetingValue');
 const zoomValue = document.getElementById('zoomValue');
 
 // Command buttons
@@ -167,10 +165,6 @@ function setupConfigurationSliders() {
         addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
     });
     
-    targetingSlider.addEventListener('input', (e) => {
-        targetingValue.textContent = e.target.value + '%';
-        addTelemetryEntry(`Targeting precision set to ${e.target.value}%`);
-    });
     
     zoomSlider.addEventListener('input', (e) => {
         zoomValue.textContent = e.target.value + '%';

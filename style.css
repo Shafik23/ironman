@@ -156,6 +156,8 @@ body {
 
 .right-panel {
     flex: 0 0 350px;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Panel headers */
@@ -417,13 +419,14 @@ body {
 
 /* Telemetry log */
 .telemetry-log {
-    height: 200px;
+    flex: 1;
     background: var(--bg-dark);
     border: 1px solid var(--primary-cyan);
     border-radius: 4px;
     padding: 10px;
     overflow-y: auto;
-    margin-bottom: 20px;
+    margin-bottom: 0;
+    min-height: 0;
     font-family: 'Courier New', monospace;
 }
 
