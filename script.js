@@ -8,11 +8,11 @@ const backgroundMusic = document.getElementById('backgroundMusic');
 
 // Configuration sliders
 const powerSlider = document.getElementById('powerSlider');
-const sensitivitySlider = document.getElementById('sensitivitySlider');
+const colorSlider = document.getElementById('colorSlider');
 const targetingSlider = document.getElementById('targetingSlider');
 const zoomSlider = document.getElementById('zoomSlider');
 const powerValue = document.getElementById('powerValue');
-const sensitivityValue = document.getElementById('sensitivityValue');
+const colorValue = document.getElementById('colorValue');
 const targetingValue = document.getElementById('targetingValue');
 const zoomValue = document.getElementById('zoomValue');
 
@@ -57,6 +57,9 @@ function initializeApp() {
     
     // Initialize zoom with default value
     updateSuitZoom(zoomSlider.value);
+    
+    // Initialize suit color with default value
+    updateSuitColor(colorSlider.value);
     
     console.log('Ironman Suit Designer GUI initialized');
 }
@@ -158,9 +161,10 @@ function setupConfigurationSliders() {
         addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
     });
     
-    sensitivitySlider.addEventListener('input', (e) => {
-        sensitivityValue.textContent = e.target.value + '%';
-        addTelemetryEntry(`Sensitivity calibrated to ${e.target.value}%`);
+    colorSlider.addEventListener('input', (e) => {
+        colorValue.textContent = e.target.value + '%';
+        updateSuitColor(e.target.value);
+        addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
     });
     
     targetingSlider.addEventListener('input', (e) => {
@@ -291,6 +295,73 @@ function calculateReactorColor(powerLevel) {
     
     const color = `rgb(${r}, ${g}, ${b})`;
     return { color, glowIntensity };
+}
+
+// Update suit color based on slider value
+function updateSuitColor(colorValue) {
+    const colorInt = parseInt(colorValue);
+    
+    // Generate color based on slider value (0-100)
+    const { color, glowColor } = calculateFrameColor(colorInt);
+    
+    // Update CSS custom properties for suit only (not UI frame)
+    document.documentElement.style.setProperty('--suit-cyan', color);
+    document.documentElement.style.setProperty('--suit-glow', `0 0 8px ${glowColor}`);
+    // Note: --primary-cyan remains unchanged to keep UI frame color constant
+}
+
+// Calculate frame color based on slider value
+function calculateFrameColor(colorValue) {
+    let r, g, b;
+    
+    if (colorValue <= 14) {
+        // Cyan to Blue (0-14%)
+        const factor = colorValue / 14;
+        r = 0;
+        g = Math.round(255 - (175 * factor)); // 255 to 80
+        b = 255;
+    } else if (colorValue <= 28) {
+        // Blue to Purple (14-28%)
+        const factor = (colorValue - 14) / 14;
+        r = Math.round(0 + (128 * factor)); // 0 to 128
+        g = Math.round(80 - (80 * factor)); // 80 to 0
+        b = 255;
+    } else if (colorValue <= 42) {
+        // Purple to Magenta (28-42%)
+        const factor = (colorValue - 28) / 14;
+        r = Math.round(128 + (127 * factor)); // 128 to 255
+        g = 0;
+        b = 255;
+    } else if (colorValue <= 57) {
+        // Magenta to Red (42-57%)
+        const factor = (colorValue - 42) / 15;
+        r = 255;
+        g = 0;
+        b = Math.round(255 - (255 * factor)); // 255 to 0
+    } else if (colorValue <= 71) {
+        // Red to Orange (57-71%)
+        const factor = (colorValue - 57) / 14;
+        r = 255;
+        g = Math.round(0 + (165 * factor)); // 0 to 165
+        b = 0;
+    } else if (colorValue <= 85) {
+        // Orange to Yellow (71-85%)
+        const factor = (colorValue - 71) / 14;
+        r = 255;
+        g = Math.round(165 + (90 * factor)); // 165 to 255
+        b = 0;
+    } else {
+        // Yellow to Green (85-100%)
+        const factor = (colorValue - 85) / 15;
+        r = Math.round(255 - (255 * factor)); // 255 to 0
+        g = 255;
+        b = Math.round(0 + (128 * factor)); // 0 to 128 (lime green)
+    }
+    
+    const color = `rgb(${r}, ${g}, ${b})`;
+    const glowColor = `rgba(${r}, ${g}, ${b}, 0.5)`;
+    
+    return { color, glowColor };
 }
 
 // Continue updateArcReactor function - update tooltip content
