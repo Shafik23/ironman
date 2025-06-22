@@ -55,6 +55,9 @@ function initializeApp() {
     // Initialize Arc Reactor with default power level
     updateArcReactor(powerSlider.value);
     
+    // Initialize zoom with default value
+    updateSuitZoom(zoomSlider.value);
+    
     console.log('Ironman Suit Designer GUI initialized');
 }
 
@@ -343,10 +346,10 @@ function executeInitializeSystems() {
     updateProgressBars();
     updateArcReactor(70);
     
-    // Set Zoom to 100%
-    zoomSlider.value = 100;
-    zoomValue.textContent = '100%';
-    updateSuitZoom(100);
+    // Set Zoom to 90%
+    zoomSlider.value = 90;
+    zoomValue.textContent = '90%';
+    updateSuitZoom(90);
     
     setTimeout(() => {
         addTelemetryEntry('Power output stabilized at 70%');
