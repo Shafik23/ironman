@@ -754,6 +754,224 @@ body {
     }
 }
 
+/* Fire Extinguisher Spray Animation */
+.fire-extinguisher-spray {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* Fire Hose */
+.fire-hose {
+    position: absolute;
+    left: 20px;
+    top: -20px;
+    width: 160px;
+    height: 40px;
+    background: linear-gradient(to bottom,
+        #1a1a1a 0%,
+        #2c2c2c 15%,
+        #404040 50%,
+        #2c2c2c 85%,
+        #1a1a1a 100%);
+    border-radius: 6px;
+    border: 3px solid #0f0f0f;
+    box-shadow: 
+        inset 0 8px 16px rgba(0, 0, 0, 0.4),
+        inset 0 -8px 16px rgba(0, 0, 0, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: rotate(15deg);
+    transform-origin: left center;
+}
+
+.fire-hose.active {
+    animation: hose-appear 0.5s ease-out forwards;
+}
+
+@keyframes hose-appear {
+    0% {
+        opacity: 0;
+        transform: rotate(15deg) translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(15deg) translateX(0);
+    }
+}
+
+
+/* Water pressure stream */
+.water-pressure-stream {
+    position: absolute;
+    left: 195px;
+    top: 40px;
+    width: 200px;
+    height: 8px;
+    background: linear-gradient(to right,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(200, 230, 255, 0.8) 30%,
+        rgba(150, 200, 255, 0.6) 70%,
+        rgba(100, 150, 200, 0.3) 100%);
+    border-radius: 4px;
+    transform: rotate(15deg);
+    transform-origin: left center;
+    opacity: 0;
+    box-shadow: 
+        0 0 4px rgba(255, 255, 255, 0.4),
+        0 0 8px rgba(200, 230, 255, 0.3);
+}
+
+.water-pressure-stream.active {
+    animation: pressure-stream 2s ease-out forwards;
+}
+
+@keyframes pressure-stream {
+    0% {
+        opacity: 0;
+        width: 0px;
+    }
+    20% {
+        opacity: 1;
+        width: 100px;
+    }
+    100% {
+        opacity: 0.8;
+        width: 200px;
+    }
+}
+
+/* Water droplet */
+.water-droplet {
+    position: absolute;
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(200, 230, 255, 0.8) 30%,
+        rgba(100, 150, 255, 0.7) 70%,
+        rgba(50, 100, 200, 0.6) 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.4),
+        2px 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+}
+
+.water-droplet.active {
+    animation: water-droplet-fall 1.2s ease-in forwards;
+}
+
+@keyframes water-droplet-fall {
+    0% {
+        opacity: 1;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+}
+
+/* Angled water streak */
+.angled-water-streak {
+    position: absolute;
+    background: rgba(200, 230, 255, 0.7);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 4px rgba(255, 255, 255, 0.4),
+        0 0 8px rgba(200, 230, 255, 0.3);
+    opacity: 0;
+}
+
+.angled-water-streak.active {
+    animation: angled-streak-appear 1.5s ease-out forwards;
+}
+
+@keyframes angled-streak-appear {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Water splash effect */
+.water-splash {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(200, 230, 255, 0.4) 40%,
+        rgba(100, 150, 200, 0.2) 80%,
+        transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.water-splash.active {
+    animation: water-splash-impact 0.8s ease-out forwards;
+}
+
+@keyframes water-splash-impact {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+}
+
+/* Emergency shutdown suit effect */
+.emergency-shutdown .schematic-part {
+    animation: shutdown-spray-effect 3s ease-out forwards;
+}
+
+@keyframes shutdown-spray-effect {
+    0% {
+        filter: drop-shadow(0 0 10px var(--suit-cyan));
+        opacity: 1;
+    }
+    30% {
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)) 
+                drop-shadow(0 0 15px rgba(200, 230, 255, 0.6));
+        opacity: 0.9;
+    }
+    60% {
+        filter: drop-shadow(0 0 3px rgba(150, 200, 255, 0.5));
+        opacity: 0.7;
+    }
+    100% {
+        filter: drop-shadow(0 0 2px rgba(100, 150, 200, 0.3));
+        opacity: 0.5;
+    }
+}
+
 
 /* Responsive design */
 @media (max-width: 1200px) {

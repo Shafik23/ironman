@@ -469,29 +469,174 @@ function executeRunDiagnostics() {
 
 function executeEmergencyShutdown() {
     addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
-    addTelemetryEntry('Initiating emergency power down sequence...');
+    addTelemetryEntry('Deploying fire suppression systems...');
     
-    // Set Power Output to 0%
-    powerSlider.value = 0;
-    powerValue.textContent = '0%';
-    updateProgressBars();
-    updateArcReactor(0);
-    
-    // Stop music and dancing animation
-    if (isMusicPlaying) {
-        backgroundMusic.pause();
-        musicToggle.textContent = 'Music: OFF';
-        musicToggle.classList.remove('active');
-        isMusicPlaying = false;
-        document.querySelector('.suit-schematic').classList.remove('dancing');
-        addTelemetryEntry('Background audio systems disabled');
-    }
+    // Create fire extinguisher spray effect
+    createFireExtinguisherSpray();
     
     setTimeout(() => {
+        addTelemetryEntry('Fire extinguisher spray deployed');
+        
+        // Set Power Output to 0%
+        powerSlider.value = 0;
+        powerValue.textContent = '0%';
+        updateProgressBars();
+        updateArcReactor(0);
+        
+        // Stop music and dancing animation
+        if (isMusicPlaying) {
+            backgroundMusic.pause();
+            musicToggle.textContent = 'Music: OFF';
+            musicToggle.classList.remove('active');
+            isMusicPlaying = false;
+            document.querySelector('.suit-schematic').classList.remove('dancing');
+            addTelemetryEntry('Background audio systems disabled');
+        }
+        
         addTelemetryEntry('Power output reduced to minimum safe levels');
         addTelemetryEntry('Non-critical systems powered down');
         addTelemetryEntry('Emergency shutdown complete - Manual restart required');
-    }, 1500);
+    }, 2000);
+}
+
+// Create fire extinguisher spray animation
+function createFireExtinguisherSpray() {
+    const schematicContainer = document.querySelector('.schematic-container');
+    const suitSchematic = document.querySelector('.suit-schematic');
+    
+    // Add emergency shutdown class to suit
+    suitSchematic.classList.add('emergency-shutdown');
+    
+    // Create spray container
+    const sprayContainer = document.createElement('div');
+    sprayContainer.className = 'fire-extinguisher-spray';
+    schematicContainer.appendChild(sprayContainer);
+    
+    // Create the fire hose first
+    createFireHose(sprayContainer);
+    
+    // Create main angled pressure stream
+    setTimeout(() => {
+        createPressureStream(sprayContainer);
+    }, 500);
+    
+    // Removed createWaterStreaks to eliminate all vertical waterfall effects
+    
+    // Create lots of water droplets
+    setTimeout(() => {
+        createWaterDroplets(sprayContainer, 150); // Much more droplets!
+    }, 700);
+    
+    // Create splash effects on the suit
+    setTimeout(() => {
+        createWaterSplashes(sprayContainer);
+    }, 900);
+    
+    // Remove spray effect after animation completes
+    setTimeout(() => {
+        sprayContainer.remove();
+        suitSchematic.classList.remove('emergency-shutdown');
+    }, 4000);
+}
+
+// Create visible fire hose
+function createFireHose(container) {
+    const hose = document.createElement('div');
+    hose.className = 'fire-hose active';
+    
+    container.appendChild(hose);
+}
+
+// Create multiple angled pressure streams
+function createPressureStream(container) {
+    for (let i = 0; i < 4; i++) {
+        setTimeout(() => {
+            const stream = document.createElement('div');
+            stream.className = 'water-pressure-stream active';
+            
+            // Position each stream with slight variations
+            const baseX = 195;
+            const baseY = 40; // Calculated: hose rotated 15°, nozzle is ~40px lower than center
+            const offsetX = (i - 1.5) * 8; // Spread horizontally: -12, -4, 4, 12
+            const offsetY = (i - 1.5) * 3; // Slight vertical spread: -4.5, -1.5, 1.5, 4.5
+            
+            stream.style.left = (baseX + offsetX) + 'px';
+            stream.style.top = (baseY + offsetY) + 'px';
+            
+            // Wider angle variation for dramatic flare
+            const baseRotation = 15; // Base angle from CSS
+            const angleVariation = (i - 1.5) * 8; // -12°, -4°, 4°, 12° (much wider spread)
+            stream.style.transform = `rotate(${baseRotation + angleVariation}deg)`;
+            
+            container.appendChild(stream);
+            
+            setTimeout(() => stream.remove(), 2000);
+        }, i * 100); // Stagger the jet starts
+    }
+}
+
+
+
+// Create water droplets
+function createWaterDroplets(container, count) {
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const droplet = document.createElement('div');
+            droplet.className = 'water-droplet active';
+            
+            // Start droplets from hose nozzle area (aligned with jets)
+            const baseX = 195;
+            const baseY = 40; // Aligned with actual nozzle opening (hose rotated 15°)
+            const nozzleSpread = (Math.random() - 0.5) * 20; // ±10px around nozzle
+            
+            // Follow the same angle trajectory as the jets with wider flare
+            const jetAngle = 15 + (Math.random() - 0.5) * 24; // 3° to 27° (matches jet flare range)
+            const distance = 20 + Math.random() * 180; // Distance along the angled trajectory
+            
+            // Calculate position along the angled trajectory
+            const angleRad = (jetAngle * Math.PI) / 180;
+            const trajectoryX = distance * Math.cos(angleRad);
+            const trajectoryY = distance * Math.sin(angleRad);
+            
+            const startX = baseX + nozzleSpread + trajectoryX;
+            const startY = baseY + (Math.random() - 0.5) * 10 + trajectoryY; // Small vertical variance
+            const size = 3 + Math.random() * 8;
+            
+            droplet.style.left = startX + 'px';
+            droplet.style.top = startY + 'px';
+            droplet.style.width = size + 'px';
+            droplet.style.height = size + 'px';
+            
+            container.appendChild(droplet);
+            
+            setTimeout(() => droplet.remove(), 1200);
+        }, i * 12); // Faster generation for more droplets
+    }
+}
+
+// Create water splash effects on the suit
+function createWaterSplashes(container) {
+    const splashPositions = [
+        { x: 180, y: 200 }, // Chest
+        { x: 160, y: 160 }, // Left shoulder
+        { x: 220, y: 160 }, // Right shoulder
+        { x: 200, y: 120 }, // Helmet
+        { x: 190, y: 280 }, // Waist
+    ];
+    
+    splashPositions.forEach((pos, index) => {
+        setTimeout(() => {
+            const splash = document.createElement('div');
+            splash.className = 'water-splash active';
+            
+            splash.style.left = (pos.x - 10) + 'px';
+            splash.style.top = (pos.y - 10) + 'px';
+            
+            container.appendChild(splash);
+            
+            setTimeout(() => splash.remove(), 800);
+        }, index * 200);
+    });
 }
 
 // Music toggle functionality
