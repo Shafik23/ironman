@@ -469,7 +469,24 @@ function executeRunDiagnostics() {
 
 function executeEmergencyShutdown() {
     addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
+    
+    // First turn off music and dancing animation immediately
+    if (isMusicPlaying) {
+        backgroundMusic.pause();
+        musicToggle.textContent = 'Music: OFF';
+        musicToggle.classList.remove('active');
+        isMusicPlaying = false;
+        document.querySelector('.suit-schematic').classList.remove('dancing');
+        addTelemetryEntry('Background audio systems disabled');
+    }
+    
     addTelemetryEntry('Deploying fire suppression systems...');
+    
+    // Play hose sound effect
+    const hoseAudio = new Audio('hose.mp3');
+    hoseAudio.play().catch((error) => {
+        console.log('Hose audio playback failed:', error);
+    });
     
     // Create fire extinguisher spray effect
     createFireExtinguisherSpray();
@@ -482,16 +499,6 @@ function executeEmergencyShutdown() {
         powerValue.textContent = '0%';
         updateProgressBars();
         updateArcReactor(0);
-        
-        // Stop music and dancing animation
-        if (isMusicPlaying) {
-            backgroundMusic.pause();
-            musicToggle.textContent = 'Music: OFF';
-            musicToggle.classList.remove('active');
-            isMusicPlaying = false;
-            document.querySelector('.suit-schematic').classList.remove('dancing');
-            addTelemetryEntry('Background audio systems disabled');
-        }
         
         addTelemetryEntry('Power output reduced to minimum safe levels');
         addTelemetryEntry('Non-critical systems powered down');
@@ -524,7 +531,7 @@ function createFireExtinguisherSpray() {
     
     // Create lots of water droplets
     setTimeout(() => {
-        createWaterDroplets(sprayContainer, 150); // Much more droplets!
+        createWaterDroplets(sprayContainer, 200); // Even more droplets!
     }, 700);
     
     // Create splash effects on the suit
@@ -532,11 +539,11 @@ function createFireExtinguisherSpray() {
         createWaterSplashes(sprayContainer);
     }, 900);
     
-    // Remove spray effect after animation completes
+    // Remove spray effect after animation completes (extended duration)
     setTimeout(() => {
         sprayContainer.remove();
         suitSchematic.classList.remove('emergency-shutdown');
-    }, 4000);
+    }, 6000);
 }
 
 // Create visible fire hose
@@ -554,11 +561,11 @@ function createPressureStream(container) {
             const stream = document.createElement('div');
             stream.className = 'water-pressure-stream active';
             
-            // Position each stream with slight variations
-            const baseX = 195;
+            // All streams start from center of hose tip for realism
+            const baseX = 195; // Center of hose tip
             const baseY = 40; // Calculated: hose rotated 15°, nozzle is ~40px lower than center
-            const offsetX = (i - 1.5) * 8; // Spread horizontally: -12, -4, 4, 12
-            const offsetY = (i - 1.5) * 3; // Slight vertical spread: -4.5, -1.5, 1.5, 4.5
+            const offsetX = 0; // All start from same point
+            const offsetY = 0; // All start from same point
             
             stream.style.left = (baseX + offsetX) + 'px';
             stream.style.top = (baseY + offsetY) + 'px';
@@ -570,7 +577,7 @@ function createPressureStream(container) {
             
             container.appendChild(stream);
             
-            setTimeout(() => stream.remove(), 2000);
+            setTimeout(() => stream.remove(), 3000);
         }, i * 100); // Stagger the jet starts
     }
 }
@@ -609,7 +616,7 @@ function createWaterDroplets(container, count) {
             
             container.appendChild(droplet);
             
-            setTimeout(() => droplet.remove(), 1200);
+            setTimeout(() => droplet.remove(), 1800);
         }, i * 12); // Faster generation for more droplets
     }
 }
@@ -617,26 +624,59 @@ function createWaterDroplets(container, count) {
 // Create water splash effects on the suit
 function createWaterSplashes(container) {
     const splashPositions = [
-        { x: 180, y: 200 }, // Chest
-        { x: 160, y: 160 }, // Left shoulder
-        { x: 220, y: 160 }, // Right shoulder
-        { x: 200, y: 120 }, // Helmet
-        { x: 190, y: 280 }, // Waist
+        { x: 220, y: 200 }, // Chest center (moved right)
+        { x: 190, y: 160 }, // Left shoulder (moved right)
+        { x: 260, y: 160 }, // Right shoulder (moved right)
+        { x: 225, y: 120 }, // Helmet center (moved right)
+        { x: 220, y: 280 }, // Waist (moved right)
+        { x: 200, y: 180 }, // Left chest (moved right)
+        { x: 250, y: 180 }, // Right chest (moved right)
+        { x: 215, y: 140 }, // Upper chest (moved right)
+        { x: 230, y: 220 }, // Lower chest (moved right)
+        { x: 160, y: 200 }, // Left arm area (moved right)
+        { x: 280, y: 200 }, // Right arm area (moved right)
+        { x: 195, y: 260 }, // Left waist (moved right)
+        { x: 245, y: 260 }, // Right waist (moved right)
+        { x: 220, y: 100 }, // Helmet top (moved right)
+        { x: 230, y: 300 }, // Lower torso (moved right)
+        { x: 150, y: 180 }, // Far left area (moved right)
+        { x: 290, y: 180 }, // Far right area (moved right)
+        { x: 180, y: 240 }, // Left side (moved right)
+        { x: 270, y: 240 }, // Right side (moved right)
+        { x: 140, y: 220 }, // Additional far left
+        { x: 300, y: 220 }, // Additional far right
+        { x: 170, y: 140 }, // Additional left shoulder area
+        { x: 270, y: 140 }, // Additional right shoulder area
+        { x: 185, y: 200 }, // Extra left chest foam
+        { x: 255, y: 200 }, // Extra right chest foam
+        { x: 205, y: 180 }, // Extra center chest foam
+        { x: 240, y: 240 }, // Extra right side foam
+        { x: 175, y: 240 }, // Extra left side foam
+        { x: 210, y: 160 }, // Extra upper chest foam
+        { x: 235, y: 280 }, // Extra right waist foam
+        { x: 190, y: 280 }, // Extra left waist foam
     ];
     
-    splashPositions.forEach((pos, index) => {
-        setTimeout(() => {
-            const splash = document.createElement('div');
-            splash.className = 'water-splash active';
-            
-            splash.style.left = (pos.x - 10) + 'px';
-            splash.style.top = (pos.y - 10) + 'px';
-            
-            container.appendChild(splash);
-            
-            setTimeout(() => splash.remove(), 800);
-        }, index * 200);
-    });
+    // Create multiple waves of splashes for continuous effect
+    for (let wave = 0; wave < 3; wave++) {
+        splashPositions.forEach((pos, index) => {
+            setTimeout(() => {
+                const splash = document.createElement('div');
+                splash.className = 'water-splash active';
+                
+                // Add some randomness to splash positions with much wider horizontal spread
+                const randomX = pos.x + (Math.random() - 0.5) * 80; // Even wider horizontal spread (40px each side)
+                const randomY = pos.y + (Math.random() - 0.5) * 20;
+                
+                splash.style.left = (randomX - 10) + 'px';
+                splash.style.top = (randomY - 10) + 'px';
+                
+                container.appendChild(splash);
+                
+                setTimeout(() => splash.remove(), 800);
+            }, (wave * 1000) + (index * 100)); // Waves every 1000ms, splashes every 100ms
+        });
+    }
 }
 
 // Music toggle functionality
