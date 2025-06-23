@@ -403,22 +403,57 @@ function setupCommandButtons() {
 // Command execution functions
 function executeInitializeSystems() {
     addTelemetryEntry('System initialization sequence started');
-    addTelemetryEntry('Setting power output to optimal levels...');
+    addTelemetryEntry('Resetting all systems to default state...');
     
-    // Set Power Output to 70%
-    powerSlider.value = 70;
-    powerValue.textContent = '70%';
-    updateProgressBars();
-    updateArcReactor(70);
+    // Set Color to 0%
+    colorSlider.value = 0;
+    colorValue.textContent = '0%';
+    updateSuitColor(0);
     
-    // Set Zoom to 90%
-    zoomSlider.value = 90;
-    zoomValue.textContent = '90%';
-    updateSuitZoom(90);
+    // Set Zoom to 100%
+    zoomSlider.value = 100;
+    zoomValue.textContent = '100%';
+    updateSuitZoom(100);
+    
+    // Set Power Output to 50% (both slider and status bar)
+    powerSlider.value = 50;
+    powerValue.textContent = '50%';
+    updateArcReactor(50);
+    
+    // Set CPU Load to 20%, Memory to 20%, and Integrity to 100%
+    const progressBars = document.querySelectorAll('.progress-fill');
+    const statusTexts = document.querySelectorAll('.status-row span:last-child');
+    
+    if (progressBars.length >= 4 && statusTexts.length >= 4) {
+        // CPU Load (first progress bar)
+        progressBars[0].style.width = '20%';
+        statusTexts[0].textContent = '20%';
+        
+        // Memory (second progress bar)
+        progressBars[1].style.width = '20%';
+        statusTexts[1].textContent = '20%';
+        
+        // Power (third progress bar) - matches slider
+        progressBars[2].style.width = '50%';
+        statusTexts[2].textContent = '50%';
+        
+        // Integrity (fourth progress bar)
+        progressBars[3].style.width = '100%';
+        statusTexts[3].textContent = '100%';
+    }
+    
+    // Deselect all System Modules
+    componentItems.forEach(comp => comp.classList.remove('selected'));
+    schematicParts.forEach(part => part.classList.remove('highlighted'));
     
     setTimeout(() => {
-        addTelemetryEntry('Power output stabilized at 70%');
-        addTelemetryEntry('Zoom calibration complete');
+        addTelemetryEntry('Power output initialized to 50%');
+        addTelemetryEntry('CPU load initialized to 20%');
+        addTelemetryEntry('Memory usage initialized to 20%');
+        addTelemetryEntry('System integrity initialized to 100%');
+        addTelemetryEntry('Suit color reset to default');
+        addTelemetryEntry('Zoom calibration complete at 100%');
+        addTelemetryEntry('All system modules deselected');
         addTelemetryEntry('All systems initialized successfully');
     }, 2000);
 }
