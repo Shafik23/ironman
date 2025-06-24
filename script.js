@@ -44,6 +44,11 @@ let isMusicPlaying = false;
 // Diagnostics state
 let isDiagnosticsRunning = false;
 
+// Party mode state
+let isPartyMode = false;
+let partyColorCycleInterval = null;
+let partyStatusInterval = null;
+
 // Initialize the application
 function initializeApp() {
     setupComponentSelection();
@@ -442,6 +447,12 @@ function executeInitializeSystems() {
     addTelemetryEntry('System initialization sequence started');
     addTelemetryEntry('Resetting all systems to default state...');
     
+    // Stop party mode if running
+    if (isPartyMode) {
+        stopPartyMode();
+        addTelemetryEntry('Party mode disabled during initialization');
+    }
+    
     // Set Color to 0%
     colorSlider.value = 0;
     colorValue.textContent = '0%';
@@ -570,14 +581,10 @@ function executeRunDiagnostics() {
 function executeEmergencyShutdown() {
     addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
     
-    // First turn off music and dancing animation immediately
-    if (isMusicPlaying) {
-        backgroundMusic.pause();
-        musicToggle.textContent = 'Music: OFF';
-        musicToggle.classList.remove('active');
-        isMusicPlaying = false;
-        document.querySelector('.suit-schematic').classList.remove('dancing');
-        addTelemetryEntry('Background audio systems disabled');
+    // First turn off party mode immediately
+    if (isPartyMode) {
+        stopPartyMode();
+        addTelemetryEntry('Party mode emergency shutdown');
     }
     
     addTelemetryEntry('Deploying fire suppression systems...');
@@ -784,45 +791,138 @@ function setupMusicToggle() {
     const suitSchematic = document.querySelector('.suit-schematic');
     
     musicToggle.addEventListener('click', () => {
-        if (isMusicPlaying) {
-            backgroundMusic.pause();
-            musicToggle.textContent = 'Music: OFF';
-            musicToggle.classList.remove('active');
-            isMusicPlaying = false;
-            // Stop dancing animation
-            suitSchematic.classList.remove('dancing');
-            addTelemetryEntry('Background audio disabled - Dance mode OFF');
+        if (isPartyMode) {
+            // Stop party mode
+            stopPartyMode();
         } else {
-            // Try to play music
-            backgroundMusic.play().then(() => {
-                musicToggle.textContent = 'Music: ON';
-                musicToggle.classList.add('active');
-                isMusicPlaying = true;
-                // Start dancing animation
-                suitSchematic.classList.add('dancing');
-                addTelemetryEntry('Background audio enabled - IRON MAN DANCE MODE ACTIVATED');
-            }).catch((error) => {
-                // Handle autoplay restrictions
-                console.log('Audio autoplay prevented:', error);
-                addTelemetryEntry('Audio source unavailable - check connection');
-                isMusicPlaying = false;
-            });
+            // Start party mode
+            startPartyMode();
         }
     });
     
     // Handle audio events
     backgroundMusic.addEventListener('ended', () => {
         // Audio ended (though it should loop)
-        isMusicPlaying = false;
-        musicToggle.textContent = 'Music: OFF';
-        musicToggle.classList.remove('active');
-        suitSchematic.classList.remove('dancing');
+        if (isPartyMode) {
+            stopPartyMode();
+        }
     });
     
     backgroundMusic.addEventListener('error', (e) => {
         console.log('Audio error:', e);
         addTelemetryEntry('Audio playback error - check audio source');
     });
+}
+
+// Party mode functions
+function startPartyMode() {
+    const suitSchematic = document.querySelector('.suit-schematic');
+    
+    // Try to play music
+    backgroundMusic.play().then(() => {
+        musicToggle.textContent = 'Party Mode: ON';
+        musicToggle.classList.add('active');
+        isMusicPlaying = true;
+        isPartyMode = true;
+        
+        // Start dancing animation
+        suitSchematic.classList.add('dancing');
+        suitSchematic.classList.add('party-mode');
+        
+        // Start color cycling
+        startColorCycling();
+        
+        // Start status fluctuations
+        startStatusFluctuations();
+        
+        addTelemetryEntry('🎉 PARTY MODE ACTIVATED - MAXIMUM OVERDRIVE! 🎉');
+    }).catch((error) => {
+        // Handle autoplay restrictions
+        console.log('Audio autoplay prevented:', error);
+        addTelemetryEntry('Audio source unavailable - check connection');
+        isMusicPlaying = false;
+        isPartyMode = false;
+    });
+}
+
+function stopPartyMode() {
+    const suitSchematic = document.querySelector('.suit-schematic');
+    
+    backgroundMusic.pause();
+    musicToggle.textContent = 'Party Mode: OFF';
+    musicToggle.classList.remove('active');
+    isMusicPlaying = false;
+    isPartyMode = false;
+    
+    // Stop dancing animation
+    suitSchematic.classList.remove('dancing');
+    suitSchematic.classList.remove('party-mode');
+    
+    // Stop color cycling
+    stopColorCycling();
+    
+    // Stop status fluctuations
+    stopStatusFluctuations();
+    
+    addTelemetryEntry('Party mode disabled - Systems returning to normal');
+}
+
+function startColorCycling() {
+    let colorPosition = 0;
+    partyColorCycleInterval = setInterval(() => {
+        // Cycle through the full color range (0-100) slowly
+        colorPosition = (colorPosition + 0.5) % 100;
+        updateSuitColor(colorPosition);
+        
+        // Update the color slider to match
+        colorSlider.value = Math.round(colorPosition);
+        colorValue.textContent = Math.round(colorPosition) + '%';
+    }, 50); // Update every 50ms for smooth cycling
+}
+
+function stopColorCycling() {
+    if (partyColorCycleInterval) {
+        clearInterval(partyColorCycleInterval);
+        partyColorCycleInterval = null;
+    }
+}
+
+function startStatusFluctuations() {
+    const progressBars = document.querySelectorAll('.progress-fill');
+    const statusTexts = document.querySelectorAll('.status-row span:last-child');
+    
+    // Store original values
+    const originalValues = [];
+    for (let i = 0; i < 4; i++) {
+        originalValues.push({
+            width: progressBars[i].style.width,
+            text: statusTexts[i].textContent
+        });
+    }
+    
+    partyStatusInterval = setInterval(() => {
+        if (!isDiagnosticsRunning) { // Don't interfere with diagnostics
+            for (let i = 0; i < 4; i++) {
+                // Semi-random fluctuation: base value ± random variation
+                const baseValue = parseInt(originalValues[i].text);
+                const variation = (Math.random() - 0.5) * 30; // ±15 variation
+                const newValue = Math.max(10, Math.min(100, baseValue + variation));
+                
+                progressBars[i].style.width = newValue + '%';
+                statusTexts[i].textContent = Math.round(newValue) + '%';
+            }
+        }
+    }, 200); // Update every 200ms
+}
+
+function stopStatusFluctuations() {
+    if (partyStatusInterval) {
+        clearInterval(partyStatusInterval);
+        partyStatusInterval = null;
+        
+        // Restore original progress bar behavior
+        updateProgressBars();
+    }
 }
 
 // Telemetry system
