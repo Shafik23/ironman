@@ -41,6 +41,9 @@ const tooltipContent = {
 // Music state
 let isMusicPlaying = false;
 
+// Diagnostics state
+let isDiagnosticsRunning = false;
+
 // Initialize the application
 function initializeApp() {
     setupComponentSelection();
@@ -66,23 +69,57 @@ function initializeApp() {
 function setupComponentSelection() {
     componentItems.forEach(item => {
         item.addEventListener('click', () => {
-            // Remove previous selection
-            componentItems.forEach(comp => comp.classList.remove('selected'));
-            schematicParts.forEach(part => part.classList.remove('highlighted'));
-            
-            // Add selection to clicked component
-            item.classList.add('selected');
-            
-            // Highlight corresponding schematic part
             const componentType = item.dataset.component;
             const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
-            if (correspondingPart) {
-                correspondingPart.classList.add('highlighted');
-            }
-            
-            // Add telemetry log entry
             const componentName = item.querySelector('.component-name').textContent;
-            addTelemetryEntry(`${componentName} selected for configuration`);
+            
+            // Check if this component is already selected
+            if (item.classList.contains('selected')) {
+                // Deselect the component
+                item.classList.remove('selected');
+                if (correspondingPart) {
+                    correspondingPart.classList.remove('highlighted');
+                }
+                
+                // Update status to OFFLINE (only if not running diagnostics)
+                if (!isDiagnosticsRunning) {
+                    const statusElement = item.querySelector('.component-status');
+                    statusElement.textContent = 'OFFLINE';
+                    statusElement.className = 'component-status offline';
+                }
+                
+                addTelemetryEntry(`${componentName} deselected`);
+            } else {
+                // Remove previous selection
+                componentItems.forEach(comp => {
+                    comp.classList.remove('selected');
+                    // Set all other components to OFFLINE (only if not running diagnostics)
+                    if (!isDiagnosticsRunning) {
+                        const compStatus = comp.querySelector('.component-status');
+                        compStatus.textContent = 'OFFLINE';
+                        compStatus.className = 'component-status offline';
+                    }
+                });
+                schematicParts.forEach(part => part.classList.remove('highlighted'));
+                
+                // Add selection to clicked component
+                item.classList.add('selected');
+                
+                // Update status to ONLINE (only if not running diagnostics)
+                if (!isDiagnosticsRunning) {
+                    const statusElement = item.querySelector('.component-status');
+                    statusElement.textContent = 'ONLINE';
+                    statusElement.className = 'component-status online';
+                }
+                
+                // Highlight corresponding schematic part
+                if (correspondingPart) {
+                    correspondingPart.classList.add('highlighted');
+                }
+                
+                // Add telemetry log entry
+                addTelemetryEntry(`${componentName} selected for configuration`);
+            }
         });
         
         // Add hover effects
@@ -459,6 +496,9 @@ function executeInitializeSystems() {
 }
 
 function executeRunDiagnostics() {
+    // Set diagnostics running flag
+    isDiagnosticsRunning = true;
+    
     addTelemetryEntry('Comprehensive diagnostics initiated');
     addTelemetryEntry('Scanning all system components...');
     
@@ -473,6 +513,20 @@ function executeRunDiagnostics() {
     const originalCpuText = statusTexts[0].textContent;
     const originalMemoryText = statusTexts[1].textContent;
     
+    // Store original component statuses
+    const originalStatuses = [];
+    componentItems.forEach(item => {
+        const statusElement = item.querySelector('.component-status');
+        originalStatuses.push({
+            element: statusElement,
+            text: statusElement.textContent,
+            className: statusElement.className
+        });
+        // Set all components to DIAG status
+        statusElement.textContent = 'DIAG';
+        statusElement.className = 'component-status diag';
+    });
+    
     // Boost CPU and Memory to 100%
     progressBars[0].style.width = '100%';
     progressBars[1].style.width = '100%';
@@ -483,23 +537,34 @@ function executeRunDiagnostics() {
     suitSchematic.classList.add('diagnostic-scan');
     
     addTelemetryEntry('CPU and Memory boosted for intensive scanning');
+    addTelemetryEntry('All system modules entered diagnostic mode');
     addTelemetryEntry('Deep system analysis in progress...');
     
-    // End diagnostics after 25 seconds
+    // End diagnostics after 15 seconds
     setTimeout(() => {
+        // Clear diagnostics running flag
+        isDiagnosticsRunning = false;
+        
         // Restore original CPU and Memory values
         progressBars[0].style.width = originalCpuWidth;
         progressBars[1].style.width = originalMemoryWidth;
         statusTexts[0].textContent = originalCpuText;
         statusTexts[1].textContent = originalMemoryText;
         
+        // Restore original component statuses
+        originalStatuses.forEach(status => {
+            status.element.textContent = status.text;
+            status.element.className = status.className;
+        });
+        
         // Remove diagnostic animation
         suitSchematic.classList.remove('diagnostic-scan');
         
         addTelemetryEntry('Diagnostic scan complete');
         addTelemetryEntry('CPU and Memory restored to normal levels');
+        addTelemetryEntry('All system modules returned to normal status');
         addTelemetryEntry('All systems nominal - No issues detected');
-    }, 25000);
+    }, 15000);
 }
 
 function executeEmergencyShutdown() {
