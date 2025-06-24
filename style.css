@@ -397,6 +397,15 @@ body {
     animation: highlight-pulse 1s ease-in-out infinite alternate;
 }
 
+/* Special handling for repulsor interaction circles */
+.schematic-part.highlighted .repulsor-interaction {
+    stroke: var(--accent-gold) !important;
+    stroke-width: 3 !important;
+    fill: rgba(255, 215, 0, 0.1) !important;
+    filter: drop-shadow(0 0 20px var(--accent-gold)) !important;
+    animation: highlight-pulse 1s ease-in-out infinite alternate;
+}
+
 /* Tooltip */
 .tooltip {
     position: absolute;
