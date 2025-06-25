@@ -11,7 +11,10 @@ This is an Iron Man suit designer web application that creates an interactive, r
 - `index.html` - Main HTML structure with SVG schematic and interface panels
 - `script.js` - Core JavaScript functionality for interactions, telemetry, and audio
 - `style.css` - Comprehensive CSS with cyberpunk/retro-futuristic styling
-- `music.mp3` - Background audio file for the interface
+- `ironman.mp3` - Background music file for party mode
+- `hose.mp3` - Additional audio file for sound effects
+- `deploy.sh` - Production deployment script using rsync
+- `push_all_changes.sh` - Git workflow helper script
 
 ## Development Commands
 
@@ -23,6 +26,16 @@ python -m http.server 8000
 # or
 npx serve .
 # or simply open index.html in a browser
+```
+
+### Deployment Commands
+
+```bash
+# Deploy to production server
+./deploy.sh
+
+# Quick git commit and push workflow
+./push_all_changes.sh "commit message"
 ```
 
 ## Architecture & Key Patterns
@@ -56,8 +69,9 @@ The application uses a component-based approach where suit parts are represented
 - Real-time telemetry log with automatic updates
 - Configuration sliders affecting system status bars
 - Keyboard shortcuts (1-6 for components, M for music, I/D/Esc for commands)
-- Background music toggle with error handling
+- Party Mode toggle with background music and visual effects
 - Scan line overlay effect for retro CRT appearance
+- Component status cycling and diagnostic modes
 
 ### Data Flow
 1. User interaction (click/hover) → Event handler
@@ -69,3 +83,15 @@ The application uses a component-based approach where suit parts are represented
 ## Development Guidelines
 
 - Whatever you do, always make sure it's "ironman" themed.
+- The application uses a component mapping system (`componentMapping` object) to sync UI elements with SVG schematic parts
+- All telemetry messages should maintain the technical/futuristic tone with system-specific terminology
+- Audio files are loaded dynamically - handle errors gracefully for missing audio files
+- Party mode affects multiple visual systems simultaneously (colors, status indicators, animations)
+
+## Important Development Notes
+
+- Components are identified by `data-component` and `data-part` attributes for event delegation
+- SVG schematic parts must correspond to entries in the `componentMapping` object
+- Telemetry system has a maximum entry limit and auto-rotates old messages
+- All animations are CSS-based and triggered via JavaScript class manipulation
+- The deployment script assumes a specific server configuration (`root@pollamin01`)
