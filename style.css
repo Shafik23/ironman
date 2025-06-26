@@ -774,7 +774,7 @@ body {
 }
 
 .party-mode .schematic-part[data-part="helmet"] {
-    animation: helmet-party-nod 0.9s ease-in-out infinite;
+    animation: helmet-party-nod 2s ease-in-out infinite;
 }
 
 .party-mode .schematic-part[data-part="repulsors"] {
@@ -812,10 +812,11 @@ body {
 }
 
 @keyframes helmet-party-nod {
-    0% { transform: translateY(0px) rotate(0deg); }
-    30% { transform: translateY(-4px) rotate(-3deg); }
-    60% { transform: translateY(2px) rotate(2deg); }
-    100% { transform: translateY(0px) rotate(0deg); }
+    0% { transform: translateY(0px) rotate(0deg) scale(1); }
+    25% { transform: translateY(-2px) rotate(-1deg) scale(1.01); }
+    50% { transform: translateY(1px) rotate(1deg) scale(0.99); }
+    75% { transform: translateY(-1px) rotate(-0.5deg) scale(1.005); }
+    100% { transform: translateY(0px) rotate(0deg) scale(1); }
 }
 
 @keyframes repulsor-party-pulse {
@@ -831,6 +832,99 @@ body {
     60% { transform: translateY(-1px) skewX(-1deg); }
     80% { transform: translateY(1px) skewX(2deg); }
     100% { transform: translateY(0px) skewX(0deg); }
+}
+
+/* Eye slit party animations */
+@keyframes eye-party-flash {
+    0% { 
+        fill: var(--accent-gold); 
+        filter: drop-shadow(0 0 3px var(--accent-gold));
+        opacity: 1;
+    }
+    20% { 
+        fill: #ff0000; 
+        filter: drop-shadow(0 0 8px #ff0000);
+        opacity: 0.3;
+    }
+    40% { 
+        fill: #00ff00; 
+        filter: drop-shadow(0 0 12px #00ff00);
+        opacity: 1;
+    }
+    60% { 
+        fill: #0080ff; 
+        filter: drop-shadow(0 0 10px #0080ff);
+        opacity: 0.2;
+    }
+    80% { 
+        fill: #ff00ff; 
+        filter: drop-shadow(0 0 15px #ff00ff);
+        opacity: 1;
+    }
+    100% { 
+        fill: var(--accent-gold); 
+        filter: drop-shadow(0 0 3px var(--accent-gold));
+        opacity: 1;
+    }
+}
+
+/* Mouth grille party animation - subtle glow effect */
+@keyframes mouth-party-glow {
+    0% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 2px var(--secondary-blue));
+    }
+    50% { 
+        fill: var(--accent-gold);
+        filter: drop-shadow(0 0 6px var(--accent-gold));
+    }
+    100% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 2px var(--secondary-blue));
+    }
+}
+
+/* Apply animations to face elements in party mode */
+.party-mode .eye-slit {
+    animation: eye-party-flash 2s ease-in-out infinite;
+}
+
+.party-mode .eye-slit:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.party-mode .schematic-part[data-part="helmet"] rect:nth-child(4),
+.party-mode .schematic-part[data-part="helmet"] rect:nth-child(5) {
+    animation: mouth-party-glow 1.5s ease-in-out infinite;
+}
+
+/* Side panel party animations - pulsing glow effect */
+@keyframes side-panel-party-glow {
+    0% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 3px var(--secondary-blue));
+    }
+    33% { 
+        fill: var(--danger-red);
+        filter: drop-shadow(0 0 8px var(--danger-red));
+    }
+    66% { 
+        fill: var(--success-green);
+        filter: drop-shadow(0 0 8px var(--success-green));
+    }
+    100% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 3px var(--secondary-blue));
+    }
+}
+
+.party-mode .schematic-part[data-part="helmet"] path:nth-child(6) {
+    animation: side-panel-party-glow 2.5s ease-in-out infinite;
+}
+
+.party-mode .schematic-part[data-part="helmet"] path:nth-child(7) {
+    animation: side-panel-party-glow 2.5s ease-in-out infinite;
+    animation-delay: 0.5s;
 }
 
 /* Diagnostic scan animation */
