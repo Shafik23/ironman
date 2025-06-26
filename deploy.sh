@@ -16,6 +16,9 @@ rsync --delete -azP -e ssh hose.mp3 $remote:$app_dir/
 # Deploy js modules folder
 rsync --delete -azP -e ssh js/ $remote:$app_dir/js/
 
+# Deploy css modules folder
+rsync --delete -azP -e ssh css/ $remote:$app_dir/css/
+
 echo "---------------------"
 echo "------ SUCCESS ------"
 echo "Iron Man Suit Designer deployed to $app_dir"

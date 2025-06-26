@@ -1,0 +1,125 @@
+/* Schematic container */
+.schematic-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background: radial-gradient(circle at center, var(--bg-lighter) 0%, var(--bg-panel) 100%);
+    border-radius: 8px;
+    margin: 10px 0;
+    min-height: 0;
+}
+
+.suit-schematic {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 10px var(--suit-cyan));
+}
+
+/* Schematic part styles */
+.schematic-part {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.part-outline {
+    fill: none;
+    stroke: var(--suit-cyan);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 5px var(--suit-cyan));
+}
+
+.part-detail {
+    fill: var(--secondary-blue);
+    stroke: var(--suit-cyan);
+    stroke-width: 1;
+}
+
+.eye-slit {
+    fill: var(--accent-gold);
+    stroke: var(--accent-gold);
+    stroke-width: 1;
+    filter: drop-shadow(0 0 3px var(--accent-gold));
+}
+
+.reactor {
+    fill: var(--accent-gold);
+    animation: reactor-pulse 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-max {
+    fill: #ffff00;
+    animation: reactor-pulse-max 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-high {
+    fill: var(--accent-gold);
+    animation: reactor-pulse-high 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-medium {
+    fill: #ff8000;
+    animation: reactor-pulse-medium 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-low {
+    fill: #ff4444;
+    animation: reactor-pulse-low 1.5s ease-in-out infinite alternate;
+}
+
+.reactor.power-critical {
+    fill: #8b0000;
+    animation: reactor-pulse-critical 1.5s ease-in-out infinite alternate;
+}
+
+.repulsor {
+    fill: var(--suit-cyan);
+    animation: repulsor-glow 2s ease-in-out infinite alternate;
+}
+
+.thruster {
+    fill: var(--warning-orange);
+}
+
+.schematic-part:hover .part-outline {
+    stroke: var(--accent-gold);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 15px var(--accent-gold));
+}
+
+.schematic-part.highlighted .part-outline {
+    stroke: var(--accent-gold);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 20px var(--accent-gold));
+    animation: highlight-pulse 1s ease-in-out infinite alternate;
+}
+
+/* Special handling for repulsor interaction circles */
+.schematic-part.highlighted .repulsor-interaction {
+    stroke: var(--accent-gold) !important;
+    stroke-width: 3 !important;
+    fill: rgba(255, 215, 0, 0.1) !important;
+    filter: drop-shadow(0 0 20px var(--accent-gold)) !important;
+    animation: highlight-pulse 1s ease-in-out infinite alternate;
+}
+
+/* Tooltip */
+.tooltip {
+    position: absolute;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--primary-cyan);
+    font-size: 0.8rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+    box-shadow: var(--shadow-glow);
+}
+
+.tooltip.visible {
+    opacity: 1;
+}

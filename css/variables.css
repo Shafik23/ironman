@@ -1,0 +1,18 @@
+/* CSS Variables for consistent theming */
+:root {
+    --primary-cyan: #00ffff;
+    --suit-cyan: #00ffff;
+    --secondary-blue: #0080ff;
+    --accent-gold: #ffd700;
+    --warning-orange: #ff8000;
+    --danger-red: #ff4444;
+    --success-green: #00ff80;
+    --bg-dark: #0a0a0a;
+    --bg-panel: #1a1a2e;
+    --bg-lighter: #16213e;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0a0;
+    --border-glow: rgba(0, 255, 255, 0.5);
+    --shadow-glow: 0 0 10px rgba(0, 255, 255, 0.3);
+    --suit-glow: 0 0 8px rgba(0, 255, 255, 0.8);
+}

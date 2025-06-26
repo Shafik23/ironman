@@ -1,0 +1,182 @@
+/* Music toggle button */
+.music-toggle {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    background: var(--bg-lighter);
+    border: 1px solid var(--secondary-blue);
+    color: var(--primary-cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.music-toggle:hover {
+    background: var(--secondary-blue);
+    box-shadow: 0 0 10px var(--secondary-blue);
+    transform: translateY(-1px);
+}
+
+.music-toggle.active {
+    background: var(--success-green);
+    border-color: var(--success-green);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--success-green);
+}
+
+/* Component list styles */
+.component-list {
+    margin-bottom: 30px;
+}
+
+.component-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: var(--bg-lighter);
+    border: 1px solid transparent;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.component-item:hover {
+    border-color: var(--primary-cyan);
+    box-shadow: inset 0 0 10px rgba(0, 255, 255, 0.2);
+}
+
+.component-item.selected {
+    border-color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.component-icon {
+    font-size: 1.2rem;
+    color: var(--primary-cyan);
+    margin-right: 12px;
+    text-shadow: 0 0 5px var(--primary-cyan);
+}
+
+.component-name {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.component-status {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.component-status.online {
+    background: var(--success-green);
+    color: var(--bg-dark);
+}
+
+.component-status.warning {
+    background: var(--warning-orange);
+    color: var(--bg-dark);
+}
+
+.component-status.error {
+    background: var(--danger-red);
+    color: var(--text-primary);
+}
+
+.component-status.offline {
+    background: var(--text-secondary);
+    color: var(--bg-dark);
+}
+
+.component-status.diag {
+    background: var(--secondary-blue);
+    color: var(--text-primary);
+}
+
+/* System status styles */
+.status-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+}
+
+.status-row span:last-child {
+    width: 40px;
+    text-align: right;
+    display: inline-block;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-dark);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--primary-cyan);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-green), var(--primary-cyan));
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Command buttons */
+.command-btn {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.command-btn.primary {
+    background: var(--success-green);
+    color: var(--bg-dark);
+}
+
+.command-btn.secondary {
+    background: var(--secondary-blue);
+    color: var(--text-primary);
+}
+
+.command-btn.danger {
+    background: var(--danger-red);
+    color: var(--text-primary);
+}
+
+.command-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.command-btn.primary:hover {
+    box-shadow: 0 5px 15px var(--success-green);
+}
+
+.command-btn.secondary:hover {
+    box-shadow: 0 5px 15px var(--secondary-blue);
+}
+
+.command-btn.danger:hover {
+    box-shadow: 0 5px 15px var(--danger-red);
+}

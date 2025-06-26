@@ -1,0 +1,573 @@
+/* Animations */
+@keyframes glow-pulse {
+    from {
+        text-shadow: 0 0 20px var(--primary-cyan);
+    }
+    to {
+        text-shadow: 0 0 30px var(--primary-cyan), 0 0 40px var(--primary-cyan);
+    }
+}
+
+@keyframes reactor-pulse {
+    from {
+        fill: var(--accent-gold);
+        filter: drop-shadow(0 0 5px var(--accent-gold));
+    }
+    to {
+        fill: #ffff00;
+        filter: drop-shadow(0 0 15px #ffff00);
+    }
+}
+
+@keyframes reactor-pulse-max {
+    from {
+        fill: #ffff00;
+        filter: drop-shadow(0 0 15px #ffff00);
+    }
+    to {
+        fill: #ffffff;
+        filter: drop-shadow(0 0 25px #ffff00);
+    }
+}
+
+@keyframes reactor-pulse-high {
+    from {
+        fill: var(--accent-gold);
+        filter: drop-shadow(0 0 8px var(--accent-gold));
+    }
+    to {
+        fill: #ffff00;
+        filter: drop-shadow(0 0 18px var(--accent-gold));
+    }
+}
+
+@keyframes reactor-pulse-medium {
+    from {
+        fill: #ff8000;
+        filter: drop-shadow(0 0 5px #ff8000);
+    }
+    to {
+        fill: #ffa500;
+        filter: drop-shadow(0 0 12px #ff8000);
+    }
+}
+
+@keyframes reactor-pulse-low {
+    from {
+        fill: #ff4444;
+        filter: drop-shadow(0 0 3px #ff4444);
+    }
+    to {
+        fill: #ff6666;
+        filter: drop-shadow(0 0 8px #ff4444);
+    }
+}
+
+@keyframes reactor-pulse-critical {
+    from {
+        fill: #8b0000;
+        filter: drop-shadow(0 0 2px #8b0000);
+    }
+    to {
+        fill: #a52a2a;
+        filter: drop-shadow(0 0 5px #8b0000);
+    }
+}
+
+@keyframes reactor-pulse-dynamic {
+    from {
+        filter: drop-shadow(0 0 var(--reactor-glow) var(--reactor-color));
+    }
+    to {
+        filter: drop-shadow(0 0 calc(var(--reactor-glow) * 1.5) var(--reactor-color));
+    }
+}
+
+@keyframes repulsor-glow {
+    from {
+        fill: var(--suit-cyan);
+        filter: drop-shadow(0 0 5px var(--suit-cyan));
+    }
+    to {
+        fill: #66ffff;
+        filter: drop-shadow(0 0 15px #66ffff);
+    }
+}
+
+@keyframes highlight-pulse {
+    from {
+        filter: drop-shadow(0 0 20px var(--accent-gold));
+    }
+    to {
+        filter: drop-shadow(0 0 30px var(--accent-gold));
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Limb animation keyframes for Iron Man dancing */
+@keyframes arm-dance-left {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(-15deg); }
+    50% { transform: rotate(5deg); }
+    75% { transform: rotate(-10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes arm-dance-right {
+    0% { transform: rotate(0deg); }
+    25% { transform: rotate(15deg); }
+    50% { transform: rotate(-5deg); }
+    75% { transform: rotate(10deg); }
+    100% { transform: rotate(0deg); }
+}
+
+@keyframes leg-dance-left {
+    0% { transform: translateX(0px) rotate(0deg); }
+    25% { transform: translateX(-3px) rotate(-2deg); }
+    50% { transform: translateX(2px) rotate(1deg); }
+    75% { transform: translateX(-1px) rotate(-1deg); }
+    100% { transform: translateX(0px) rotate(0deg); }
+}
+
+@keyframes leg-dance-right {
+    0% { transform: translateX(0px) rotate(0deg); }
+    25% { transform: translateX(3px) rotate(2deg); }
+    50% { transform: translateX(-2px) rotate(-1deg); }
+    75% { transform: translateX(1px) rotate(1deg); }
+    100% { transform: translateX(0px) rotate(0deg); }
+}
+
+@keyframes body-groove {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-2px); }
+    100% { transform: translateY(0px); }
+}
+
+/* Dancing classes - applied when music is playing */
+.dancing .schematic-part[data-part="arms"] {
+    animation: arm-dance-left 2.5s ease-in-out infinite;
+    transform-origin: 200px 200px;
+}
+
+.dancing .schematic-part[data-part="legs"] {
+    animation: leg-dance-left 2.2s ease-in-out infinite;
+    transform-origin: 200px 320px;
+}
+
+.dancing .schematic-part[data-part="chest"] {
+    animation: body-groove 1.8s ease-in-out infinite;
+}
+
+.dancing .schematic-part[data-part="helmet"] {
+    animation: body-groove 1.8s ease-in-out infinite;
+}
+
+/* Enhanced Party Mode animations - more dramatic */
+.party-mode .schematic-part[data-part="arms"] {
+    animation: arm-party-wild 1.2s ease-in-out infinite;
+    transform-origin: 200px 200px;
+}
+
+.party-mode .schematic-part[data-part="legs"] {
+    animation: leg-party-wild 1.1s ease-in-out infinite;
+    transform-origin: 200px 320px;
+}
+
+.party-mode .schematic-part[data-part="chest"] {
+    animation: body-party-bounce 1.0s ease-in-out infinite;
+}
+
+.party-mode .schematic-part[data-part="helmet"] {
+    animation: helmet-party-nod 2s ease-in-out infinite;
+}
+
+.party-mode .schematic-part[data-part="repulsors"] {
+    animation: repulsor-party-pulse 0.8s ease-in-out infinite;
+}
+
+.party-mode .schematic-part[data-part="thrusters"] {
+    animation: thruster-party-wiggle 1.3s ease-in-out infinite;
+}
+
+/* Party mode keyframes - much more dramatic */
+@keyframes arm-party-wild {
+    0% { transform: rotate(0deg) scale(1); }
+    20% { transform: rotate(-25deg) scale(1.05); }
+    40% { transform: rotate(30deg) scale(0.95); }
+    60% { transform: rotate(-20deg) scale(1.08); }
+    80% { transform: rotate(25deg) scale(0.92); }
+    100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes leg-party-wild {
+    0% { transform: translateX(0px) rotate(0deg) scaleY(1); }
+    25% { transform: translateX(-8px) rotate(-5deg) scaleY(1.05); }
+    50% { transform: translateX(10px) rotate(4deg) scaleY(0.95); }
+    75% { transform: translateX(-6px) rotate(-3deg) scaleY(1.03); }
+    100% { transform: translateX(0px) rotate(0deg) scaleY(1); }
+}
+
+@keyframes body-party-bounce {
+    0% { transform: translateY(0px) scale(1); }
+    25% { transform: translateY(-6px) scale(1.02); }
+    50% { transform: translateY(4px) scale(0.98); }
+    75% { transform: translateY(-3px) scale(1.01); }
+    100% { transform: translateY(0px) scale(1); }
+}
+
+@keyframes helmet-party-nod {
+    0% { transform: translateY(0px) rotate(0deg) scale(1); }
+    25% { transform: translateY(-2px) rotate(-1deg) scale(1.01); }
+    50% { transform: translateY(1px) rotate(1deg) scale(0.99); }
+    75% { transform: translateY(-1px) rotate(-0.5deg) scale(1.005); }
+    100% { transform: translateY(0px) rotate(0deg) scale(1); }
+}
+
+@keyframes repulsor-party-pulse {
+    0% { transform: scale(1); filter: drop-shadow(0 0 5px var(--accent-gold)); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 15px var(--danger-red)); }
+    100% { transform: scale(1); filter: drop-shadow(0 0 5px var(--accent-gold)); }
+}
+
+@keyframes thruster-party-wiggle {
+    0% { transform: translateY(0px) skewX(0deg); }
+    20% { transform: translateY(-3px) skewX(-2deg); }
+    40% { transform: translateY(2px) skewX(3deg); }
+    60% { transform: translateY(-1px) skewX(-1deg); }
+    80% { transform: translateY(1px) skewX(2deg); }
+    100% { transform: translateY(0px) skewX(0deg); }
+}
+
+/* Eye slit party animations */
+@keyframes eye-party-flash {
+    0% { 
+        fill: var(--accent-gold); 
+        filter: drop-shadow(0 0 3px var(--accent-gold));
+        opacity: 1;
+    }
+    20% { 
+        fill: #ff0000; 
+        filter: drop-shadow(0 0 8px #ff0000);
+        opacity: 0.3;
+    }
+    40% { 
+        fill: #00ff00; 
+        filter: drop-shadow(0 0 12px #00ff00);
+        opacity: 1;
+    }
+    60% { 
+        fill: #0080ff; 
+        filter: drop-shadow(0 0 10px #0080ff);
+        opacity: 0.2;
+    }
+    80% { 
+        fill: #ff00ff; 
+        filter: drop-shadow(0 0 15px #ff00ff);
+        opacity: 1;
+    }
+    100% { 
+        fill: var(--accent-gold); 
+        filter: drop-shadow(0 0 3px var(--accent-gold));
+        opacity: 1;
+    }
+}
+
+/* Mouth grille party animation - subtle glow effect */
+@keyframes mouth-party-glow {
+    0% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 2px var(--secondary-blue));
+    }
+    50% { 
+        fill: var(--accent-gold);
+        filter: drop-shadow(0 0 6px var(--accent-gold));
+    }
+    100% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 2px var(--secondary-blue));
+    }
+}
+
+/* Apply animations to face elements in party mode */
+.party-mode .eye-slit {
+    animation: eye-party-flash 2s ease-in-out infinite;
+}
+
+.party-mode .eye-slit:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.party-mode .schematic-part[data-part="helmet"] rect:nth-child(4),
+.party-mode .schematic-part[data-part="helmet"] rect:nth-child(5) {
+    animation: mouth-party-glow 1.5s ease-in-out infinite;
+}
+
+/* Side panel party animations - pulsing glow effect */
+@keyframes side-panel-party-glow {
+    0% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 3px var(--secondary-blue));
+    }
+    33% { 
+        fill: var(--danger-red);
+        filter: drop-shadow(0 0 8px var(--danger-red));
+    }
+    66% { 
+        fill: var(--success-green);
+        filter: drop-shadow(0 0 8px var(--success-green));
+    }
+    100% { 
+        fill: var(--secondary-blue);
+        filter: drop-shadow(0 0 3px var(--secondary-blue));
+    }
+}
+
+.party-mode .schematic-part[data-part="helmet"] path:nth-child(6) {
+    animation: side-panel-party-glow 2.5s ease-in-out infinite;
+}
+
+.party-mode .schematic-part[data-part="helmet"] path:nth-child(7) {
+    animation: side-panel-party-glow 2.5s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+/* Diagnostic scan animation */
+.diagnostic-scan .schematic-part {
+    animation: diagnostic-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes diagnostic-pulse {
+    from {
+        filter: drop-shadow(0 0 5px var(--suit-cyan));
+    }
+    to {
+        filter: drop-shadow(0 0 15px var(--accent-gold));
+    }
+}
+
+/* Fire Extinguisher Spray Animation */
+.fire-extinguisher-spray {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 50;
+}
+
+/* Fire Hose */
+.fire-hose {
+    position: absolute;
+    left: 20px;
+    top: -20px;
+    width: 160px;
+    height: 40px;
+    background: linear-gradient(to bottom,
+        #1a1a1a 0%,
+        #2c2c2c 15%,
+        #404040 50%,
+        #2c2c2c 85%,
+        #1a1a1a 100%);
+    border-radius: 6px;
+    border: 3px solid #0f0f0f;
+    box-shadow: 
+        inset 0 8px 16px rgba(0, 0, 0, 0.4),
+        inset 0 -8px 16px rgba(0, 0, 0, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        0 4px 12px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: rotate(15deg);
+    transform-origin: left center;
+}
+
+.fire-hose.active {
+    animation: hose-appear 0.5s ease-out forwards;
+}
+
+@keyframes hose-appear {
+    0% {
+        opacity: 0;
+        transform: rotate(15deg) translateX(-50px);
+    }
+    100% {
+        opacity: 1;
+        transform: rotate(15deg) translateX(0);
+    }
+}
+
+/* Water pressure stream */
+.water-pressure-stream {
+    position: absolute;
+    left: 195px;
+    top: 40px;
+    width: 200px;
+    height: 8px;
+    background: linear-gradient(to right,
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(200, 230, 255, 0.8) 30%,
+        rgba(150, 200, 255, 0.6) 70%,
+        rgba(100, 150, 200, 0.3) 100%);
+    border-radius: 4px;
+    transform: rotate(15deg);
+    transform-origin: left center;
+    opacity: 0;
+    box-shadow: 
+        0 0 4px rgba(255, 255, 255, 0.4),
+        0 0 8px rgba(200, 230, 255, 0.3);
+}
+
+.water-pressure-stream.active {
+    animation: pressure-stream 2s ease-out forwards;
+}
+
+@keyframes pressure-stream {
+    0% {
+        opacity: 0;
+        width: 0px;
+    }
+    20% {
+        opacity: 1;
+        width: 100px;
+    }
+    100% {
+        opacity: 0.8;
+        width: 200px;
+    }
+}
+
+/* Water droplet */
+.water-droplet {
+    position: absolute;
+    background: radial-gradient(circle at 30% 30%, 
+        rgba(255, 255, 255, 0.9) 0%,
+        rgba(200, 230, 255, 0.8) 30%,
+        rgba(100, 150, 255, 0.7) 70%,
+        rgba(50, 100, 200, 0.6) 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    box-shadow: 
+        inset 2px 2px 4px rgba(255, 255, 255, 0.4),
+        2px 2px 8px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+}
+
+.water-droplet.active {
+    animation: water-droplet-fall 1.2s ease-in forwards;
+}
+
+@keyframes water-droplet-fall {
+    0% {
+        opacity: 1;
+        transform: scale(0.8);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+}
+
+/* Angled water streak */
+.angled-water-streak {
+    position: absolute;
+    background: rgba(200, 230, 255, 0.7);
+    border-radius: 2px;
+    box-shadow: 
+        0 0 4px rgba(255, 255, 255, 0.4),
+        0 0 8px rgba(200, 230, 255, 0.3);
+    opacity: 0;
+}
+
+.angled-water-streak.active {
+    animation: angled-streak-appear 1.5s ease-out forwards;
+}
+
+@keyframes angled-streak-appear {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 1;
+    }
+    70% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Water splash effect */
+.water-splash {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle,
+        rgba(255, 255, 255, 0.6) 0%,
+        rgba(200, 230, 255, 0.4) 40%,
+        rgba(100, 150, 200, 0.2) 80%,
+        transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+}
+
+.water-splash.active {
+    animation: water-splash-impact 0.8s ease-out forwards;
+}
+
+@keyframes water-splash-impact {
+    0% {
+        opacity: 0;
+        transform: scale(0.2);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2.5);
+    }
+}
+
+/* Emergency shutdown suit effect */
+.emergency-shutdown .schematic-part {
+    animation: shutdown-spray-effect 3s ease-out forwards;
+}
+
+@keyframes shutdown-spray-effect {
+    0% {
+        filter: drop-shadow(0 0 10px var(--suit-cyan));
+        opacity: 1;
+    }
+    30% {
+        filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8)) 
+                drop-shadow(0 0 15px rgba(200, 230, 255, 0.6));
+        opacity: 0.9;
+    }
+    60% {
+        filter: drop-shadow(0 0 3px rgba(150, 200, 255, 0.5));
+        opacity: 0.7;
+    }
+    100% {
+        filter: drop-shadow(0 0 2px rgba(100, 150, 200, 0.3));
+        opacity: 0.5;
+    }
+}
