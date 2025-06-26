@@ -9,7 +9,14 @@ This is an Iron Man suit designer web application that creates an interactive, r
 ## File Structure
 
 - `index.html` - Main HTML structure with SVG schematic and interface panels
-- `style.css` - Comprehensive CSS with cyberpunk/retro-futuristic styling
+- `style.css` - Main CSS file that imports modular stylesheets
+- `css/` - Modular CSS architecture:
+  - `variables.css` - CSS custom properties and color schemes
+  - `base.css` - Base styles and layout fundamentals
+  - `components.css` - Component-specific styling
+  - `schematic.css` - SVG schematic and visual elements
+  - `animations.css` - Animation definitions and effects
+  - `main.css` - Main application styling
 - `js/` - Modular ES6 JavaScript architecture:
   - `app.js` - Main entry point and initialization
   - `constants.js` - Component mappings and tooltip content
@@ -90,6 +97,8 @@ Suit parts are represented in three synchronized layers:
 - Component mappings are centralized in `constants.js`
 - State flags are centralized in `state.js`
 - Each module should have a single, clear responsibility
+- CSS is modularized: add new styles to appropriate files in `css/` directory
+- CSS variables for theming are defined in `css/variables.css`
 
 ## Important Development Notes
 
