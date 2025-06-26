@@ -735,39 +735,21 @@ function createWaterDroplets(container, count) {
 
 // Create water splash effects on the suit
 function createWaterSplashes(container) {
-  const splashPositions = [
-    { x: 220, y: 200 }, // Chest center (moved right)
-    { x: 190, y: 160 }, // Left shoulder (moved right)
-    { x: 260, y: 160 }, // Right shoulder (moved right)
-    { x: 225, y: 120 }, // Helmet center (moved right)
-    { x: 220, y: 280 }, // Waist (moved right)
-    { x: 200, y: 180 }, // Left chest (moved right)
-    { x: 250, y: 180 }, // Right chest (moved right)
-    { x: 215, y: 140 }, // Upper chest (moved right)
-    { x: 230, y: 220 }, // Lower chest (moved right)
-    { x: 160, y: 200 }, // Left arm area (moved right)
-    { x: 280, y: 200 }, // Right arm area (moved right)
-    { x: 195, y: 260 }, // Left waist (moved right)
-    { x: 245, y: 260 }, // Right waist (moved right)
-    { x: 220, y: 100 }, // Helmet top (moved right)
-    { x: 230, y: 300 }, // Lower torso (moved right)
-    { x: 150, y: 180 }, // Far left area (moved right)
-    { x: 290, y: 180 }, // Far right area (moved right)
-    { x: 180, y: 240 }, // Left side (moved right)
-    { x: 270, y: 240 }, // Right side (moved right)
-    { x: 140, y: 220 }, // Additional far left
-    { x: 300, y: 220 }, // Additional far right
-    { x: 170, y: 140 }, // Additional left shoulder area
-    { x: 270, y: 140 }, // Additional right shoulder area
-    { x: 185, y: 200 }, // Extra left chest foam
-    { x: 255, y: 200 }, // Extra right chest foam
-    { x: 205, y: 180 }, // Extra center chest foam
-    { x: 240, y: 240 }, // Extra right side foam
-    { x: 175, y: 240 }, // Extra left side foam
-    { x: 210, y: 160 }, // Extra upper chest foam
-    { x: 235, y: 280 }, // Extra right waist foam
-    { x: 190, y: 280 } // Extra left waist foam
-  ];
+  // Define suit regions with their centers and splash densities
+  const suitRegions = {
+    helmet: { center: { x: 220, y: 120 }, radius: 30, density: 4 },
+    upperChest: { center: { x: 220, y: 160 }, radius: 35, density: 5 },
+    chest: { center: { x: 220, y: 200 }, radius: 40, density: 6 },
+    leftShoulder: { center: { x: 180, y: 160 }, radius: 25, density: 3 },
+    rightShoulder: { center: { x: 260, y: 160 }, radius: 25, density: 3 },
+    leftArm: { center: { x: 150, y: 200 }, radius: 30, density: 3 },
+    rightArm: { center: { x: 290, y: 200 }, radius: 30, density: 3 },
+    waist: { center: { x: 220, y: 260 }, radius: 35, density: 5 },
+    lowerTorso: { center: { x: 220, y: 290 }, radius: 30, density: 4 }
+  };
+
+  // Generate splash positions dynamically
+  const splashPositions = generateSplashPositions(suitRegions);
 
   // Create multiple waves of splashes for continuous effect
   for (let wave = 0; wave < 3; wave++) {
@@ -789,6 +771,33 @@ function createWaterSplashes(container) {
       }, wave * 1000 + index * 100); // Waves every 1000ms, splashes every 100ms
     });
   }
+}
+
+// Generate splash positions based on suit regions
+function generateSplashPositions(regions) {
+  const positions = [];
+  
+  Object.values(regions).forEach(region => {
+    // Generate positions in a circular pattern within each region
+    for (let i = 0; i < region.density; i++) {
+      // Use golden angle for better distribution
+      const angle = i * 2.39996323; // ~137.5 degrees in radians
+      const r = region.radius * Math.sqrt(Math.random()); // Square root for uniform distribution
+      
+      positions.push({
+        x: region.center.x + r * Math.cos(angle),
+        y: region.center.y + r * Math.sin(angle)
+      });
+    }
+    
+    // Add some extra positions at region centers for better coverage
+    positions.push({
+      x: region.center.x + (Math.random() - 0.5) * 10,
+      y: region.center.y + (Math.random() - 0.5) * 10
+    });
+  });
+  
+  return positions;
 }
 
 // Music toggle functionality
