@@ -1,4 +1,5 @@
 import { dom } from './dom.js';
+import { jarvisAnnounce, isJarvisActive } from './jarvis.js';
 
 export function addTelemetryEntry(message) {
   const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -16,6 +17,31 @@ export function addTelemetryEntry(message) {
   setTimeout(() => {
     entry.style.opacity = '1';
   }, 50);
+
+  // Have J.A.R.V.I.S. announce important telemetry entries
+  if (isJarvisActive() && shouldAnnounce(message)) {
+    jarvisAnnounce(message);
+  }
+}
+
+function shouldAnnounce(message) {
+  // Only announce important system messages, not every single telemetry entry
+  const importantKeywords = [
+    'initialized',
+    'activated',
+    'deactivated',
+    'emergency',
+    'warning',
+    'critical',
+    'diagnostic',
+    'complete',
+    'online',
+    'offline',
+    'ready'
+  ];
+  
+  const messageLower = message.toLowerCase();
+  return importantKeywords.some(keyword => messageLower.includes(keyword));
 }
 
 export function startTelemetryUpdates() {

@@ -2,6 +2,7 @@ import { dom } from './dom.js';
 import { componentMapping } from './constants.js';
 import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { announceComponentChange } from './jarvis.js';
 
 export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
@@ -23,6 +24,7 @@ export function setupComponentSelection() {
         }
 
         addTelemetryEntry(`${componentName} deselected`);
+        announceComponentChange(componentType, false);
       } else {
         dom.componentItems.forEach(comp => {
           comp.classList.remove('selected');
@@ -47,6 +49,7 @@ export function setupComponentSelection() {
         }
 
         addTelemetryEntry(`${componentName} selected for configuration`);
+        announceComponentChange(componentType, true);
       }
     });
 

@@ -5,6 +5,8 @@ export const dom = {
   telemetryLog: null,
   musicToggle: null,
   backgroundMusic: null,
+  jarvisToggle: null,
+  jarvisIndicator: null,
   powerSlider: null,
   colorSlider: null,
   zoomSlider: null,
@@ -25,6 +27,8 @@ export function initializeDOMReferences() {
   dom.telemetryLog = document.getElementById('telemetryLog');
   dom.musicToggle = document.getElementById('musicToggle');
   dom.backgroundMusic = document.getElementById('backgroundMusic');
+  dom.jarvisToggle = document.getElementById('jarvisToggle');
+  dom.jarvisIndicator = document.getElementById('jarvisIndicator');
   dom.powerSlider = document.getElementById('powerSlider');
   dom.colorSlider = document.getElementById('colorSlider');
   dom.zoomSlider = document.getElementById('zoomSlider');

@@ -6,6 +6,7 @@ import { setupCommandButtons, executeInitializeSystemsQuiet } from './commands.j
 import { setupMusicToggle } from './party.js';
 import { startTelemetryUpdates, addTelemetryEntry } from './telemetry.js';
 import { setupKeyboardShortcuts } from './keyboard.js';
+import { initializeJarvis, toggleJarvis } from './jarvis.js';
 
 function initializeApp() {
   initializeDOMReferences();
@@ -17,10 +18,21 @@ function initializeApp() {
   setupMusicToggle();
   startTelemetryUpdates();
   setupKeyboardShortcuts();
+  
+  // Initialize J.A.R.V.I.S.
+  initializeJarvis();
+  setupJarvisToggle();
 
   executeInitializeSystemsQuiet();
 
   console.log('Ironman Suit Designer GUI initialized');
+}
+
+function setupJarvisToggle() {
+  const jarvisToggle = document.getElementById('jarvisToggle');
+  if (jarvisToggle) {
+    jarvisToggle.addEventListener('click', toggleJarvis);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', initializeApp);

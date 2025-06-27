@@ -26,6 +26,69 @@
     box-shadow: 0 0 15px var(--success-green);
 }
 
+/* J.A.R.V.I.S. toggle button */
+.jarvis-toggle {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: var(--bg-lighter);
+    border: 1px solid var(--secondary-blue);
+    color: var(--primary-cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.jarvis-toggle:hover {
+    background: var(--secondary-blue);
+    box-shadow: 0 0 10px var(--secondary-blue);
+    transform: translateY(-1px);
+}
+
+.jarvis-toggle.active {
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--accent-gold);
+    animation: pulse 2s infinite;
+}
+
+/* J.A.R.V.I.S. visual indicator */
+.jarvis-indicator {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--accent-gold) 0%, transparent 70%);
+    border: 2px solid var(--accent-gold);
+    opacity: 0;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.jarvis-indicator.active {
+    opacity: 0.5;
+    animation: jarvisPulse 3s infinite;
+}
+
+.jarvis-indicator.speaking {
+    opacity: 1;
+    animation: jarvisSpeaking 0.5s infinite;
+    box-shadow: 0 0 20px var(--accent-gold);
+}
+
+@keyframes jarvisPulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+@keyframes jarvisSpeaking {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
 /* Component list styles */
 .component-list {
     margin-bottom: 30px;

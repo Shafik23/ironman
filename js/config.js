@@ -1,13 +1,21 @@
 import { dom } from './dom.js';
 import { tooltipContent } from './constants.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { announcePowerLevel } from './jarvis.js';
 
 export function setupConfigurationSliders() {
+  let powerAnnounceTimeout;
   dom.powerSlider.addEventListener('input', e => {
     dom.powerValue.textContent = e.target.value + '%';
     updateProgressBars();
     updateArcReactor(e.target.value);
     addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
+    
+    // Debounce power level announcements
+    clearTimeout(powerAnnounceTimeout);
+    powerAnnounceTimeout = setTimeout(() => {
+      announcePowerLevel(parseInt(e.target.value));
+    }, 500);
   });
 
   dom.colorSlider.addEventListener('input', e => {

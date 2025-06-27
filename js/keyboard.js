@@ -18,6 +18,10 @@ export function setupKeyboardShortcuts() {
       case 'M':
         dom.musicToggle.click();
         break;
+      case 'j':
+      case 'J':
+        dom.jarvisToggle?.click();
+        break;
       case 'i':
       case 'I':
         dom.commandButtons[0].click(); // Initialize
