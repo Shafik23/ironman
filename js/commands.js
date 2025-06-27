@@ -56,6 +56,8 @@ function performSystemInitialization() {
     stopPartyMode();
   }
 
+  dom.backgroundMusic.currentTime = 0;
+
   dom.colorSlider.value = 0;
   dom.colorValue.textContent = '0%';
   updateSuitColor(0);
