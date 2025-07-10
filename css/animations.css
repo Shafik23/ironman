@@ -202,10 +202,10 @@
 /* Party mode keyframes - much more dramatic */
 @keyframes arm-party-wild {
     0% { transform: rotate(0deg) scale(1); }
-    20% { transform: rotate(-25deg) scale(1.05); }
-    40% { transform: rotate(30deg) scale(0.95); }
-    60% { transform: rotate(-20deg) scale(1.08); }
-    80% { transform: rotate(25deg) scale(0.92); }
+    20% { transform: rotate(-8deg) scale(1.01); }
+    40% { transform: rotate(10deg) scale(0.99); }
+    60% { transform: rotate(-6deg) scale(1.02); }
+    80% { transform: rotate(8deg) scale(0.98); }
     100% { transform: rotate(0deg) scale(1); }
 }
 
@@ -219,9 +219,9 @@
 
 @keyframes body-party-bounce {
     0% { transform: translateY(0px) scale(1); }
-    25% { transform: translateY(-6px) scale(1.02); }
-    50% { transform: translateY(4px) scale(0.98); }
-    75% { transform: translateY(-3px) scale(1.01); }
+    25% { transform: translateY(-2px) scale(1.008); }
+    50% { transform: translateY(1.5px) scale(0.995); }
+    75% { transform: translateY(-1px) scale(1.003); }
     100% { transform: translateY(0px) scale(1); }
 }
 
