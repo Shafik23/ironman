@@ -3,6 +3,7 @@ import { componentMapping } from './constants.js';
 import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
+import { events } from './events.js';
 
 export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
@@ -11,7 +12,9 @@ export function setupComponentSelection() {
       const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
       const componentName = item.querySelector('.component-name').textContent;
 
-      if (item.classList.contains('selected')) {
+      const wasSelected = item.classList.contains('selected');
+
+      if (wasSelected) {
         item.classList.remove('selected');
         if (correspondingPart) {
           correspondingPart.classList.remove('highlighted');
@@ -25,6 +28,7 @@ export function setupComponentSelection() {
 
         addTelemetryEntry(`${componentName} deselected`);
         announceComponentChange(componentType, false);
+        events.emit('component:selection', { component: componentType, selected: false });
       } else {
         dom.componentItems.forEach(comp => {
           comp.classList.remove('selected');
@@ -50,6 +54,7 @@ export function setupComponentSelection() {
 
         addTelemetryEntry(`${componentName} selected for configuration`);
         announceComponentChange(componentType, true);
+        events.emit('component:selection', { component: componentType, selected: true });
       }
     });
 

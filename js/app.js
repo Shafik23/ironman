@@ -10,15 +10,17 @@ import { initializeJarvis, toggleJarvis } from './jarvis.js';
 
 function initializeApp() {
   initializeDOMReferences();
-  
+
+  // Start telemetry listeners first so we capture early events
+  startTelemetryUpdates();
+
   setupComponentSelection();
   setupSchematicInteraction();
   setupConfigurationSliders();
   setupCommandButtons();
   setupMusicToggle();
-  startTelemetryUpdates();
   setupKeyboardShortcuts();
-  
+
   // Initialize J.A.R.V.I.S.
   initializeJarvis();
   setupJarvisToggle();
@@ -35,14 +37,16 @@ function setupJarvisToggle() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', initializeApp);
+document.addEventListener('DOMContentLoaded', () => {
+  initializeApp();
+
+  setTimeout(() => {
+    addTelemetryEntry('Ironman Suit Designer GUI ready');
+    addTelemetryEntry('All interface modules initialized');
+    addTelemetryEntry('Ready for suit configuration');
+  }, 1000);
+});
 
 window.addEventListener('resize', () => {
   hideTooltip();
 });
-
-setTimeout(() => {
-  addTelemetryEntry('Ironman Suit Designer GUI ready');
-  addTelemetryEntry('All interface modules initialized');
-  addTelemetryEntry('Ready for suit configuration');
-}, 1000);

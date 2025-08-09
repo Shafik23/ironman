@@ -35,7 +35,9 @@ function showTooltip(event, partType) {
 }
 
 function updateTooltipPosition(event) {
-  const rect = event.currentTarget.closest('.schematic-container').getBoundingClientRect();
+  const container = event.currentTarget.closest('.schematic-container');
+  if (!container) return;
+  const rect = container.getBoundingClientRect();
   dom.tooltip.style.left = event.clientX - rect.left + 10 + 'px';
   dom.tooltip.style.top = event.clientY - rect.top - 10 + 'px';
 }

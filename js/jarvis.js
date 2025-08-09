@@ -9,61 +9,61 @@ let voiceEnabled = false;
 
 const jarvisPhrases = {
   greeting: [
-    "Good evening, sir. All systems are operational.",
-    "Welcome back, sir. The Mark VII is ready for deployment.",
-    "Greetings, sir. Shall I run a systems check?",
-    "Online and ready, sir."
+    'Good evening, sir. All systems are operational.',
+    'Welcome back, sir. The Mark VII is ready for deployment.',
+    'Greetings, sir. Shall I run a systems check?',
+    'Online and ready, sir.'
   ],
   initialization: [
-    "Initializing all systems.",
-    "Running startup sequence.",
-    "Systems coming online.",
-    "Boot sequence initiated."
+    'Initializing all systems.',
+    'Running startup sequence.',
+    'Systems coming online.',
+    'Boot sequence initiated.'
   ],
   diagnostics: [
-    "Running full diagnostics sweep.",
-    "Analyzing all systems for anomalies.",
-    "Comprehensive scan in progress.",
-    "Diagnostics mode activated."
+    'Running full diagnostics sweep.',
+    'Analyzing all systems for anomalies.',
+    'Comprehensive scan in progress.',
+    'Diagnostics mode activated.'
   ],
   emergency: [
-    "Emergency shutdown initiated!",
-    "Warning: Emergency protocols engaged!",
-    "All systems powering down immediately!",
-    "Emergency shutdown sequence activated!"
+    'Emergency shutdown initiated!',
+    'Warning: Emergency protocols engaged!',
+    'All systems powering down immediately!',
+    'Emergency shutdown sequence activated!'
   ],
   componentSelect: {
-    helmet: "Helmet systems activated. HUD online.",
-    chest: "Arc reactor engaged. Power output stable.",
-    arms: "Arm servos online. Weapon systems ready.",
-    legs: "Leg actuators engaged. Mobility systems active.",
-    repulsors: "Repulsor array charged and ready.",
-    thrusters: "Flight systems online. Ready for takeoff."
+    helmet: 'Helmet systems activated. HUD online.',
+    chest: 'Arc reactor engaged. Power output stable.',
+    arms: 'Arm servos online. Weapon systems ready.',
+    legs: 'Leg actuators engaged. Mobility systems active.',
+    repulsors: 'Repulsor array charged and ready.',
+    thrusters: 'Flight systems online. Ready for takeoff.'
   },
   componentDeselect: {
-    helmet: "Helmet systems offline.",
-    chest: "Arc reactor disengaged.",
-    arms: "Arm servos deactivated.",
-    legs: "Leg actuators offline.",
-    repulsors: "Repulsor array powering down.",
-    thrusters: "Flight systems deactivated."
+    helmet: 'Helmet systems offline.',
+    chest: 'Arc reactor disengaged.',
+    arms: 'Arm servos deactivated.',
+    legs: 'Leg actuators offline.',
+    repulsors: 'Repulsor array powering down.',
+    thrusters: 'Flight systems deactivated.'
   },
   powerLevels: {
-    critical: "Warning: Power levels critical.",
-    low: "Power levels below optimal parameters.",
-    normal: "Power levels stable.",
-    high: "Power output exceeding normal parameters."
+    critical: 'Warning: Power levels critical.',
+    low: 'Power levels below optimal parameters.',
+    normal: 'Power levels stable.',
+    high: 'Power output exceeding normal parameters.'
   },
   partyMode: {
     on: "Party mode activated. Let's rock and roll, sir!",
-    off: "Party mode deactivated. Returning to normal operations."
+    off: 'Party mode deactivated. Returning to normal operations.'
   },
   random: [
-    "Systems functioning within normal parameters.",
-    "No threats detected in the immediate vicinity.",
-    "All systems green across the board.",
-    "Shall I compile a threat assessment, sir?",
-    "Standing by for your orders."
+    'Systems functioning within normal parameters.',
+    'No threats detected in the immediate vicinity.',
+    'All systems green across the board.',
+    'Shall I compile a threat assessment, sir?',
+    'Standing by for your orders.'
   ]
 };
 
@@ -79,9 +79,9 @@ export function initializeJarvis() {
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
-    
+
     recognition.onresult = handleVoiceCommand;
-    recognition.onerror = (event) => {
+    recognition.onerror = event => {
       console.error('Speech recognition error:', event.error);
       if (jarvisActive) {
         startListening();
@@ -96,12 +96,16 @@ export function initializeJarvis() {
 }
 
 export function speak(text, priority = false) {
-  if (!voiceEnabled || !jarvisActive || synthesis.speaking) {
+  if (!voiceEnabled || !jarvisActive) {
     return;
   }
 
-  if (priority && synthesis.speaking) {
+  if (priority && synthesis?.speaking) {
     synthesis.cancel();
+  }
+
+  if (synthesis?.speaking) {
+    return; // skip non-priority while speaking
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
@@ -110,12 +114,10 @@ export function speak(text, priority = false) {
   utterance.volume = 0.8;
 
   const voices = synthesis.getVoices();
-  const preferredVoice = voices.find(voice => 
-    voice.name.includes('Daniel') || 
-    voice.name.includes('James') || 
-    voice.name.includes('Oliver')
+  const preferredVoice = voices.find(
+    voice => voice.name.includes('Daniel') || voice.name.includes('James') || voice.name.includes('Oliver')
   );
-  
+
   if (preferredVoice) {
     utterance.voice = preferredVoice;
   }
@@ -167,7 +169,7 @@ export function announcePowerLevel(level) {
 
 export function toggleJarvis() {
   jarvisActive = !jarvisActive;
-  
+
   if (dom.jarvisToggle) {
     dom.jarvisToggle.textContent = `J.A.R.V.I.S.: ${jarvisActive ? 'ONLINE' : 'OFFLINE'}`;
     dom.jarvisToggle.classList.toggle('active', jarvisActive);

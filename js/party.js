@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { updateSuitColor, updateProgressBars } from './config.js';
 import { jarvisAnnounce, jarvisPhrases } from './jarvis.js';
+import { events } from './events.js';
 
 export function setupMusicToggle() {
   dom.musicToggle.addEventListener('click', () => {
@@ -40,6 +41,7 @@ function startPartyMode() {
       startColorCycling();
       startStatusFluctuations();
 
+      events.emit('party:started');
       addTelemetryEntry('🎉 PARTY MODE ACTIVATED - MAXIMUM OVERDRIVE! 🎉');
       jarvisAnnounce(jarvisPhrases.partyMode.on, true);
     })
@@ -64,6 +66,7 @@ export function stopPartyMode() {
   stopColorCycling();
   stopStatusFluctuations();
 
+  events.emit('party:stopped');
   addTelemetryEntry('Party mode disabled - Systems returning to normal');
   jarvisAnnounce(jarvisPhrases.partyMode.off);
 }
