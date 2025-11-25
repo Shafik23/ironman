@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ironman</title>
-    <link rel="stylesheet" href="style.css?v=20251124233254">
+    <link rel="stylesheet" href="style.css?v=20251124234618">
 </head>
 
 <body>
@@ -137,24 +137,28 @@
                         <!-- Arms -->
                         <g class="schematic-part" data-part="arms">
                             <!-- Left arm -->
-                            <!-- Upper arm (trapezoid shoulder to elbow) -->
-                            <path d="M100 140 L150 140 L145 160 L105 160 Z" class="part-outline" />
-                            <!-- Forearm (tapered rectangle) -->
-                            <path d="M85 170 L105 170 L100 230 L90 230 Z" class="part-outline" />
-                            <!-- Wrist armor segment -->
-                            <rect x="87" y="232" width="16" height="8" rx="2" class="part-detail" />
-                            <!-- Left repulsor (attached to left arm) -->
-                            <circle cx="95" cy="242" r="12" class="part-outline repulsor" />
+                            <g class="limb left-arm">
+                                <!-- Upper arm (trapezoid shoulder to elbow) -->
+                                <path d="M100 140 L150 140 L145 160 L105 160 Z" class="part-outline" />
+                                <!-- Forearm (tapered rectangle) -->
+                                <path d="M85 170 L105 170 L100 230 L90 230 Z" class="part-outline" />
+                                <!-- Wrist armor segment -->
+                                <rect x="87" y="232" width="16" height="8" rx="2" class="part-detail" />
+                                <!-- Left repulsor (attached to left arm) -->
+                                <circle cx="95" cy="242" r="12" class="part-outline repulsor" />
+                            </g>
 
                             <!-- Right arm -->
-                            <!-- Upper arm (trapezoid shoulder to elbow) -->
-                            <path d="M250 140 L300 140 L295 160 L255 160 Z" class="part-outline" />
-                            <!-- Forearm (tapered rectangle) -->
-                            <path d="M295 170 L315 170 L310 230 L300 230 Z" class="part-outline" />
-                            <!-- Wrist armor segment -->
-                            <rect x="297" y="232" width="16" height="8" rx="2" class="part-detail" />
-                            <!-- Right repulsor (attached to right arm) -->
-                            <circle cx="305" cy="242" r="12" class="part-outline repulsor" />
+                            <g class="limb right-arm">
+                                <!-- Upper arm (trapezoid shoulder to elbow) -->
+                                <path d="M250 140 L300 140 L295 160 L255 160 Z" class="part-outline" />
+                                <!-- Forearm (tapered rectangle) -->
+                                <path d="M295 170 L315 170 L310 230 L300 230 Z" class="part-outline" />
+                                <!-- Wrist armor segment -->
+                                <rect x="297" y="232" width="16" height="8" rx="2" class="part-detail" />
+                                <!-- Right repulsor (attached to right arm) -->
+                                <circle cx="305" cy="242" r="12" class="part-outline repulsor" />
+                            </g>
                         </g>
 
                         <!-- Repulsors (invisible interaction layer) -->
@@ -168,28 +172,42 @@
                         <!-- Legs -->
                         <g class="schematic-part" data-part="legs">
                             <!-- Left leg -->
-                            <!-- Thigh armor (trapezoid) -->
-                            <path d="M170 240 L195 240 L190 320 L175 320 Z" class="part-outline" />
-                            <!-- Shin armor (inverted trapezoid) -->
-                            <path d="M165 330 L200 330 L195 390 L170 390 Z" class="part-outline" />
-                            <!-- Knee joint -->
-                            <rect x="175" y="318" width="15" height="8" rx="2" class="part-detail" />
+                            <g class="limb left-leg">
+                                <!-- Thigh armor (trapezoid) -->
+                                <path d="M170 240 L195 240 L190 320 L175 320 Z" class="part-outline" />
+                                <!-- Shin armor (inverted trapezoid) -->
+                                <path d="M165 330 L200 330 L195 390 L170 390 Z" class="part-outline" />
+                                <!-- Knee joint -->
+                                <rect x="175" y="318" width="15" height="8" rx="2" class="part-detail" />
+                                <!-- Left foot thrusters (bound to leg) -->
+                                <rect x="170" y="400" width="10" height="15" class="part-outline thruster" />
+                                <rect x="185" y="400" width="10" height="15" class="part-outline thruster" />
+                            </g>
 
                             <!-- Right leg -->
-                            <!-- Thigh armor (trapezoid) -->
-                            <path d="M205 240 L230 240 L225 320 L210 320 Z" class="part-outline" />
-                            <!-- Shin armor (inverted trapezoid) -->
-                            <path d="M200 330 L235 330 L230 390 L205 390 Z" class="part-outline" />
-                            <!-- Knee joint -->
-                            <rect x="210" y="318" width="15" height="8" rx="2" class="part-detail" />
+                            <g class="limb right-leg">
+                                <!-- Thigh armor (trapezoid) -->
+                                <path d="M205 240 L230 240 L225 320 L210 320 Z" class="part-outline" />
+                                <!-- Shin armor (inverted trapezoid) -->
+                                <path d="M200 330 L235 330 L230 390 L205 390 Z" class="part-outline" />
+                                <!-- Knee joint -->
+                                <rect x="210" y="318" width="15" height="8" rx="2" class="part-detail" />
+                                <!-- Right foot thrusters (bound to leg) -->
+                                <rect x="205" y="400" width="10" height="15" class="part-outline thruster" />
+                                <rect x="220" y="400" width="10" height="15" class="part-outline thruster" />
+                            </g>
                         </g>
 
-                        <!-- Thrusters -->
+                        <!-- Thrusters (invisible interaction layer) -->
                         <g class="schematic-part" data-part="thrusters">
-                            <rect x="170" y="400" width="10" height="15" class="part-outline thruster" />
-                            <rect x="185" y="400" width="10" height="15" class="part-outline thruster" />
-                            <rect x="205" y="400" width="10" height="15" class="part-outline thruster" />
-                            <rect x="220" y="400" width="10" height="15" class="part-outline thruster" />
+                            <rect x="170" y="400" width="10" height="15" class="thruster-interaction"
+                                style="fill:none;stroke:none;pointer-events:all;" />
+                            <rect x="185" y="400" width="10" height="15" class="thruster-interaction"
+                                style="fill:none;stroke:none;pointer-events:all;" />
+                            <rect x="205" y="400" width="10" height="15" class="thruster-interaction"
+                                style="fill:none;stroke:none;pointer-events:all;" />
+                            <rect x="220" y="400" width="10" height="15" class="thruster-interaction"
+                                style="fill:none;stroke:none;pointer-events:all;" />
                         </g>
                     </svg>
 
@@ -249,7 +267,7 @@
         <!-- Local music file for Ironman interface -->
     </audio>
 
-    <script type="module" src="js/app.js?v=20251124233254"></script>
+    <script type="module" src="js/app.js?v=20251124234618"></script>
 </body>
 
 </html>
