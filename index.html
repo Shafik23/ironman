@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ironman</title>
-    <link rel="stylesheet" href="style.css?v=20251124235941">
+    <link rel="stylesheet" href="style.css?v=20251125012035">
 </head>
 
 <body>
@@ -110,103 +110,243 @@
             <div class="panel center-panel">
                 <div class="panel-header">SUIT SCHEMATIC - MK-VII</div>
                 <div class="schematic-container">
-                    <svg class="suit-schematic" viewBox="40 40 320 380">
+                    <svg class="suit-schematic" viewBox="0 20 400 480">
+                        <!-- Defs for gradients and filters -->
+                        <defs>
+                            <linearGradient id="helmetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff4444;stop-opacity:0.3" />
+                                <stop offset="50%" style="stop-color:#cc0000;stop-opacity:0.2" />
+                                <stop offset="100%" style="stop-color:#ff4444;stop-opacity:0.3" />
+                            </linearGradient>
+                            <linearGradient id="goldAccent" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#ffd700;stop-opacity:0.8" />
+                                <stop offset="50%" style="stop-color:#ffed4a;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#ffd700;stop-opacity:0.8" />
+                            </linearGradient>
+                            <filter id="glow">
+                                <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                                <feMerge>
+                                    <feMergeNode in="coloredBlur"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                        </defs>
+
                         <!-- Helmet -->
                         <g class="schematic-part" data-part="helmet">
-                            <!-- Main helmet trapezoid shape -->
-                            <path d="M170 45 L230 45 L240 100 L160 100 Z" class="part-outline" />
-                            <!-- Eye slits -->
-                            <rect x="180" y="65" width="12" height="6" rx="3" class="part-detail eye-slit" />
-                            <rect x="208" y="65" width="12" height="6" rx="3" class="part-detail eye-slit" />
-                            <!-- Mouth/ventilation grille -->
-                            <rect x="185" y="85" width="30" height="3" rx="1" class="part-detail" />
-                            <rect x="185" y="90" width="30" height="2" rx="1" class="part-detail" />
-                            <!-- Side panels -->
-                            <path d="M160 100 L155 85 L165 75 L170 90" class="part-detail" />
-                            <path d="M240 100 L245 85 L235 75 L230 90" class="part-detail" />
+                            <!-- Main faceplate - sleek Iron Man shape -->
+                            <path d="M200 30
+                                     L225 35 L240 50 L248 75
+                                     L245 100 L238 115 L225 128
+                                     L200 138
+                                     L175 128 L162 115 L155 100
+                                     L152 75 L160 50 L175 35 Z"
+                                  class="part-outline" fill="url(#helmetGrad)" />
+
+                            <!-- Forehead plate -->
+                            <path d="M175 38 L200 32 L225 38 L230 48 L218 55 L200 50 L182 55 L170 48 Z"
+                                  class="part-detail" />
+
+                            <!-- Brow ridge -->
+                            <path d="M162 62 L182 58 L200 55 L218 58 L238 62 L235 68 L200 60 L165 68 Z"
+                                  class="part-detail" />
+
+                            <!-- Eye slits - slanting upward from center to ears -->
+                            <path d="M166 81 L192 83 L192 87 L168 85 Z"
+                                  fill="#ffffff" class="part-detail eye-slit" filter="url(#glow)" />
+                            <path d="M234 81 L208 83 L208 87 L232 85 Z"
+                                  fill="#ffffff" class="part-detail eye-slit" filter="url(#glow)" />
+
+                            <!-- Cheek plates -->
+                            <path d="M155 85 L165 92 L168 110 L160 115 L152 100 Z" class="part-detail" />
+                            <path d="M245 85 L235 92 L232 110 L240 115 L248 100 Z" class="part-detail" />
+
+                            <!-- Mouth piece - subtle horizontal slit -->
+                            <line x1="180" y1="112" x2="220" y2="112" stroke-width="2" class="part-detail" />
+
+                            <!-- Chin point -->
+                            <path d="M182 122 L200 138 L218 122 L212 128 L200 135 L188 128 Z"
+                                  class="part-detail" />
+
+                            <!-- Jaw line accents -->
+                            <path d="M162 115 L175 128 L178 122 L165 110 Z" class="part-detail" />
+                            <path d="M238 115 L225 128 L222 122 L235 110 Z" class="part-detail" />
                         </g>
+
+                        <!-- Neck -->
+                        <path d="M175 133 L180 145 L220 145 L225 133" class="part-outline" style="fill:none" />
 
                         <!-- Chest/Arc Reactor -->
                         <g class="schematic-part" data-part="chest">
-                            <rect x="160" y="130" width="80" height="100" rx="10" class="part-outline" />
-                            <circle cx="200" cy="160" r="15" class="part-detail reactor" />
-                            <circle cx="200" cy="160" r="10" class="part-detail" />
-                            <circle cx="200" cy="160" r="5" class="part-detail" />
+                            <!-- Main chest plate -->
+                            <path d="M140 148
+                                     L155 145 L200 142 L245 145 L260 148
+                                     L270 180 L265 230 L250 255
+                                     L200 265
+                                     L150 255 L135 230 L130 180 Z"
+                                  class="part-outline" fill="url(#helmetGrad)" />
+
+                            <!-- Upper chest armor plates -->
+                            <path d="M155 150 L175 148 L180 170 L160 175 Z" class="part-detail" />
+                            <path d="M245 150 L225 148 L220 170 L240 175 Z" class="part-detail" />
+
+                            <!-- Arc Reactor housing -->
+                            <circle cx="200" cy="190" r="28" class="part-detail" />
+                            <circle cx="200" cy="190" r="22" class="part-detail reactor" filter="url(#glow)" />
+                            <circle cx="200" cy="190" r="15" class="part-detail" style="fill:rgba(0,255,255,0.3)" />
+                            <circle cx="200" cy="190" r="8" class="part-detail" style="fill:rgba(255,255,255,0.8)" />
+                            <!-- Reactor segments -->
+                            <path d="M200 168 L205 175 L200 178 L195 175 Z" class="part-detail" style="fill:var(--suit-cyan)" />
+                            <path d="M200 212 L205 205 L200 202 L195 205 Z" class="part-detail" style="fill:var(--suit-cyan)" />
+                            <path d="M178 190 L185 195 L188 190 L185 185 Z" class="part-detail" style="fill:var(--suit-cyan)" />
+                            <path d="M222 190 L215 195 L212 190 L215 185 Z" class="part-detail" style="fill:var(--suit-cyan)" />
+
+                            <!-- Abdominal armor segments -->
+                            <path d="M160 225 L190 220 L190 240 L165 245 Z" class="part-detail" />
+                            <path d="M240 225 L210 220 L210 240 L235 245 Z" class="part-detail" />
+                            <path d="M170 248 L195 243 L195 258 L175 260 Z" class="part-detail" />
+                            <path d="M230 248 L205 243 L205 258 L225 260 Z" class="part-detail" />
                         </g>
 
                         <!-- Arms -->
                         <g class="schematic-part" data-part="arms">
                             <!-- Left arm -->
                             <g class="limb left-arm">
-                                <!-- Upper arm (trapezoid shoulder to elbow) -->
-                                <path d="M100 140 L150 140 L145 160 L105 160 Z" class="part-outline" />
-                                <!-- Forearm (tapered rectangle) -->
-                                <path d="M85 170 L105 170 L100 230 L90 230 Z" class="part-outline" />
-                                <!-- Wrist armor segment -->
-                                <rect x="87" y="232" width="16" height="8" rx="2" class="part-detail" />
-                                <!-- Left repulsor (attached to left arm) -->
-                                <circle cx="95" cy="242" r="12" class="part-outline repulsor" />
+                                <!-- Shoulder pauldron -->
+                                <path d="M130 145 L145 140 L155 148 L150 175 L125 180 L115 165 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M135 155 L148 152 L145 168 L132 170 Z" class="part-detail" />
+
+                                <!-- Upper arm / bicep -->
+                                <path d="M115 182 L130 178 L135 220 L118 225 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M120 190 L128 188 L130 210 L122 212 Z" class="part-detail" />
+
+                                <!-- Elbow joint -->
+                                <ellipse cx="125" cy="232" rx="12" ry="8" class="part-detail" />
+
+                                <!-- Forearm -->
+                                <path d="M110 240 L138 238 L135 295 L108 298 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M115 250 L132 248 L130 280 L113 282 Z" class="part-detail" />
+
+                                <!-- Wrist / gauntlet -->
+                                <path d="M105 300 L138 297 L140 320 L103 325 Z" class="part-detail" />
+
+                                <!-- Hand with repulsor -->
+                                <path d="M100 328 L140 323 L145 350 L135 360 L110 362 L95 355 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <circle cx="120" cy="345" r="12" class="part-outline repulsor" filter="url(#glow)" />
+                                <circle cx="120" cy="345" r="6" class="part-detail" style="fill:rgba(255,255,255,0.8)" />
                             </g>
 
                             <!-- Right arm -->
                             <g class="limb right-arm">
-                                <!-- Upper arm (trapezoid shoulder to elbow) -->
-                                <path d="M250 140 L300 140 L295 160 L255 160 Z" class="part-outline" />
-                                <!-- Forearm (tapered rectangle) -->
-                                <path d="M295 170 L315 170 L310 230 L300 230 Z" class="part-outline" />
-                                <!-- Wrist armor segment -->
-                                <rect x="297" y="232" width="16" height="8" rx="2" class="part-detail" />
-                                <!-- Right repulsor (attached to right arm) -->
-                                <circle cx="305" cy="242" r="12" class="part-outline repulsor" />
+                                <!-- Shoulder pauldron -->
+                                <path d="M270 145 L255 140 L245 148 L250 175 L275 180 L285 165 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M265 155 L252 152 L255 168 L268 170 Z" class="part-detail" />
+
+                                <!-- Upper arm / bicep -->
+                                <path d="M285 182 L270 178 L265 220 L282 225 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M280 190 L272 188 L270 210 L278 212 Z" class="part-detail" />
+
+                                <!-- Elbow joint -->
+                                <ellipse cx="275" cy="232" rx="12" ry="8" class="part-detail" />
+
+                                <!-- Forearm -->
+                                <path d="M290 240 L262 238 L265 295 L292 298 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M285 250 L268 248 L270 280 L287 282 Z" class="part-detail" />
+
+                                <!-- Wrist / gauntlet -->
+                                <path d="M295 300 L262 297 L260 320 L297 325 Z" class="part-detail" />
+
+                                <!-- Hand with repulsor -->
+                                <path d="M300 328 L260 323 L255 350 L265 360 L290 362 L305 355 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <circle cx="280" cy="345" r="12" class="part-outline repulsor" filter="url(#glow)" />
+                                <circle cx="280" cy="345" r="6" class="part-detail" style="fill:rgba(255,255,255,0.8)" />
                             </g>
                         </g>
 
                         <!-- Repulsors (invisible interaction layer) -->
                         <g class="schematic-part" data-part="repulsors">
-                            <circle cx="95" cy="242" r="12" class="part-outline repulsor-interaction"
+                            <circle cx="120" cy="345" r="15" class="part-outline repulsor-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
-                            <circle cx="305" cy="242" r="12" class="part-outline repulsor-interaction"
+                            <circle cx="280" cy="345" r="15" class="part-outline repulsor-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
                         </g>
+
+                        <!-- Waist / hip armor -->
+                        <path d="M155 265 L200 270 L245 265 L250 285 L200 295 L150 285 Z"
+                              class="part-outline" style="fill:url(#helmetGrad)" />
 
                         <!-- Legs -->
                         <g class="schematic-part" data-part="legs">
                             <!-- Left leg -->
                             <g class="limb left-leg">
-                                <!-- Thigh armor (trapezoid) -->
-                                <path d="M170 240 L195 240 L190 320 L175 320 Z" class="part-outline" />
-                                <!-- Shin armor (inverted trapezoid) -->
-                                <path d="M165 330 L200 330 L195 390 L170 390 Z" class="part-outline" />
-                                <!-- Knee joint -->
-                                <rect x="175" y="318" width="15" height="8" rx="2" class="part-detail" />
-                                <!-- Left foot thrusters (bound to leg) -->
-                                <rect x="170" y="400" width="10" height="15" class="part-outline thruster" />
-                                <rect x="185" y="400" width="10" height="15" class="part-outline thruster" />
+                                <!-- Hip joint -->
+                                <ellipse cx="170" cy="295" rx="15" ry="10" class="part-detail" />
+
+                                <!-- Thigh armor -->
+                                <path d="M155 305 L185 300 L188 370 L152 375 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M160 315 L180 312 L182 355 L158 358 Z" class="part-detail" />
+
+                                <!-- Knee cap -->
+                                <path d="M150 375 L190 370 L192 395 L148 400 Z" class="part-detail" />
+                                <ellipse cx="170" cy="385" rx="18" ry="12" class="part-detail" />
+
+                                <!-- Shin armor -->
+                                <path d="M148 402 L192 397 L188 455 L152 458 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M155 410 L185 407 L182 445 L158 447 Z" class="part-detail" />
+
+                                <!-- Foot / boot with thrusters -->
+                                <path d="M145 460 L195 455 L200 478 L140 480 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <rect x="155" y="468" width="12" height="10" rx="2" class="part-outline thruster" />
+                                <rect x="172" y="468" width="12" height="10" rx="2" class="part-outline thruster" />
                             </g>
 
                             <!-- Right leg -->
                             <g class="limb right-leg">
-                                <!-- Thigh armor (trapezoid) -->
-                                <path d="M205 240 L230 240 L225 320 L210 320 Z" class="part-outline" />
-                                <!-- Shin armor (inverted trapezoid) -->
-                                <path d="M200 330 L235 330 L230 390 L205 390 Z" class="part-outline" />
-                                <!-- Knee joint -->
-                                <rect x="210" y="318" width="15" height="8" rx="2" class="part-detail" />
-                                <!-- Right foot thrusters (bound to leg) -->
-                                <rect x="205" y="400" width="10" height="15" class="part-outline thruster" />
-                                <rect x="220" y="400" width="10" height="15" class="part-outline thruster" />
+                                <!-- Hip joint -->
+                                <ellipse cx="230" cy="295" rx="15" ry="10" class="part-detail" />
+
+                                <!-- Thigh armor -->
+                                <path d="M245 305 L215 300 L212 370 L248 375 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M240 315 L220 312 L218 355 L242 358 Z" class="part-detail" />
+
+                                <!-- Knee cap -->
+                                <path d="M250 375 L210 370 L208 395 L252 400 Z" class="part-detail" />
+                                <ellipse cx="230" cy="385" rx="18" ry="12" class="part-detail" />
+
+                                <!-- Shin armor -->
+                                <path d="M252 402 L208 397 L212 455 L248 458 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <path d="M245 410 L215 407 L218 445 L242 447 Z" class="part-detail" />
+
+                                <!-- Foot / boot with thrusters -->
+                                <path d="M255 460 L205 455 L200 478 L260 480 Z"
+                                      class="part-outline" fill="url(#helmetGrad)" />
+                                <rect x="215" y="468" width="12" height="10" rx="2" class="part-outline thruster" />
+                                <rect x="232" y="468" width="12" height="10" rx="2" class="part-outline thruster" />
                             </g>
                         </g>
 
                         <!-- Thrusters (invisible interaction layer) -->
                         <g class="schematic-part" data-part="thrusters">
-                            <rect x="170" y="400" width="10" height="15" class="thruster-interaction"
+                            <rect x="155" y="468" width="12" height="10" class="thruster-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
-                            <rect x="185" y="400" width="10" height="15" class="thruster-interaction"
+                            <rect x="172" y="468" width="12" height="10" class="thruster-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
-                            <rect x="205" y="400" width="10" height="15" class="thruster-interaction"
+                            <rect x="215" y="468" width="12" height="10" class="thruster-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
-                            <rect x="220" y="400" width="10" height="15" class="thruster-interaction"
+                            <rect x="232" y="468" width="12" height="10" class="thruster-interaction"
                                 style="fill:none;stroke:none;pointer-events:all;" />
                         </g>
                     </svg>
@@ -243,8 +383,8 @@
 
                     <div class="config-group">
                         <label class="config-label">ZOOM</label>
-                        <input type="range" class="config-slider" id="zoomSlider" min="25" max="200" value="90">
-                        <span class="config-value" id="zoomValue">90%</span>
+                        <input type="range" class="config-slider" id="zoomSlider" min="25" max="200" value="100">
+                        <span class="config-value" id="zoomValue">100%</span>
                     </div>
 
                 </div>
@@ -267,7 +407,7 @@
         <!-- Local music file for Ironman interface -->
     </audio>
 
-    <script type="module" src="js/app.js?v=20251124235941"></script>
+    <script type="module" src="js/app.js?v=20251125012035"></script>
 </body>
 
 </html>

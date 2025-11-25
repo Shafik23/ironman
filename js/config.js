@@ -54,10 +54,10 @@ export function updateProgressBars() {
 
 export function updateSuitZoom(zoomValue) {
   const suitBounds = {
-    left: 85,
-    right: 315,
-    top: 45,
-    bottom: 415
+    left: 95,
+    right: 305,
+    top: 25,
+    bottom: 485
   };
 
   const suitWidth = suitBounds.right - suitBounds.left;
