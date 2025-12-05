@@ -43,6 +43,37 @@
     filter: drop-shadow(0 0 3px var(--accent-gold));
 }
 
+/* Arc Reactor - Enhanced multi-layer design */
+.reactor-glow-outer {
+    opacity: 0.6;
+    animation: reactor-breathe 2s ease-in-out infinite alternate;
+}
+
+.reactor-ring {
+    stroke: #00cfff;
+    stroke-width: 1;
+    animation: reactor-pulse-new 1.5s ease-in-out infinite alternate;
+}
+
+.reactor-inner {
+    fill: rgba(0, 220, 255, 0.5);
+    stroke: #00e5ff;
+    stroke-width: 0.5;
+    animation: reactor-pulse-new 1.5s ease-in-out infinite alternate;
+}
+
+.reactor-core {
+    stroke: #ffffff;
+    stroke-width: 0.5;
+    animation: reactor-core-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.reactor-center {
+    fill: #ffffff;
+    animation: reactor-center-pulse 1s ease-in-out infinite alternate;
+}
+
+/* Legacy reactor classes for JS power level integration */
 .reactor {
     fill: var(--accent-gold);
     animation: reactor-pulse 1.5s ease-in-out infinite alternate;

@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ironman</title>
-    <link rel="stylesheet" href="style.css?v=20251128032346">
+    <link rel="stylesheet" href="style.css?v=20251204195527">
 </head>
 
 <body>
@@ -130,6 +130,52 @@
                                     <feMergeNode in="SourceGraphic"/>
                                 </feMerge>
                             </filter>
+                            <!-- Enhanced arc reactor glow filters -->
+                            <filter id="reactorGlowOuter" x="-100%" y="-100%" width="300%" height="300%">
+                                <feGaussianBlur stdDeviation="8" result="blur1"/>
+                                <feColorMatrix in="blur1" type="matrix"
+                                    values="0 0 0 0 0.2
+                                            0 0 0 0 0.8
+                                            0 0 0 0 1
+                                            0 0 0 1 0" result="cyan1"/>
+                                <feMerge>
+                                    <feMergeNode in="cyan1"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <filter id="reactorGlowInner" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="3" result="blur2"/>
+                                <feMerge>
+                                    <feMergeNode in="blur2"/>
+                                    <feMergeNode in="blur2"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <filter id="reactorGlowCore" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="2" result="blur3"/>
+                                <feMerge>
+                                    <feMergeNode in="blur3"/>
+                                    <feMergeNode in="blur3"/>
+                                    <feMergeNode in="blur3"/>
+                                    <feMergeNode in="SourceGraphic"/>
+                                </feMerge>
+                            </filter>
+                            <!-- Arc reactor gradients -->
+                            <radialGradient id="reactorCoreGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                                <stop offset="40%" style="stop-color:#e0f7ff;stop-opacity:1" />
+                                <stop offset="100%" style="stop-color:#00d4ff;stop-opacity:0.9" />
+                            </radialGradient>
+                            <radialGradient id="reactorRingGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#00e5ff;stop-opacity:0.9" />
+                                <stop offset="60%" style="stop-color:#00b8ff;stop-opacity:0.7" />
+                                <stop offset="100%" style="stop-color:#0088cc;stop-opacity:0.5" />
+                            </radialGradient>
+                            <radialGradient id="reactorOuterGrad" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" style="stop-color:#00a8ff;stop-opacity:0.4" />
+                                <stop offset="70%" style="stop-color:#006699;stop-opacity:0.2" />
+                                <stop offset="100%" style="stop-color:#003344;stop-opacity:0.1" />
+                            </radialGradient>
                         </defs>
 
                         <!-- Helmet -->
@@ -186,16 +232,17 @@
                             <path d="M155 150 L175 148 L180 170 L160 175 Z" class="part-detail" />
                             <path d="M245 150 L225 148 L220 170 L240 175 Z" class="part-detail" />
 
-                            <!-- Arc Reactor housing -->
-                            <circle cx="200" cy="190" r="28" class="part-detail" />
-                            <circle cx="200" cy="190" r="22" class="part-detail reactor" filter="url(#glow)" />
-                            <circle cx="200" cy="190" r="15" class="part-detail" style="fill:rgba(0,255,255,0.3)" />
-                            <circle cx="200" cy="190" r="8" class="part-detail" style="fill:rgba(255,255,255,0.8)" />
-                            <!-- Reactor segments -->
-                            <path d="M200 168 L205 175 L200 178 L195 175 Z" class="part-detail" style="fill:var(--suit-cyan)" />
-                            <path d="M200 212 L205 205 L200 202 L195 205 Z" class="part-detail" style="fill:var(--suit-cyan)" />
-                            <path d="M178 190 L185 195 L188 190 L185 185 Z" class="part-detail" style="fill:var(--suit-cyan)" />
-                            <path d="M222 190 L215 195 L212 190 L215 185 Z" class="part-detail" style="fill:var(--suit-cyan)" />
+                            <!-- Arc Reactor - Enhanced multi-layer glow design -->
+                            <!-- Outer diffuse glow (largest, most diffuse) -->
+                            <circle cx="200" cy="190" r="32" class="reactor-glow-outer" fill="url(#reactorOuterGrad)" filter="url(#reactorGlowOuter)" />
+                            <!-- Main reactor ring with inner glow -->
+                            <circle cx="200" cy="190" r="22" class="reactor-ring" fill="url(#reactorRingGrad)" filter="url(#reactorGlowInner)" />
+                            <!-- Inner bright ring -->
+                            <circle cx="200" cy="190" r="14" class="reactor-inner" filter="url(#reactorGlowInner)" />
+                            <!-- Core with intense glow -->
+                            <circle cx="200" cy="190" r="8" class="reactor-core" fill="url(#reactorCoreGrad)" filter="url(#reactorGlowCore)" />
+                            <!-- Center bright spot -->
+                            <circle cx="200" cy="190" r="3" class="reactor-center" />
 
                             <!-- Abdominal armor segments -->
                             <path d="M160 225 L190 220 L190 240 L165 245 Z" class="part-detail" />
@@ -403,7 +450,7 @@
         <!-- Local music file for Ironman interface -->
     </audio>
 
-    <script type="module" src="js/app.js?v=20251128032346"></script>
+    <script type="module" src="js/app.js?v=20251204195527"></script>
 </body>
 
 </html>
