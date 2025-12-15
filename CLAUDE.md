@@ -16,7 +16,8 @@ This is an Iron Man suit designer web application that creates an interactive, r
 
 ### Scripts
 - `serve.py` - Local development server for ES6 modules
-- `start.sh` - Convenience script to start server and open browser
+- `serve_live.py` - Live reload server (auto-refreshes browser on file changes)
+- `dev.sh` - Convenience script to start live reload server and open browser
 - `deploy.sh` - Production deployment script using rsync
 - `push_all_changes.sh` - Git workflow script (add, commit, push)
 - `bust-cache.sh` - Cache-busting script for deployments
@@ -56,8 +57,9 @@ This is an Iron Man suit designer web application that creates an interactive, r
 ```bash
 # Serve locally with ES6 module support
 ./serve.py
-# or use the start script (launches server + opens browser)
-./start.sh
+
+# Or use dev script for live reload (launches server + opens browser)
+./dev.sh
 ```
 
 ### Deployment Commands
