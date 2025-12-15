@@ -1,0 +1,392 @@
+/* Night Cityscape Background - Forward Flying Perspective */
+
+.cityscape-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    perspective: 1000px;
+    perspective-origin: 50% 60%;
+    background: linear-gradient(
+        180deg,
+        #000008 0%,
+        #000510 20%,
+        #001020 40%,
+        #0a1830 60%,
+        #102540 80%,
+        #152a45 100%
+    );
+}
+
+.cityscape-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+/* Stars Layer - Twinkling starfield (stationary) */
+.cityscape-layer.stars {
+    background-image:
+        radial-gradient(1px 1px at 10% 10%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 20% 25%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 35% 8%, rgba(255, 255, 255, 0.9), transparent),
+        radial-gradient(1px 1px at 45% 30%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1px 1px at 55% 12%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(2px 2px at 65% 22%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 75% 5%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(1px 1px at 85% 18%, rgba(255, 255, 255, 0.9), transparent),
+        radial-gradient(1px 1px at 95% 28%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1px 1px at 5% 35%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(2px 2px at 15% 42%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(1px 1px at 25% 38%, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 40% 45%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1px 1px at 60% 40%, rgba(255, 255, 255, 0.9), transparent),
+        radial-gradient(2px 2px at 80% 35%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(1px 1px at 90% 48%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(1px 1px at 30% 15%, rgba(200, 220, 255, 0.9), transparent),
+        radial-gradient(1px 1px at 70% 32%, rgba(255, 200, 200, 0.8), transparent);
+    animation: star-twinkle 4s ease-in-out infinite;
+}
+
+@keyframes star-twinkle {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* Clouds - drift forward slowly */
+.cityscape-layer.clouds-far {
+    height: 50%;
+    top: 10%;
+    background:
+        radial-gradient(ellipse 300px 80px at 20% 50%, rgba(30, 50, 80, 0.3), transparent),
+        radial-gradient(ellipse 400px 100px at 50% 30%, rgba(20, 40, 70, 0.25), transparent),
+        radial-gradient(ellipse 350px 90px at 80% 60%, rgba(25, 45, 75, 0.3), transparent);
+    animation: clouds-forward 20s linear infinite;
+    transform-origin: 50% 100%;
+}
+
+.cityscape-layer.clouds-near {
+    height: 40%;
+    top: 15%;
+    background:
+        radial-gradient(ellipse 200px 60px at 30% 40%, rgba(40, 60, 90, 0.35), transparent),
+        radial-gradient(ellipse 250px 70px at 70% 55%, rgba(35, 55, 85, 0.3), transparent);
+    animation: clouds-forward-fast 12s linear infinite;
+    transform-origin: 50% 100%;
+}
+
+@keyframes clouds-forward {
+    0% {
+        transform: scale(0.3) translateY(-50%);
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.5;
+    }
+    80% {
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(2) translateY(30%);
+        opacity: 0;
+    }
+}
+
+@keyframes clouds-forward-fast {
+    0% {
+        transform: scale(0.5) translateY(-30%);
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.4;
+    }
+    85% {
+        opacity: 0.2;
+    }
+    100% {
+        transform: scale(2.5) translateY(50%);
+        opacity: 0;
+    }
+}
+
+/* === FORWARD FLYING BUILDINGS === */
+/* Buildings appear at horizon and rush toward viewer */
+
+/* Building Container for perspective */
+.cityscape-layer.buildings-far,
+.cityscape-layer.buildings-mid,
+.cityscape-layer.buildings-near {
+    bottom: 0;
+    top: auto;
+    transform-style: preserve-3d;
+}
+
+/* Far buildings - slowest, smallest starting point */
+.cityscape-layer.buildings-far {
+    height: 60%;
+    background: transparent;
+}
+
+.cityscape-layer.buildings-far::before,
+.cityscape-layer.buildings-far::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: #0a1525;
+    animation: building-rush-slow 8s linear infinite;
+}
+
+.cityscape-layer.buildings-far::before {
+    left: 10%;
+    width: 8%;
+    clip-path: polygon(20% 100%, 20% 30%, 40% 30%, 40% 20%, 60% 20%, 60% 30%, 80% 30%, 80% 100%);
+    animation-delay: 0s;
+}
+
+.cityscape-layer.buildings-far::after {
+    right: 10%;
+    width: 8%;
+    clip-path: polygon(20% 100%, 20% 25%, 50% 25%, 50% 15%, 80% 15%, 80% 100%);
+    animation-delay: -4s;
+}
+
+/* Mid buildings */
+.cityscape-layer.buildings-mid {
+    height: 70%;
+    background: transparent;
+}
+
+.cityscape-layer.buildings-mid::before,
+.cityscape-layer.buildings-mid::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: #081018;
+    animation: building-rush-mid 6s linear infinite;
+}
+
+.cityscape-layer.buildings-mid::before {
+    left: 5%;
+    width: 12%;
+    clip-path: polygon(10% 100%, 10% 40%, 30% 40%, 30% 20%, 50% 20%, 50% 35%, 70% 35%, 70% 25%, 90% 25%, 90% 100%);
+    animation-delay: -1s;
+}
+
+.cityscape-layer.buildings-mid::after {
+    right: 5%;
+    width: 12%;
+    clip-path: polygon(10% 100%, 10% 30%, 40% 30%, 40% 15%, 60% 15%, 60% 30%, 90% 30%, 90% 100%);
+    animation-delay: -4s;
+}
+
+/* Near buildings - fastest, largest */
+.cityscape-layer.buildings-near {
+    height: 80%;
+    background: transparent;
+}
+
+.cityscape-layer.buildings-near::before,
+.cityscape-layer.buildings-near::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    height: 100%;
+    background: #050a10;
+    animation: building-rush-fast 4s linear infinite;
+}
+
+.cityscape-layer.buildings-near::before {
+    left: 0;
+    width: 15%;
+    clip-path: polygon(0% 100%, 0% 50%, 30% 50%, 30% 20%, 60% 20%, 60% 40%, 100% 40%, 100% 100%);
+    animation-delay: 0s;
+}
+
+.cityscape-layer.buildings-near::after {
+    right: 0;
+    width: 15%;
+    clip-path: polygon(0% 100%, 0% 35%, 40% 35%, 40% 15%, 70% 15%, 70% 45%, 100% 45%, 100% 100%);
+    animation-delay: -2s;
+}
+
+/* Building rush animations - appear at center, rush to sides */
+@keyframes building-rush-slow {
+    0% {
+        transform: translateZ(-500px) translateX(40%) scale(0.1);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.6;
+    }
+    90% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateZ(200px) translateX(0%) scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes building-rush-mid {
+    0% {
+        transform: translateZ(-400px) translateX(30%) scale(0.15);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.7;
+    }
+    90% {
+        opacity: 0.9;
+    }
+    100% {
+        transform: translateZ(300px) translateX(0%) scale(1.8);
+        opacity: 0;
+    }
+}
+
+@keyframes building-rush-fast {
+    0% {
+        transform: translateZ(-300px) translateX(20%) scale(0.2);
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.8;
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateZ(400px) translateX(0%) scale(2);
+        opacity: 0;
+    }
+}
+
+/* City Lights - windows twinkling as buildings pass */
+.cityscape-layer.city-lights {
+    bottom: 0;
+    top: auto;
+    height: 50%;
+    pointer-events: none;
+}
+
+/* Light streaks effect - like passing city lights */
+.cityscape-layer.city-lights::before,
+.cityscape-layer.city-lights::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 230, 150, 0.8),
+        rgba(255, 230, 150, 0.4),
+        transparent
+    );
+    animation: light-streak 2s linear infinite;
+}
+
+.cityscape-layer.city-lights::before {
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.cityscape-layer.city-lights::after {
+    right: 15%;
+    animation-delay: -1s;
+}
+
+@keyframes light-streak {
+    0% {
+        transform: translateZ(-200px) scaleY(0.1);
+        opacity: 0;
+    }
+    20% {
+        opacity: 1;
+    }
+    80% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateZ(300px) scaleY(2);
+        opacity: 0;
+    }
+}
+
+/* Additional window lights scattered */
+.cityscape-layer.city-lights {
+    background-image:
+        radial-gradient(2px 3px at 8% 60%, rgba(255, 230, 150, 0.9), transparent),
+        radial-gradient(2px 3px at 12% 70%, rgba(200, 220, 255, 0.8), transparent),
+        radial-gradient(2px 3px at 88% 55%, rgba(255, 230, 150, 0.9), transparent),
+        radial-gradient(2px 3px at 92% 65%, rgba(200, 220, 255, 0.7), transparent),
+        radial-gradient(2px 3px at 5% 75%, rgba(255, 200, 100, 0.8), transparent),
+        radial-gradient(2px 3px at 95% 72%, rgba(255, 200, 100, 0.8), transparent);
+    animation: lights-pulse 3s ease-in-out infinite;
+}
+
+@keyframes lights-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Road/ground effect rushing toward viewer */
+.cityscape-container::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 15%;
+    background: linear-gradient(
+        to top,
+        #030508 0%,
+        #050a10 50%,
+        transparent 100%
+    );
+    z-index: 10;
+}
+
+/* Center line (road marking rushing forward) */
+.cityscape-container::before {
+    content: '';
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    width: 4px;
+    height: 200px;
+    background: repeating-linear-gradient(
+        to bottom,
+        rgba(255, 200, 50, 0.8) 0px,
+        rgba(255, 200, 50, 0.8) 30px,
+        transparent 30px,
+        transparent 60px
+    );
+    transform: translateX(-50%) perspective(500px) rotateX(60deg);
+    transform-origin: bottom center;
+    animation: road-rush 0.5s linear infinite;
+    z-index: 11;
+}
+
+@keyframes road-rush {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 60px;
+    }
+}
+
+/* Pause animations when HUD is not active (performance) */
+.hud-overlay:not(.active) .cityscape-layer,
+.hud-overlay:not(.active) .cityscape-container::before,
+.hud-overlay:not(.active) .cityscape-container::after {
+    animation-play-state: paused;
+}

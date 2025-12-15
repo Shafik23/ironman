@@ -22,6 +22,10 @@ export function setupKeyboardShortcuts() {
       case 'J':
         dom.jarvisToggle?.click();
         break;
+      case 'h':
+      case 'H':
+        dom.hudToggle?.click();
+        break;
       case 'i':
       case 'I':
         dom.commandButtons[0].click(); // Initialize

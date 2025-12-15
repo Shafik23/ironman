@@ -35,10 +35,13 @@
                 <div class="panel-header">SYSTEM MODULES</div>
 
                 <!-- Party Mode Toggle Button -->
-                <button id="musicToggle" class="music-toggle">Party Mode: OFF</button>
+                <button id="musicToggle" class="mode-toggle">Party Mode: OFF</button>
+
+                <!-- HUD Overlay Mode Toggle Button -->
+                <button id="hudToggle" class="mode-toggle">HUD Mode: OFF</button>
 
                 <!-- J.A.R.V.I.S. Voice Assistant Toggle -->
-                <!-- <button id="jarvisToggle" class="jarvis-toggle">J.A.R.V.I.S.: OFFLINE</button>
+                <!-- <button id="jarvisToggle" class="mode-toggle jarvis-toggle">J.A.R.V.I.S.: OFFLINE</button>
                 <div id="jarvisIndicator" class="jarvis-indicator"></div> -->
 
                 <div class="component-list">
@@ -452,6 +455,149 @@
         <source src="ironman.mp3" type="audio/mpeg">
         <!-- Local music file for Ironman interface -->
     </audio>
+
+    <!-- HUD Overlay Mode -->
+    <div id="hudOverlay" class="hud-overlay">
+        <!-- Back to Schematic Button -->
+        <button id="hudBackBtn" class="hud-back-btn">← SCHEMATIC VIEW</button>
+
+        <!-- Visor Edge Effects -->
+        <div class="visor-edge visor-edge-top"></div>
+        <div class="visor-edge visor-edge-bottom"></div>
+        <div class="visor-edge visor-edge-left"></div>
+        <div class="visor-edge visor-edge-right"></div>
+
+        <!-- Cityscape Background Layers (parallax) -->
+        <div class="cityscape-container">
+            <div class="cityscape-layer stars"></div>
+            <div class="cityscape-layer clouds clouds-far"></div>
+            <div class="cityscape-layer clouds clouds-near"></div>
+            <div class="cityscape-layer buildings buildings-far"></div>
+            <div class="cityscape-layer buildings buildings-mid"></div>
+            <div class="cityscape-layer buildings buildings-near"></div>
+            <div class="cityscape-layer city-lights"></div>
+        </div>
+
+        <!-- HUD Elements Container -->
+        <div class="hud-elements">
+            <!-- Top Bar: Heading/Compass, Altitude, Speed -->
+            <div class="hud-top-bar">
+                <div class="hud-altitude">
+                    <span class="label">ALT</span>
+                    <span class="value" id="hudAltitude">15,420</span>
+                    <span class="unit">FT</span>
+                </div>
+                <div class="hud-compass">
+                    <div class="compass-track">
+                        <div class="compass-markers"></div>
+                    </div>
+                    <div class="compass-indicator">V</div>
+                </div>
+                <div class="hud-speed">
+                    <span class="label">SPD</span>
+                    <span class="value" id="hudSpeed">847</span>
+                    <span class="unit">KTS</span>
+                </div>
+            </div>
+
+            <!-- Center: Targeting Reticle -->
+            <div class="hud-center">
+                <svg class="targeting-reticle" viewBox="0 0 200 200">
+                    <circle class="reticle-outer" cx="100" cy="100" r="80" />
+                    <circle class="reticle-inner" cx="100" cy="100" r="40" />
+                    <line class="reticle-crosshair" x1="100" y1="10" x2="100" y2="40" />
+                    <line class="reticle-crosshair" x1="100" y1="160" x2="100" y2="190" />
+                    <line class="reticle-crosshair" x1="10" y1="100" x2="40" y2="100" />
+                    <line class="reticle-crosshair" x1="160" y1="100" x2="190" y2="100" />
+                    <circle class="reticle-center" cx="100" cy="100" r="5" />
+                    <!-- Corner brackets -->
+                    <path class="reticle-bracket" d="M30,30 L30,50 M30,30 L50,30" />
+                    <path class="reticle-bracket" d="M170,30 L170,50 M170,30 L150,30" />
+                    <path class="reticle-bracket" d="M30,170 L30,150 M30,170 L50,170" />
+                    <path class="reticle-bracket" d="M170,170 L170,150 M170,170 L150,170" />
+                </svg>
+                <div class="target-lock-indicator hidden" id="targetLock">
+                    <span>TARGET LOCKED</span>
+                </div>
+            </div>
+
+            <!-- Left Side: Power Gauges -->
+            <div class="hud-left-panel">
+                <div class="hud-gauge power-gauge">
+                    <div class="gauge-label">POWER</div>
+                    <div class="gauge-arc">
+                        <svg viewBox="0 0 100 60">
+                            <path class="gauge-bg" d="M10,55 A45,45 0 0,1 90,55" />
+                            <path class="gauge-fill" id="hudPowerArc" d="M10,55 A45,45 0 0,1 90,55" />
+                        </svg>
+                    </div>
+                    <div class="gauge-value" id="hudPowerValue">85%</div>
+                </div>
+                <div class="hud-gauge repulsor-gauge">
+                    <div class="gauge-label">REPULSOR</div>
+                    <div class="gauge-bar">
+                        <div class="gauge-fill-bar" id="hudRepulsorBar"></div>
+                    </div>
+                    <div class="gauge-value">READY</div>
+                </div>
+                <div class="hud-gauge thruster-gauge">
+                    <div class="gauge-label">THRUSTER</div>
+                    <div class="gauge-bar">
+                        <div class="gauge-fill-bar" id="hudThrusterBar"></div>
+                    </div>
+                    <div class="gauge-value" id="hudThrusterStatus">ONLINE</div>
+                </div>
+            </div>
+
+            <!-- Right Side: Systems Status & Radar -->
+            <div class="hud-right-panel">
+                <div class="hud-radar">
+                    <svg class="radar-display" viewBox="0 0 120 120">
+                        <circle class="radar-bg" cx="60" cy="60" r="55" />
+                        <circle class="radar-ring" cx="60" cy="60" r="40" />
+                        <circle class="radar-ring" cx="60" cy="60" r="25" />
+                        <line class="radar-line" x1="60" y1="5" x2="60" y2="115" />
+                        <line class="radar-line" x1="5" y1="60" x2="115" y2="60" />
+                        <line class="radar-sweep" x1="60" y1="60" x2="60" y2="5" />
+                        <!-- Threat indicators added dynamically -->
+                        <g class="radar-threats" id="radarThreats"></g>
+                        <circle class="radar-center" cx="60" cy="60" r="3" />
+                    </svg>
+                </div>
+                <div class="hud-system-status">
+                    <div class="status-item">
+                        <span class="status-label">HELMET</span>
+                        <span class="status-icon" id="hudHelmetStatus">◊</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">REACTOR</span>
+                        <span class="status-icon" id="hudChestStatus">◈</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">ARMS</span>
+                        <span class="status-icon" id="hudArmsStatus">▣</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">LEGS</span>
+                        <span class="status-icon" id="hudLegsStatus">▢</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Bar: Warnings & Mode Indicator -->
+            <div class="hud-bottom-bar">
+                <div class="hud-coordinates">
+                    <span id="hudLat">40.7128 N</span>
+                    <span id="hudLon">74.0060 W</span>
+                </div>
+                <div class="hud-mode">FLIGHT MODE</div>
+                <div class="hud-warnings" id="hudWarnings"></div>
+            </div>
+        </div>
+
+        <!-- Visor HUD Frame Overlay -->
+        <div class="visor-frame"></div>
+    </div>
 
     <script type="module" src="js/app.js?v=20251214201409"></script>
 </body>

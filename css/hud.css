@@ -1,0 +1,167 @@
+/* HUD Overlay Mode - Main Container and Visor Effect */
+
+.hud-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1000;
+    display: none;
+    overflow: hidden;
+    background: #000;
+}
+
+.hud-overlay.active {
+    display: block;
+    animation: hud-boot 0.8s ease-out forwards;
+}
+
+@keyframes hud-boot {
+    0% {
+        opacity: 0;
+        filter: blur(10px) brightness(2);
+    }
+    30% {
+        opacity: 0.5;
+        filter: blur(5px) brightness(1.5);
+    }
+    100% {
+        opacity: 1;
+        filter: blur(0) brightness(1);
+    }
+}
+
+/* Visor Edge Effects - Creates curved helmet viewport illusion */
+.visor-edge {
+    position: absolute;
+    z-index: 100;
+    pointer-events: none;
+}
+
+.visor-edge-top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.7) 40%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    border-bottom-left-radius: 50% 100%;
+    border-bottom-right-radius: 50% 100%;
+}
+
+.visor-edge-bottom {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.7) 40%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    border-top-left-radius: 50% 100%;
+    border-top-right-radius: 50% 100%;
+}
+
+.visor-edge-left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 60px;
+    background: linear-gradient(
+        90deg,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+.visor-edge-right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 60px;
+    background: linear-gradient(
+        270deg,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.5) 50%,
+        rgba(0, 0, 0, 0) 100%
+    );
+}
+
+/* Visor Frame - Subtle helmet outline */
+.visor-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99;
+    pointer-events: none;
+    border: 3px solid rgba(255, 215, 0, 0.15);
+    border-radius: 10% 10% 15% 15% / 5% 5% 10% 10%;
+    box-shadow:
+        inset 0 0 100px rgba(0, 0, 0, 0.5),
+        inset 0 0 50px rgba(0, 255, 255, 0.05);
+}
+
+/* Back to Schematic Button (shown in HUD mode) */
+.hud-back-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 200;
+    padding: 10px 20px;
+    background: var(--bg-lighter);
+    border: 1px solid var(--secondary-blue);
+    color: var(--primary-cyan);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.hud-back-btn:hover {
+    background: var(--secondary-blue);
+    box-shadow: 0 0 10px var(--secondary-blue);
+    transform: translateY(-1px);
+}
+
+/* Hide main container when HUD is active */
+.container.hud-active {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Scan lines effect for HUD (optional enhancement) */
+.hud-overlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 255, 0.02) 0px,
+        rgba(0, 255, 255, 0.02) 1px,
+        transparent 1px,
+        transparent 3px
+    );
+    pointer-events: none;
+    z-index: 101;
+    animation: hud-scanlines 0.1s linear infinite;
+}
+
+@keyframes hud-scanlines {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(3px); }
+}

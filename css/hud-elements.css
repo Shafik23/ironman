@@ -1,0 +1,449 @@
+/* HUD Elements - Targeting, Gauges, Radar, Status Displays */
+
+.hud-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+    pointer-events: none;
+    font-family: 'Orbitron', monospace;
+    color: var(--primary-cyan);
+}
+
+/* ============================================
+   TOP BAR - Compass, Altitude, Speed
+   ============================================ */
+.hud-top-bar {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+/* Compass */
+.hud-compass {
+    position: relative;
+    width: 300px;
+    height: 40px;
+    overflow: hidden;
+}
+
+.compass-track {
+    position: relative;
+    width: 600px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    animation: compass-drift 20s linear infinite;
+}
+
+@keyframes compass-drift {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.compass-markers {
+    display: flex;
+    gap: 0;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.compass-markers::before {
+    content: 'N . . . . 030 . . . . 060 . . . . E . . . . 120 . . . . 150 . . . . S . . . . 210 . . . . 240 . . . . W . . . . 300 . . . . 330 . . . . N . . . . 030 . . . . 060 . . . . E';
+    white-space: nowrap;
+    color: rgba(0, 255, 255, 0.6);
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.compass-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2rem;
+    color: var(--accent-gold);
+    text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+}
+
+/* Altitude Display */
+.hud-altitude,
+.hud-speed {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 15px;
+    background: rgba(0, 20, 40, 0.6);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+.hud-altitude .label,
+.hud-speed .label {
+    font-size: 0.6rem;
+    color: rgba(0, 255, 255, 0.6);
+    letter-spacing: 2px;
+}
+
+.hud-altitude .value,
+.hud-speed .value {
+    font-size: 1.4rem;
+    font-weight: bold;
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+}
+
+.hud-altitude .unit,
+.hud-speed .unit {
+    font-size: 0.5rem;
+    color: rgba(0, 255, 255, 0.5);
+}
+
+/* ============================================
+   CENTER - Targeting Reticle
+   ============================================ */
+.hud-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.targeting-reticle {
+    width: 200px;
+    height: 200px;
+}
+
+.reticle-outer {
+    fill: none;
+    stroke: rgba(0, 255, 255, 0.4);
+    stroke-width: 1;
+    animation: reticle-rotate 10s linear infinite;
+    transform-origin: center;
+}
+
+.reticle-inner {
+    fill: none;
+    stroke: rgba(0, 255, 255, 0.6);
+    stroke-width: 1.5;
+    animation: reticle-rotate-reverse 8s linear infinite;
+    transform-origin: center;
+}
+
+@keyframes reticle-rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes reticle-rotate-reverse {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(-360deg); }
+}
+
+.reticle-crosshair {
+    stroke: rgba(0, 255, 255, 0.8);
+    stroke-width: 2;
+}
+
+.reticle-center {
+    fill: rgba(0, 255, 255, 0.9);
+    animation: reticle-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes reticle-pulse {
+    0%, 100% { opacity: 0.6; r: 4; }
+    50% { opacity: 1; r: 6; }
+}
+
+.reticle-bracket {
+    fill: none;
+    stroke: var(--accent-gold);
+    stroke-width: 2;
+    opacity: 0.8;
+}
+
+/* Target Lock Indicator */
+.target-lock-indicator {
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 15px;
+    background: rgba(255, 50, 50, 0.2);
+    border: 1px solid var(--danger-red);
+    color: var(--danger-red);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    animation: target-flash 0.5s ease-in-out infinite;
+}
+
+.target-lock-indicator.hidden {
+    display: none;
+}
+
+@keyframes target-flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================
+   LEFT PANEL - Power Gauges
+   ============================================ */
+.hud-left-panel {
+    position: absolute;
+    left: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.hud-gauge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.gauge-label {
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: rgba(0, 255, 255, 0.7);
+}
+
+/* Arc-style gauge for power */
+.gauge-arc {
+    width: 100px;
+    height: 55px;
+}
+
+.gauge-arc svg {
+    width: 100%;
+    height: 100%;
+}
+
+.gauge-bg {
+    fill: none;
+    stroke: rgba(0, 255, 255, 0.2);
+    stroke-width: 8;
+    stroke-linecap: round;
+}
+
+.gauge-fill {
+    fill: none;
+    stroke: var(--primary-cyan);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 126;
+    stroke-dashoffset: 25;
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+    transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+
+.gauge-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Bar-style gauges for repulsor/thruster */
+.gauge-bar {
+    width: 120px;
+    height: 8px;
+    background: rgba(0, 255, 255, 0.15);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.gauge-fill-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--primary-cyan), var(--success-green));
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    animation: bar-pulse 2s ease-in-out infinite;
+}
+
+@keyframes bar-pulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 1; }
+}
+
+/* ============================================
+   RIGHT PANEL - Radar & System Status
+   ============================================ */
+.hud-right-panel {
+    position: absolute;
+    right: 80px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 25px;
+}
+
+/* Radar Display */
+.hud-radar {
+    width: 140px;
+    height: 140px;
+}
+
+.radar-display {
+    width: 100%;
+    height: 100%;
+}
+
+.radar-bg {
+    fill: rgba(0, 20, 40, 0.5);
+    stroke: rgba(0, 255, 255, 0.3);
+    stroke-width: 1;
+}
+
+.radar-ring {
+    fill: none;
+    stroke: rgba(0, 255, 255, 0.2);
+    stroke-width: 1;
+}
+
+.radar-line {
+    stroke: rgba(0, 255, 255, 0.15);
+    stroke-width: 1;
+}
+
+.radar-sweep {
+    stroke: rgba(0, 255, 255, 0.8);
+    stroke-width: 2;
+    transform-origin: 60px 60px;
+    animation: radar-sweep 3s linear infinite;
+}
+
+@keyframes radar-sweep {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.radar-center {
+    fill: var(--primary-cyan);
+    filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.8));
+}
+
+/* Radar threat blips */
+.radar-threat {
+    fill: var(--danger-red);
+    animation: threat-blink 1s ease-in-out infinite;
+}
+
+@keyframes threat-blink {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* System Status Icons */
+.hud-system-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.status-icon {
+    font-size: 1rem;
+    color: var(--success-green);
+    text-shadow: 0 0 10px rgba(0, 255, 128, 0.6);
+}
+
+.status-icon.offline {
+    color: rgba(0, 255, 255, 0.3);
+    text-shadow: none;
+}
+
+.status-label {
+    color: rgba(0, 255, 255, 0.7);
+}
+
+/* ============================================
+   BOTTOM BAR - Warnings, Mode, Coordinates
+   ============================================ */
+.hud-bottom-bar {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 50px;
+}
+
+.hud-warnings {
+    min-width: 200px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--danger-red);
+    text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+}
+
+.hud-mode {
+    padding: 8px 20px;
+    background: rgba(0, 255, 128, 0.1);
+    border: 1px solid var(--success-green);
+    color: var(--success-green);
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgba(0, 255, 128, 0.5);
+}
+
+.hud-coordinates {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.65rem;
+    color: rgba(0, 255, 255, 0.6);
+    letter-spacing: 1px;
+}
+
+/* ============================================
+   ANIMATIONS - Additional effects
+   ============================================ */
+
+/* Glitch effect for warnings */
+@keyframes hud-glitch {
+    0%, 90%, 100% { transform: translateX(0); opacity: 1; }
+    92% { transform: translateX(-2px); opacity: 0.8; }
+    94% { transform: translateX(2px); opacity: 0.9; }
+    96% { transform: translateX(-1px); opacity: 0.85; }
+    98% { transform: translateX(1px); opacity: 0.95; }
+}
+
+.hud-warning-active {
+    animation: hud-glitch 2s ease-in-out infinite;
+}
+
+/* Power gauge color states */
+.gauge-fill.power-critical {
+    stroke: var(--danger-red);
+    filter: drop-shadow(0 0 8px rgba(255, 68, 68, 0.6));
+}
+
+.gauge-fill.power-low {
+    stroke: var(--accent-gold);
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.6));
+}
+
+.gauge-fill.power-high {
+    stroke: var(--success-green);
+    filter: drop-shadow(0 0 8px rgba(0, 255, 128, 0.6));
+}

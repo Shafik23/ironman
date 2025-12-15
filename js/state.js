@@ -3,5 +3,6 @@ export const state = {
   isDiagnosticsRunning: false,
   isPartyMode: false,
   partyColorCycleInterval: null,
-  partyStatusInterval: null
+  partyStatusInterval: null,
+  isHudMode: false
 };

@@ -17,7 +17,22 @@ export const dom = {
   progressBars: null,
   statusTexts: null,
   suitSchematic: null,
-  schematicContainer: null
+  schematicContainer: null,
+  // HUD Mode elements
+  hudToggle: null,
+  hudOverlay: null,
+  hudBackBtn: null,
+  hudAltitude: null,
+  hudSpeed: null,
+  hudPowerValue: null,
+  hudPowerArc: null,
+  hudWarnings: null,
+  hudLat: null,
+  hudLon: null,
+  hudHelmetStatus: null,
+  hudChestStatus: null,
+  hudArmsStatus: null,
+  hudLegsStatus: null
 };
 
 export function initializeDOMReferences() {
@@ -40,4 +55,19 @@ export function initializeDOMReferences() {
   dom.statusTexts = document.querySelectorAll('.status-row span:last-child');
   dom.suitSchematic = document.querySelector('.suit-schematic');
   dom.schematicContainer = document.querySelector('.schematic-container');
+  // HUD Mode elements
+  dom.hudToggle = document.getElementById('hudToggle');
+  dom.hudOverlay = document.getElementById('hudOverlay');
+  dom.hudBackBtn = document.getElementById('hudBackBtn');
+  dom.hudAltitude = document.getElementById('hudAltitude');
+  dom.hudSpeed = document.getElementById('hudSpeed');
+  dom.hudPowerValue = document.getElementById('hudPowerValue');
+  dom.hudPowerArc = document.getElementById('hudPowerArc');
+  dom.hudWarnings = document.getElementById('hudWarnings');
+  dom.hudLat = document.getElementById('hudLat');
+  dom.hudLon = document.getElementById('hudLon');
+  dom.hudHelmetStatus = document.getElementById('hudHelmetStatus');
+  dom.hudChestStatus = document.getElementById('hudChestStatus');
+  dom.hudArmsStatus = document.getElementById('hudArmsStatus');
+  dom.hudLegsStatus = document.getElementById('hudLegsStatus');
 }

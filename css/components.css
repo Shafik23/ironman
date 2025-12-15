@@ -1,5 +1,5 @@
-/* Music toggle button */
-.music-toggle {
+/* Base mode toggle button - shared styles */
+.mode-toggle {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;
@@ -13,44 +13,27 @@
     transition: all 0.3s ease;
 }
 
-.music-toggle:hover {
+.mode-toggle:hover {
     background: var(--secondary-blue);
     box-shadow: 0 0 10px var(--secondary-blue);
     transform: translateY(-1px);
 }
 
-.music-toggle.active {
+.mode-toggle.active {
     background: var(--success-green);
     border-color: var(--success-green);
     color: var(--bg-dark);
     box-shadow: 0 0 15px var(--success-green);
 }
 
-/* J.A.R.V.I.S. toggle button */
+/* J.A.R.V.I.S. toggle - gold active state instead of green */
 .jarvis-toggle {
-    width: 100%;
-    padding: 10px;
     margin-bottom: 10px;
-    background: var(--bg-lighter);
-    border: 1px solid var(--secondary-blue);
-    color: var(--primary-cyan);
-    font-family: 'Orbitron', monospace;
-    font-size: 0.9rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.jarvis-toggle:hover {
-    background: var(--secondary-blue);
-    box-shadow: 0 0 10px var(--secondary-blue);
-    transform: translateY(-1px);
 }
 
 .jarvis-toggle.active {
     background: var(--accent-gold);
     border-color: var(--accent-gold);
-    color: var(--bg-dark);
     box-shadow: 0 0 15px var(--accent-gold);
     animation: pulse 2s infinite;
 }

@@ -8,6 +8,7 @@ import { setupMusicToggle } from './party.js';
 import { startTelemetryUpdates, addTelemetryEntry } from './telemetry.js';
 import { setupKeyboardShortcuts } from './keyboard.js';
 import { initializeJarvis, toggleJarvis } from './jarvis.js';
+import { setupHudMode } from './hud.js';
 
 function initializeApp() {
   initializeDOMReferences();
@@ -27,6 +28,9 @@ function initializeApp() {
   // Initialize J.A.R.V.I.S.
   initializeJarvis();
   setupJarvisToggle();
+
+  // Initialize HUD Mode
+  setupHudMode();
 
   executeInitializeSystemsQuiet();
 
