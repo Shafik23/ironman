@@ -15,9 +15,8 @@ This is an Iron Man suit designer web application that creates an interactive, r
 - `hose.mp3` - Audio file for emergency shutdown effects
 
 ### Scripts
-- `serve.py` - Local development server for ES6 modules
 - `serve_live.py` - Live reload server (auto-refreshes browser on file changes)
-- `dev.sh` - Convenience script to start live reload server and open browser
+- `dev.sh` - Development script (auto-creates venv, installs deps, starts server)
 - `deploy.sh` - Production deployment script using rsync
 - `push_all_changes.sh` - Git workflow script (add, commit, push)
 - `bust-cache.sh` - Cache-busting script for deployments
@@ -55,10 +54,7 @@ This is an Iron Man suit designer web application that creates an interactive, r
 ## Development Commands
 
 ```bash
-# Serve locally with ES6 module support
-./serve.py
-
-# Or use dev script for live reload (launches server + opens browser)
+# Start development server with live reload (auto-installs dependencies)
 ./dev.sh
 ```
 
@@ -182,7 +178,7 @@ The project uses a cache-busting system to ensure browsers load fresh assets:
 
 ## Important Development Notes
 
-- ES6 modules require a web server (use `./serve.py` for local development)
+- ES6 modules require a web server (use `./dev.sh` for local development)
 - Components are identified by `data-component` and `data-part` attributes
 - Telemetry system has a 20-entry limit and auto-rotates old messages
 - All animations are CSS-based and triggered via JavaScript class manipulation
