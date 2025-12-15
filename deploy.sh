@@ -31,6 +31,9 @@ rsync --delete -azP -e ssh index.html $remote:$app_dir/
 rsync --delete -azP -e ssh style.css $remote:$app_dir/
 rsync --delete -azP -e ssh ironman.mp3 $remote:$app_dir/
 rsync --delete -azP -e ssh hose.mp3 $remote:$app_dir/
+rsync --delete -azP -e ssh favicon.png $remote:$app_dir/
+rsync --delete -azP -e ssh apple-touch-icon.png $remote:$app_dir/
+rsync --delete -azP -e ssh favicon-192.png $remote:$app_dir/
 
 # Deploy JavaScript modules (ES6 modules for app functionality)
 rsync --delete -azP -e ssh js/ $remote:$app_dir/js/
