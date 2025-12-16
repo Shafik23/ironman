@@ -8,16 +8,26 @@ let radarThreats = [];
 
 // Simulation state
 const simState = {
-  altitude: 15420,
-  speed: 847,
-  heading: 45,
-  lat: 40.7128,
-  lon: -74.006
+  altitude: 10000,
+  speed: 750,
+  heading: 42
+};
+
+// Compass configuration
+const COMPASS_CONFIG = {
+  pixelsPerDegree: 4,  // How many pixels per degree of heading
+  visibleDegrees: 75   // How many degrees visible in the compass window
 };
 
 export function initializeHudElements() {
+  // Initialize compass tape
+  initializeCompass();
+
   // Initialize radar threats
   createRadarThreats();
+
+  // Set initial heading display
+  updateCompass(simState.heading);
 }
 
 export function startHudSimulation() {
@@ -43,6 +53,72 @@ function updateFlightData() {
   }
   if (dom.hudSpeed) {
     dom.hudSpeed.textContent = Math.round(simState.speed);
+  }
+}
+
+// Compass tape system
+function initializeCompass() {
+  const compassTrack = document.getElementById('compassTrack');
+  if (!compassTrack) return;
+
+  // Generate compass tape: we need enough degrees to cover the visible window
+  // plus buffer on each side for smooth scrolling
+  // Generate 0-360 twice for seamless wrapping
+  const markers = [];
+
+  for (let cycle = 0; cycle < 2; cycle++) {
+    for (let deg = 0; deg < 360; deg += 5) {
+      const marker = createCompassMarker(deg);
+      markers.push(marker);
+    }
+  }
+
+  compassTrack.innerHTML = markers.join('');
+}
+
+function createCompassMarker(degree) {
+  const cardinals = { 0: 'N', 90: 'E', 180: 'S', 270: 'W' };
+  const { pixelsPerDegree } = COMPASS_CONFIG;
+  const markerWidth = pixelsPerDegree * 5;
+
+  // Cardinal directions
+  if (cardinals[degree]) {
+    return `<span class="cardinal" style="display:inline-block;width:${markerWidth}px;text-align:left;padding-left:2px">${cardinals[degree]}</span>`;
+  }
+
+  // Every 10 degrees show the number
+  if (degree % 10 === 0) {
+    const displayDeg = degree.toString().padStart(3, '0');
+    return `<span class="degree" style="display:inline-block;width:${markerWidth}px;text-align:left">${displayDeg}</span>`;
+  }
+
+  // Every 5 degrees show a tick
+  return `<span class="tick" style="display:inline-block;width:${markerWidth}px;text-align:left;padding-left:2px">|</span>`;
+}
+
+function updateCompass(heading) {
+  const compassTrack = document.getElementById('compassTrack');
+  const compassHeading = document.getElementById('compassHeading');
+  if (!compassTrack) return;
+
+  // Normalize heading to 0-360
+  heading = ((heading % 360) + 360) % 360;
+
+  const { pixelsPerDegree } = COMPASS_CONFIG;
+
+  // Calculate offset to center the heading under the indicator
+  // The compass window is 300px wide, so center is at 150px
+  // Adjustment accounts for indicator width and label alignment
+  const centerOffset = 150;
+  const labelOffset = 8; // Fine-tune to align indicator with exact degree
+  const headingPixels = heading * pixelsPerDegree;
+  const offset = centerOffset - headingPixels + labelOffset;
+
+  compassTrack.style.transform = `translateX(${offset}px)`;
+
+  // Update heading display
+  if (compassHeading) {
+    compassHeading.textContent = `${Math.round(heading).toString().padStart(3, '0')}°`;
   }
 }
 
@@ -164,11 +240,13 @@ export function updateHudSystemStatus(component, isOnline) {
 
 // Reset simulation to initial state
 export function resetHudSimulation() {
-  simState.altitude = 15420;
-  simState.speed = 847;
-  simState.heading = 45;
-  simState.lat = 40.7128;
-  simState.lon = -74.006;
+  simState.altitude = 10000;
+  simState.speed = 750;
+  simState.heading = 42;
 
+  updateCompass(simState.heading);
   createRadarThreats();
 }
+
+// Export for future use when making heading dynamic
+export { updateCompass };

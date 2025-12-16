@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
     <link rel="apple-touch-icon" sizes="128x128" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-    <link rel="stylesheet" href="style.css?v=20251215203317">
+    <link rel="stylesheet" href="style.css?v=20251215205058">
 </head>
 
 <body>
@@ -484,18 +484,17 @@
             <div class="hud-top-bar">
                 <div class="hud-altitude">
                     <span class="label">ALT</span>
-                    <span class="value" id="hudAltitude">15,420</span>
+                    <span class="value" id="hudAltitude">10,000</span>
                     <span class="unit">FT</span>
                 </div>
                 <div class="hud-compass">
-                    <div class="compass-track">
-                        <div class="compass-markers"></div>
-                    </div>
-                    <div class="compass-indicator">V</div>
+                    <div class="compass-track" id="compassTrack"></div>
+                    <div class="compass-indicator">▼</div>
+                    <div class="compass-heading" id="compassHeading">042°</div>
                 </div>
                 <div class="hud-speed">
                     <span class="label">SPD</span>
-                    <span class="value" id="hudSpeed">847</span>
+                    <span class="value" id="hudSpeed">750</span>
                     <span class="unit">KTS</span>
                 </div>
             </div>
@@ -594,7 +593,7 @@
         <div class="visor-frame"></div>
     </div>
 
-    <script type="module" src="js/app.js?v=20251215203317"></script>
+    <script type="module" src="js/app.js?v=20251215205058"></script>
 </body>
 
 </html>

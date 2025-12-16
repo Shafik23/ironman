@@ -29,44 +29,57 @@
 .hud-compass {
     position: relative;
     width: 300px;
-    height: 40px;
+    height: 55px;
     overflow: hidden;
 }
 
 .compass-track {
-    position: relative;
-    width: 600px;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    /* Animation removed - will be made dynamic based on user input later */
-}
-
-.compass-markers {
-    display: flex;
-    gap: 0;
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-}
-
-.compass-markers::before {
-    content: 'N . . . . 030 . . . . 060 . . . . E . . . . 120 . . . . 150 . . . . S . . . . 210 . . . . 240 . . . . W . . . . 300 . . . . 330 . . . . N . . . . 030 . . . . 060 . . . . E';
+    position: absolute;
+    top: 15px;
+    left: 0;
+    height: 20px;
     white-space: nowrap;
+    font-size: 0.75rem;
     color: rgba(0, 255, 255, 0.6);
     text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+    line-height: 20px;
+}
+
+.compass-track .cardinal {
+    color: var(--accent-gold);
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.compass-track .degree {
+    color: rgba(0, 255, 255, 0.9);
+}
+
+.compass-track .tick {
+    color: rgba(0, 255, 255, 0.4);
 }
 
 .compass-indicator {
     position: absolute;
-    top: 0;
+    top: 2px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     color: var(--accent-gold);
     text-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
     line-height: 1;
-    width: 20px;
-    text-align: center;
+    z-index: 10;
+}
+
+.compass-heading {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--primary-cyan);
+    text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
 }
 
 /* Altitude Display */
