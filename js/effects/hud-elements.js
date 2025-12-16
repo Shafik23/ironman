@@ -80,20 +80,23 @@ function createCompassMarker(degree) {
   const cardinals = { 0: 'N', 90: 'E', 180: 'S', 270: 'W' };
   const { pixelsPerDegree } = COMPASS_CONFIG;
   const markerWidth = pixelsPerDegree * 5;
+  // Use border-box so padding doesn't increase total width
+  // Left-align text so the start of the marker = exact degree position
+  const baseStyle = `display:inline-block;width:${markerWidth}px;box-sizing:border-box;text-align:left;`;
 
   // Cardinal directions
   if (cardinals[degree]) {
-    return `<span class="cardinal" style="display:inline-block;width:${markerWidth}px;text-align:left;padding-left:2px">${cardinals[degree]}</span>`;
+    return `<span class="cardinal" style="${baseStyle}">${cardinals[degree]}</span>`;
   }
 
   // Every 10 degrees show the number
   if (degree % 10 === 0) {
     const displayDeg = degree.toString().padStart(3, '0');
-    return `<span class="degree" style="display:inline-block;width:${markerWidth}px;text-align:left">${displayDeg}</span>`;
+    return `<span class="degree" style="${baseStyle}">${displayDeg}</span>`;
   }
 
   // Every 5 degrees show a tick
-  return `<span class="tick" style="display:inline-block;width:${markerWidth}px;text-align:left;padding-left:2px">|</span>`;
+  return `<span class="tick" style="${baseStyle}">|</span>`;
 }
 
 function updateCompass(heading) {
@@ -108,11 +111,12 @@ function updateCompass(heading) {
 
   // Calculate offset to center the heading under the indicator
   // The compass window is 300px wide, so center is at 150px
-  // Adjustment accounts for indicator width and label alignment
+  // With left-aligned text, marker start = exact degree position
+  // Calibration accounts for indicator width and visual alignment
   const centerOffset = 150;
-  const labelOffset = 8; // Fine-tune to align indicator with exact degree
+  const indicatorCalibration = 16; // Fine-tune to align indicator tip with exact degree
   const headingPixels = heading * pixelsPerDegree;
-  const offset = centerOffset - headingPixels + labelOffset;
+  const offset = centerOffset - headingPixels - indicatorCalibration;
 
   compassTrack.style.transform = `translateX(${offset}px)`;
 
