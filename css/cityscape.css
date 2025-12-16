@@ -114,7 +114,7 @@
 }
 
 /* === FORWARD FLYING BUILDINGS === */
-/* Buildings appear at horizon and rush toward viewer */
+/* Buildings appear at horizon (center) and rush outward past viewer */
 
 /* Building Container for perspective */
 .cityscape-layer.buildings-far,
@@ -138,21 +138,24 @@
     bottom: 0;
     height: 100%;
     background: #0a1525;
-    animation: building-rush-slow 8s linear infinite;
 }
 
+/* Left side building - starts at vanishing point, moves LEFT */
 .cityscape-layer.buildings-far::before {
-    left: 10%;
-    width: 8%;
+    left: 38%;
+    width: 10%;
     clip-path: polygon(20% 100%, 20% 30%, 40% 30%, 40% 20%, 60% 20%, 60% 30%, 80% 30%, 80% 100%);
+    animation: building-rush-far-left 6s linear infinite;
     animation-delay: 0s;
 }
 
+/* Right side building - starts at vanishing point, moves RIGHT */
 .cityscape-layer.buildings-far::after {
-    right: 10%;
-    width: 8%;
+    right: 38%;
+    width: 10%;
     clip-path: polygon(20% 100%, 20% 25%, 50% 25%, 50% 15%, 80% 15%, 80% 100%);
-    animation-delay: -4s;
+    animation: building-rush-far-right 6s linear infinite;
+    animation-delay: -3s;
 }
 
 /* Mid buildings */
@@ -168,21 +171,22 @@
     bottom: 0;
     height: 100%;
     background: #081018;
-    animation: building-rush-mid 6s linear infinite;
 }
 
 .cityscape-layer.buildings-mid::before {
-    left: 5%;
+    left: 38%;
     width: 12%;
     clip-path: polygon(10% 100%, 10% 40%, 30% 40%, 30% 20%, 50% 20%, 50% 35%, 70% 35%, 70% 25%, 90% 25%, 90% 100%);
-    animation-delay: -1s;
+    animation: building-rush-mid-left 6s linear infinite;
+    animation-delay: -1.5s;
 }
 
 .cityscape-layer.buildings-mid::after {
-    right: 5%;
+    right: 38%;
     width: 12%;
     clip-path: polygon(10% 100%, 10% 30%, 40% 30%, 40% 15%, 60% 15%, 60% 30%, 90% 30%, 90% 100%);
-    animation-delay: -4s;
+    animation: building-rush-mid-right 6s linear infinite;
+    animation-delay: -4.5s;
 }
 
 /* Near buildings - fastest, largest */
@@ -198,71 +202,129 @@
     bottom: 0;
     height: 100%;
     background: #050a10;
-    animation: building-rush-fast 4s linear infinite;
 }
 
 .cityscape-layer.buildings-near::before {
-    left: 0;
+    left: 38%;
     width: 15%;
     clip-path: polygon(0% 100%, 0% 50%, 30% 50%, 30% 20%, 60% 20%, 60% 40%, 100% 40%, 100% 100%);
-    animation-delay: 0s;
-}
-
-.cityscape-layer.buildings-near::after {
-    right: 0;
-    width: 15%;
-    clip-path: polygon(0% 100%, 0% 35%, 40% 35%, 40% 15%, 70% 15%, 70% 45%, 100% 45%, 100% 100%);
+    animation: building-rush-near-left 6s linear infinite;
     animation-delay: -2s;
 }
 
-/* Building rush animations - appear at center, rush to sides */
-@keyframes building-rush-slow {
+.cityscape-layer.buildings-near::after {
+    right: 38%;
+    width: 15%;
+    clip-path: polygon(0% 100%, 0% 35%, 40% 35%, 40% 15%, 70% 15%, 70% 45%, 100% 45%, 100% 100%);
+    animation: building-rush-near-right 6s linear infinite;
+    animation-delay: -5s;
+}
+
+/* === BUILDING ANIMATIONS === */
+/* All buildings start at same vanishing point (38% from edge) */
+/* Same duration, different travel distances create depth illusion */
+
+/* FAR buildings - smallest movement, stay closer to center */
+@keyframes building-rush-far-left {
     0% {
-        transform: translateZ(-500px) translateX(40%) scale(0.1);
+        transform: translateX(0) scale(0.15);
         opacity: 0;
     }
-    10% {
+    8% {
+        opacity: 0.5;
+    }
+    92% {
         opacity: 0.6;
     }
-    90% {
-        opacity: 0.8;
-    }
     100% {
-        transform: translateZ(200px) translateX(0%) scale(1.5);
+        transform: translateX(-20vw) scale(1.2);
         opacity: 0;
     }
 }
 
-@keyframes building-rush-mid {
+@keyframes building-rush-far-right {
     0% {
-        transform: translateZ(-400px) translateX(30%) scale(0.15);
+        transform: translateX(0) scale(0.15);
         opacity: 0;
     }
-    10% {
-        opacity: 0.7;
+    8% {
+        opacity: 0.5;
     }
-    90% {
-        opacity: 0.9;
+    92% {
+        opacity: 0.6;
     }
     100% {
-        transform: translateZ(300px) translateX(0%) scale(1.8);
+        transform: translateX(20vw) scale(1.2);
         opacity: 0;
     }
 }
 
-@keyframes building-rush-fast {
+/* MID buildings - medium movement */
+@keyframes building-rush-mid-left {
     0% {
-        transform: translateZ(-300px) translateX(20%) scale(0.2);
+        transform: translateX(0) scale(0.2);
         opacity: 0;
     }
-    10% {
+    8% {
+        opacity: 0.6;
+    }
+    92% {
         opacity: 0.8;
     }
-    85% {
+    100% {
+        transform: translateX(-35vw) scale(1.6);
+        opacity: 0;
+    }
+}
+
+@keyframes building-rush-mid-right {
+    0% {
+        transform: translateX(0) scale(0.2);
+        opacity: 0;
+    }
+    8% {
+        opacity: 0.6;
+    }
+    92% {
+        opacity: 0.8;
+    }
+    100% {
+        transform: translateX(35vw) scale(1.6);
+        opacity: 0;
+    }
+}
+
+/* NEAR buildings - largest movement, go to edges */
+@keyframes building-rush-near-left {
+    0% {
+        transform: translateX(0) scale(0.25);
+        opacity: 0;
+    }
+    8% {
+        opacity: 0.8;
+    }
+    92% {
         opacity: 1;
     }
     100% {
-        transform: translateZ(400px) translateX(0%) scale(2);
+        transform: translateX(-50vw) scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes building-rush-near-right {
+    0% {
+        transform: translateX(0) scale(0.25);
+        opacity: 0;
+    }
+    8% {
+        opacity: 0.8;
+    }
+    92% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(50vw) scale(2);
         opacity: 0;
     }
 }
@@ -344,34 +406,105 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 15%;
+    height: 30%;
     background: linear-gradient(
         to top,
-        #030508 0%,
+        #020305 0%,
+        #030508 20%,
         #050a10 50%,
+        #081018 75%,
         transparent 100%
     );
     z-index: 10;
+}
+
+/* Street surface with lane markings */
+.street-surface {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 35%;
+    z-index: 11;
+    perspective: 800px;
+    perspective-origin: 50% 100%;
 }
 
 /* Center line (road marking rushing forward) */
 .cityscape-container::before {
     content: '';
     position: absolute;
-    bottom: 5%;
+    bottom: 0;
     left: 50%;
-    width: 4px;
-    height: 200px;
+    width: 6px;
+    height: 400px;
     background: repeating-linear-gradient(
         to bottom,
-        rgba(255, 200, 50, 0.8) 0px,
-        rgba(255, 200, 50, 0.8) 30px,
-        transparent 30px,
-        transparent 60px
+        rgba(255, 200, 50, 0.9) 0px,
+        rgba(255, 200, 50, 0.9) 40px,
+        transparent 40px,
+        transparent 80px
     );
-    transform: translateX(-50%) perspective(500px) rotateX(60deg);
+    transform: translateX(-50%) perspective(600px) rotateX(70deg);
     transform-origin: bottom center;
-    animation: road-rush 0.5s linear infinite;
+    animation: road-rush 0.4s linear infinite;
+    z-index: 12;
+}
+
+/* Left lane edge */
+.street-surface::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 30%;
+    width: 3px;
+    height: 350px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 200, 255, 0.6) 0%,
+        rgba(0, 200, 255, 0.3) 50%,
+        transparent 100%
+    );
+    transform: perspective(600px) rotateX(70deg);
+    transform-origin: bottom center;
+    z-index: 12;
+}
+
+/* Right lane edge */
+.street-surface::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 30%;
+    width: 3px;
+    height: 350px;
+    background: linear-gradient(
+        to top,
+        rgba(0, 200, 255, 0.6) 0%,
+        rgba(0, 200, 255, 0.3) 50%,
+        transparent 100%
+    );
+    transform: perspective(600px) rotateX(70deg);
+    transform-origin: bottom center;
+    z-index: 12;
+}
+
+/* Road grid lines rushing toward viewer */
+.street-grid {
+    position: absolute;
+    bottom: 0;
+    left: 20%;
+    right: 20%;
+    height: 300px;
+    background: repeating-linear-gradient(
+        to top,
+        rgba(0, 150, 200, 0.15) 0px,
+        transparent 2px,
+        transparent 40px
+    );
+    transform: perspective(600px) rotateX(75deg);
+    transform-origin: bottom center;
+    animation: grid-rush 0.8s linear infinite;
     z-index: 11;
 }
 
@@ -380,13 +513,23 @@
         background-position: 0 0;
     }
     100% {
-        background-position: 0 60px;
+        background-position: 0 80px;
+    }
+}
+
+@keyframes grid-rush {
+    0% {
+        background-position: 0 0;
+    }
+    100% {
+        background-position: 0 40px;
     }
 }
 
 /* Pause animations when HUD is not active (performance) */
 .hud-overlay:not(.active) .cityscape-layer,
 .hud-overlay:not(.active) .cityscape-container::before,
-.hud-overlay:not(.active) .cityscape-container::after {
+.hud-overlay:not(.active) .cityscape-container::after,
+.hud-overlay:not(.active) .street-grid {
     animation-play-state: paused;
 }
