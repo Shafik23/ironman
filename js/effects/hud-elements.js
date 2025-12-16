@@ -37,35 +37,12 @@ export function stopHudSimulation() {
 }
 
 function updateFlightData() {
-  // Gentle drift for altitude (flying sensation)
-  simState.altitude += (Math.random() - 0.48) * 50;
-  simState.altitude = Math.max(5000, Math.min(35000, simState.altitude));
-
-  // Speed fluctuation
-  simState.speed += (Math.random() - 0.5) * 20;
-  simState.speed = Math.max(200, Math.min(1500, simState.speed));
-
-  // Heading drift
-  simState.heading += (Math.random() - 0.5) * 2;
-  if (simState.heading > 360) simState.heading -= 360;
-  if (simState.heading < 0) simState.heading += 360;
-
-  // Coordinate drift (very subtle)
-  simState.lat += (Math.random() - 0.5) * 0.0001;
-  simState.lon += (Math.random() - 0.5) * 0.0001;
-
-  // Update DOM elements
+  // Static values for now - will be made dynamic based on user input later
   if (dom.hudAltitude) {
     dom.hudAltitude.textContent = Math.round(simState.altitude).toLocaleString();
   }
   if (dom.hudSpeed) {
     dom.hudSpeed.textContent = Math.round(simState.speed);
-  }
-  if (dom.hudLat) {
-    dom.hudLat.textContent = `${simState.lat.toFixed(4)} N`;
-  }
-  if (dom.hudLon) {
-    dom.hudLon.textContent = `${Math.abs(simState.lon).toFixed(4)} W`;
   }
 }
 
