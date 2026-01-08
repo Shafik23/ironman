@@ -409,6 +409,31 @@
     text-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
 }
 
+/* Flight Controls Hint */
+.hud-flight-controls-hint {
+    font-size: 0.65rem;
+    color: rgba(0, 255, 255, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.hud-flight-controls-hint:hover {
+    opacity: 1;
+}
+
+.hud-flight-controls-hint .hint-key {
+    display: inline-block;
+    padding: 2px 6px;
+    background: rgba(0, 255, 255, 0.1);
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: var(--primary-cyan);
+}
+
 .hud-mode {
     padding: 8px 20px;
     background: rgba(0, 255, 128, 0.1);

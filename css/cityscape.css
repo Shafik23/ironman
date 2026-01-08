@@ -1,5 +1,10 @@
 /* Night Cityscape Background - Forward Flying Perspective */
 
+/* CSS Custom Property for yaw offset (set by JavaScript) */
+:root {
+    --yaw-offset: 0%;
+}
+
 .cityscape-container {
     position: absolute;
     top: 0;
@@ -18,6 +23,9 @@
         #102540 80%,
         #152a45 100%
     );
+    /* Smooth transitions for yaw movement */
+    transition: perspective-origin 0.1s ease-out, transform 0.1s ease-out;
+    transform-origin: center center;
 }
 
 .cityscape-layer {
@@ -28,7 +36,7 @@
     top: 0;
 }
 
-/* Stars Layer - Twinkling starfield (stationary) */
+/* Stars Layer - Twinkling starfield (shifts with yaw) */
 .cityscape-layer.stars {
     background-image:
         radial-gradient(1px 1px at 10% 10%, rgba(255, 255, 255, 0.8), transparent),
@@ -50,6 +58,9 @@
         radial-gradient(1px 1px at 30% 15%, rgba(200, 220, 255, 0.9), transparent),
         radial-gradient(1px 1px at 70% 32%, rgba(255, 200, 200, 0.8), transparent);
     animation: star-twinkle 4s ease-in-out infinite;
+    /* Stars shift opposite to yaw direction (parallax effect) */
+    transform: translateX(calc(var(--yaw-offset) * -0.4));
+    transition: transform 0.15s ease-out;
 }
 
 @keyframes star-twinkle {
@@ -57,7 +68,7 @@
     50% { opacity: 1; }
 }
 
-/* Clouds - drift forward slowly */
+/* Clouds - drift forward slowly (shift with yaw) */
 .cityscape-layer.clouds-far {
     height: 50%;
     top: 10%;
@@ -67,6 +78,9 @@
         radial-gradient(ellipse 350px 90px at 80% 60%, rgba(25, 45, 75, 0.3), transparent);
     animation: clouds-forward 20s linear infinite;
     transform-origin: 50% 100%;
+    /* Clouds shift with yaw - subtle for distant clouds */
+    left: calc(var(--yaw-offset) * -0.2);
+    transition: left 0.15s ease-out;
 }
 
 .cityscape-layer.clouds-near {
@@ -77,6 +91,9 @@
         radial-gradient(ellipse 250px 70px at 70% 55%, rgba(35, 55, 85, 0.3), transparent);
     animation: clouds-forward-fast 12s linear infinite;
     transform-origin: 50% 100%;
+    /* Near clouds shift more */
+    left: calc(var(--yaw-offset) * -0.4);
+    transition: left 0.15s ease-out;
 }
 
 @keyframes clouds-forward {
@@ -123,6 +140,23 @@
     bottom: 0;
     top: auto;
     transform-style: preserve-3d;
+    /* Yaw offset shifts buildings horizontally - opposite to turn direction */
+    /* When turning right (positive yaw), buildings shift left (negative) */
+    transition: left 0.1s ease-out;
+}
+
+/* Parallax yaw shift - far buildings shift less, near buildings shift more */
+/* Positive offset (right turn) → negative left → buildings shift left (world moves left as you look right) */
+.cityscape-layer.buildings-far {
+    left: calc(var(--yaw-offset) * -0.3);
+}
+
+.cityscape-layer.buildings-mid {
+    left: calc(var(--yaw-offset) * -0.6);
+}
+
+.cityscape-layer.buildings-near {
+    left: calc(var(--yaw-offset) * -1.0);
 }
 
 /* Far buildings - slowest, smallest starting point */
@@ -360,6 +394,9 @@
     top: auto;
     height: 50%;
     pointer-events: none;
+    /* City lights shift with buildings (near parallax) */
+    left: calc(var(--yaw-offset) * -0.8);
+    transition: left 0.1s ease-out;
 }
 
 
@@ -408,7 +445,9 @@
     height: 35%;
     z-index: 11;
     perspective: 800px;
-    perspective-origin: 50% 100%;
+    /* Perspective origin shifts with yaw for road perspective (same direction as turn) */
+    perspective-origin: calc(50% + var(--yaw-offset) * 0.5) 100%;
+    transition: perspective-origin 0.1s ease-out;
 }
 
 /* Center line (road marking rushing forward) */

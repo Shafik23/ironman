@@ -2,9 +2,18 @@
 // Handles dynamic HUD element updates (altitude, speed, radar, etc.)
 
 import { dom } from '../dom.js';
+import {
+  initFlightControls,
+  startFlightControls,
+  stopFlightControls,
+  resetFlightState,
+  getHeading
+} from './flight-controls.js';
+import { setCityscapeYawOffset } from './cityscape.js';
 
 let simulationInterval = null;
 let radarThreats = [];
+let flightControlsInitialized = false;
 
 // Simulation state
 const simState = {
@@ -26,12 +35,31 @@ export function initializeHudElements() {
   // Initialize radar threats
   createRadarThreats();
 
+  // Initialize flight controls (only once)
+  if (!flightControlsInitialized) {
+    initFlightControls(
+      // Heading change callback - update compass
+      (heading) => {
+        simState.heading = heading;
+        updateCompass(heading);
+      },
+      // Yaw offset callback - shift cityscape perspective
+      (offset) => {
+        setCityscapeYawOffset(offset);
+      }
+    );
+    flightControlsInitialized = true;
+  }
+
   // Set initial heading display
   updateCompass(simState.heading);
 }
 
 export function startHudSimulation() {
   if (simulationInterval) return;
+
+  // Start flight controls for yaw motion
+  startFlightControls();
 
   simulationInterval = setInterval(() => {
     updateFlightData();
@@ -40,6 +68,9 @@ export function startHudSimulation() {
 }
 
 export function stopHudSimulation() {
+  // Stop flight controls
+  stopFlightControls();
+
   if (simulationInterval) {
     clearInterval(simulationInterval);
     simulationInterval = null;
@@ -248,8 +279,14 @@ export function resetHudSimulation() {
   simState.speed = 750;
   simState.heading = 42;
 
+  // Reset flight controls state
+  resetFlightState();
+
   updateCompass(simState.heading);
   createRadarThreats();
+
+  // Reset cityscape yaw offset
+  setCityscapeYawOffset(0);
 }
 
 // Export for future use when making heading dynamic
