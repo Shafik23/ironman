@@ -362,50 +362,6 @@
     pointer-events: none;
 }
 
-/* Light streaks effect - like passing city lights */
-.cityscape-layer.city-lights::before,
-.cityscape-layer.city-lights::after {
-    content: '';
-    position: absolute;
-    bottom: 20%;
-    width: 3px;
-    height: 60%;
-    background: linear-gradient(
-        to bottom,
-        transparent,
-        rgba(255, 230, 150, 0.8),
-        rgba(255, 230, 150, 0.4),
-        transparent
-    );
-    animation: light-streak 2s linear infinite;
-}
-
-.cityscape-layer.city-lights::before {
-    left: 15%;
-    animation-delay: 0s;
-}
-
-.cityscape-layer.city-lights::after {
-    right: 15%;
-    animation-delay: -1s;
-}
-
-@keyframes light-streak {
-    0% {
-        transform: translateZ(-200px) scaleY(0.1);
-        opacity: 0;
-    }
-    20% {
-        opacity: 1;
-    }
-    80% {
-        opacity: 0.8;
-    }
-    100% {
-        transform: translateZ(300px) scaleY(2);
-        opacity: 0;
-    }
-}
 
 /* Additional window lights scattered */
 .cityscape-layer.city-lights {
@@ -465,8 +421,8 @@
     height: 400px;
     background: repeating-linear-gradient(
         to bottom,
-        rgba(255, 200, 50, 0.9) 0px,
-        rgba(255, 200, 50, 0.9) 40px,
+        rgba(60, 70, 85, 0.9) 0px,
+        rgba(60, 70, 85, 0.9) 40px,
         transparent 40px,
         transparent 80px
     );
