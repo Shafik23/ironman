@@ -20,6 +20,7 @@ export function setupConfigurationSliders() {
   dom.colorSlider.addEventListener('input', e => {
     dom.colorValue.textContent = e.target.value + '%';
     updateSuitColor(e.target.value);
+    updateArcReactor(dom.powerSlider.value); // Sync reactor color with suit
     events.emit('color:changed', { value: parseInt(e.target.value) });
     addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
   });
@@ -77,12 +78,17 @@ export function updateSuitZoom(zoomValue) {
 }
 
 export function updateArcReactor(powerLevel) {
-  const reactor = document.querySelector('.reactor');
+  const reactor = document.querySelector('.reactor-core');
+  if (!reactor) return;
+
   const powerInt = parseInt(powerLevel);
+  const colorValue = parseInt(dom.colorSlider.value);
 
   reactor.classList.remove('power-max', 'power-high', 'power-medium', 'power-low', 'power-critical');
 
-  const { color, glowIntensity } = calculateReactorColor(powerInt);
+  // Get suit color and interpolate from white (0% power) to suit color (100% power)
+  const { color: suitColor } = calculateFrameColor(colorValue);
+  const { color, glowIntensity } = calculateReactorFromSuitColor(suitColor, powerInt);
 
   reactor.style.fill = color;
   reactor.style.filter = `drop-shadow(0 0 ${glowIntensity}px ${color})`;
@@ -95,37 +101,21 @@ export function updateArcReactor(powerLevel) {
   updateReactorTooltip(powerInt);
 }
 
-function calculateReactorColor(powerLevel) {
-  let r, g, b, glowIntensity;
+function calculateReactorFromSuitColor(suitColor, powerLevel) {
+  // Parse suit color RGB values
+  const match = suitColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  const [suitR, suitG, suitB] = match ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])] : [0, 255, 255];
 
-  if (powerLevel <= 25) {
-    const factor = powerLevel / 25;
-    r = Math.round(139 + 116 * factor);
-    g = Math.round(0 + 68 * factor);
-    b = 0;
-    glowIntensity = 3 + 5 * factor;
-  } else if (powerLevel <= 50) {
-    const factor = (powerLevel - 25) / 25;
-    r = 255;
-    g = Math.round(68 + 60 * factor);
-    b = 0;
-    glowIntensity = 8 + 4 * factor;
-  } else if (powerLevel <= 75) {
-    const factor = (powerLevel - 50) / 25;
-    r = 255;
-    g = Math.round(128 + 87 * factor);
-    b = Math.round(0 + 0 * factor);
-    glowIntensity = 12 + 6 * factor;
-  } else {
-    const factor = (powerLevel - 75) / 25;
-    r = 255;
-    g = Math.round(215 + 40 * factor);
-    b = Math.round(0 + 255 * factor);
-    glowIntensity = 18 + 12 * factor;
-  }
+  // Interpolate from white (0% power) to suit color (100% power)
+  const factor = powerLevel / 100;
+  const r = Math.round(255 - (255 - suitR) * factor);
+  const g = Math.round(255 - (255 - suitG) * factor);
+  const b = Math.round(255 - (255 - suitB) * factor);
 
-  const color = `rgb(${r}, ${g}, ${b})`;
-  return { color, glowIntensity };
+  // Glow: 3px at 0% to 30px at 100%, with exponential curve for more punch at high power
+  const glowIntensity = 3 + Math.pow(factor, 1.5) * 27;
+
+  return { color: `rgb(${r}, ${g}, ${b})`, glowIntensity };
 }
 
 export function updateSuitColor(colorValue) {
