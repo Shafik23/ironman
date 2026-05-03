@@ -1,8 +1,8 @@
 export const state = {
-  isMusicPlaying: false,
   isDiagnosticsRunning: false,
   isPartyMode: false,
   partyColorCycleInterval: null,
   partyStatusInterval: null,
-  isHudMode: false
+  isHudMode: false,
+  reactorTooltip: null
 };

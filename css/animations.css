@@ -8,72 +8,6 @@
     }
 }
 
-@keyframes reactor-pulse {
-    from {
-        fill: var(--accent-gold);
-        filter: drop-shadow(0 0 5px var(--accent-gold));
-    }
-    to {
-        fill: #ffff00;
-        filter: drop-shadow(0 0 15px #ffff00);
-    }
-}
-
-@keyframes reactor-pulse-max {
-    from {
-        fill: #ffff00;
-        filter: drop-shadow(0 0 15px #ffff00);
-    }
-    to {
-        fill: #ffffff;
-        filter: drop-shadow(0 0 25px #ffff00);
-    }
-}
-
-@keyframes reactor-pulse-high {
-    from {
-        fill: var(--accent-gold);
-        filter: drop-shadow(0 0 8px var(--accent-gold));
-    }
-    to {
-        fill: #ffff00;
-        filter: drop-shadow(0 0 18px var(--accent-gold));
-    }
-}
-
-@keyframes reactor-pulse-medium {
-    from {
-        fill: #ff8000;
-        filter: drop-shadow(0 0 5px #ff8000);
-    }
-    to {
-        fill: #ffa500;
-        filter: drop-shadow(0 0 12px #ff8000);
-    }
-}
-
-@keyframes reactor-pulse-low {
-    from {
-        fill: #ff4444;
-        filter: drop-shadow(0 0 3px #ff4444);
-    }
-    to {
-        fill: #ff6666;
-        filter: drop-shadow(0 0 8px #ff4444);
-    }
-}
-
-@keyframes reactor-pulse-critical {
-    from {
-        fill: #8b0000;
-        filter: drop-shadow(0 0 2px #8b0000);
-    }
-    to {
-        fill: #a52a2a;
-        filter: drop-shadow(0 0 5px #8b0000);
-    }
-}
-
 @keyframes reactor-pulse-dynamic {
     from {
         filter: drop-shadow(0 0 var(--reactor-glow) var(--reactor-color));
@@ -391,12 +325,11 @@
     animation: eye-party-flash 2s ease-in-out infinite;
 }
 
-.party-mode .eye-slit:nth-child(2) {
+.party-mode .eye-slit + .eye-slit {
     animation-delay: 0.2s;
 }
 
-.party-mode .schematic-part[data-part="helmet"] rect:nth-child(4),
-.party-mode .schematic-part[data-part="helmet"] rect:nth-child(5) {
+.party-mode .mouth-line {
     animation: mouth-party-glow 1.5s ease-in-out infinite;
 }
 
@@ -569,36 +502,6 @@
     100% {
         opacity: 0;
         transform: scale(0.6);
-    }
-}
-
-/* Angled water streak */
-.angled-water-streak {
-    position: absolute;
-    background: rgba(200, 230, 255, 0.7);
-    border-radius: 2px;
-    box-shadow: 
-        0 0 4px rgba(255, 255, 255, 0.4),
-        0 0 8px rgba(200, 230, 255, 0.3);
-    opacity: 0;
-}
-
-.angled-water-streak.active {
-    animation: angled-streak-appear 1.5s ease-out forwards;
-}
-
-@keyframes angled-streak-appear {
-    0% {
-        opacity: 0;
-    }
-    30% {
-        opacity: 1;
-    }
-    70% {
-        opacity: 0.8;
-    }
-    100% {
-        opacity: 0;
     }
 }
 

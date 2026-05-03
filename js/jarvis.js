@@ -1,4 +1,3 @@
-import { state } from './state.js';
 import { dom } from './dom.js';
 import { addTelemetryEntry } from './telemetry.js';
 
@@ -6,6 +5,7 @@ let synthesis = null;
 let recognition = null;
 let jarvisActive = false;
 let voiceEnabled = false;
+let listeningRestartTimeout = null;
 
 const jarvisPhrases = {
   greeting: [
@@ -89,13 +89,13 @@ export function initializeJarvis() {
     };
     recognition.onend = () => {
       if (jarvisActive) {
-        setTimeout(startListening, 500);
+        listeningRestartTimeout = setTimeout(startListening, 500);
       }
     };
   }
 }
 
-export function speak(text, priority = false) {
+function speak(text, priority = false) {
   if (!voiceEnabled || !jarvisActive) {
     return;
   }
@@ -137,7 +137,7 @@ export function speak(text, priority = false) {
   synthesis.speak(utterance);
 }
 
-export function getRandomPhrase(category) {
+function getRandomPhrase(category) {
   const phrases = jarvisPhrases[category];
   if (Array.isArray(phrases)) {
     return phrases[Math.floor(Math.random() * phrases.length)];
@@ -186,6 +186,10 @@ export function toggleJarvis() {
       startListening();
     }
   } else {
+    if (listeningRestartTimeout) {
+      clearTimeout(listeningRestartTimeout);
+      listeningRestartTimeout = null;
+    }
     synthesis?.cancel();
     recognition?.stop();
     addTelemetryEntry('J.A.R.V.I.S. voice assistant deactivated');

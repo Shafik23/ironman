@@ -73,37 +73,6 @@
     animation: reactor-center-pulse 1s ease-in-out infinite alternate;
 }
 
-/* Legacy reactor classes for JS power level integration */
-.reactor {
-    fill: var(--accent-gold);
-    animation: reactor-pulse 1.5s ease-in-out infinite alternate;
-}
-
-.reactor.power-max {
-    fill: #ffff00;
-    animation: reactor-pulse-max 1.5s ease-in-out infinite alternate;
-}
-
-.reactor.power-high {
-    fill: var(--accent-gold);
-    animation: reactor-pulse-high 1.5s ease-in-out infinite alternate;
-}
-
-.reactor.power-medium {
-    fill: #ff8000;
-    animation: reactor-pulse-medium 1.5s ease-in-out infinite alternate;
-}
-
-.reactor.power-low {
-    fill: #ff4444;
-    animation: reactor-pulse-low 1.5s ease-in-out infinite alternate;
-}
-
-.reactor.power-critical {
-    fill: #8b0000;
-    animation: reactor-pulse-critical 1.5s ease-in-out infinite alternate;
-}
-
 .repulsor {
     fill: var(--suit-cyan);
     animation: repulsor-glow 2s ease-in-out infinite alternate;

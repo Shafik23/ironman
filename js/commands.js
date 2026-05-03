@@ -4,6 +4,15 @@ import { updateProgressBars, updateArcReactor, updateSuitColor, updateSuitZoom }
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
+import { addTelemetryEntry } from './telemetry.js';
+
+let hoseAudio = null;
+function getHoseAudio() {
+  if (!hoseAudio) {
+    hoseAudio = new Audio('hose.mp3');
+  }
+  return hoseAudio;
+}
 
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
@@ -92,6 +101,11 @@ function performSystemInitialization() {
 }
 
 function executeRunDiagnostics() {
+  if (state.isDiagnosticsRunning) {
+    addTelemetryEntry('Diagnostics already running - scan request ignored');
+    return;
+  }
+
   state.isDiagnosticsRunning = true;
 
   events.emit('diagnostics:start');
@@ -148,17 +162,19 @@ function executeEmergencyShutdown() {
   events.emit('shutdown:start');
 
   if (state.isPartyMode) {
-    stopPartyMode();
-    events.emit('party:stopped', { reason: 'shutdown' });
+    stopPartyMode('shutdown');
   }
 
   try {
-    const hoseAudio = new Audio('hose.mp3');
-    hoseAudio.play().catch(() => {
-      /* ignore */
+    const audio = getHoseAudio();
+    audio.currentTime = 0;
+    audio.play().catch(err => {
+      console.warn('Emergency audio playback failed:', err);
+      addTelemetryEntry('Warning: Emergency audio unavailable');
     });
   } catch (e) {
-    // ignore audio issues
+    console.warn('Emergency audio initialization failed:', e);
+    addTelemetryEntry('Warning: Emergency audio unavailable');
   }
 
   triggerEmergencyShutdownEffect(dom);

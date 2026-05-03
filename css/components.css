@@ -125,16 +125,6 @@
     color: var(--bg-dark);
 }
 
-.component-status.warning {
-    background: var(--warning-orange);
-    color: var(--bg-dark);
-}
-
-.component-status.error {
-    background: var(--danger-red);
-    color: var(--text-primary);
-}
-
 .component-status.offline {
     background: var(--text-secondary);
     color: var(--bg-dark);

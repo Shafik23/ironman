@@ -1,5 +1,5 @@
 #!/bin/bash
-SCRIPT_DIR="$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_DIR="$SCRIPT_DIR/venv"
 
 # Create virtual environment if it doesn't exist
@@ -28,4 +28,4 @@ elif command -v open &> /dev/null; then
 fi
 
 # Start the live reload server (runs in foreground, handles Ctrl+C gracefully)
-python3 serve_live.py
+python3 "$SCRIPT_DIR/serve_live.py"

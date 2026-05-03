@@ -1,9 +1,21 @@
 import { dom } from './dom.js';
-import { tooltipContent } from './constants.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announcePowerLevel } from './jarvis.js';
 import { events } from './events.js';
 import { debounce } from './utils/timing.js';
+import { state } from './state.js';
+
+const COLOR_STOPS = [
+  { max: 14, from: [0, 255, 255], to: [0, 80, 255] },
+  { max: 28, from: [0, 80, 255], to: [128, 0, 255] },
+  { max: 42, from: [128, 0, 255], to: [255, 0, 255] },
+  { max: 57, from: [255, 0, 255], to: [255, 0, 0] },
+  { max: 71, from: [255, 0, 0], to: [255, 165, 0] },
+  { max: 85, from: [255, 165, 0], to: [255, 255, 0] },
+  { max: 100, from: [255, 255, 0], to: [0, 255, 128] }
+];
+
+const STATUS_BAR_COUNT = 4;
 
 export function setupConfigurationSliders() {
   const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
@@ -20,7 +32,7 @@ export function setupConfigurationSliders() {
   dom.colorSlider.addEventListener('input', e => {
     dom.colorValue.textContent = e.target.value + '%';
     updateSuitColor(e.target.value);
-    updateArcReactor(dom.powerSlider.value); // Sync reactor color with suit
+    updateArcReactor(dom.powerSlider.value);
     events.emit('color:changed', { value: parseInt(e.target.value) });
     addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
   });
@@ -45,8 +57,8 @@ export function updateProgressBars() {
 
   const values = [cpuLoad, memory, power, integrity];
 
-  if (progressBars.length >= 4 && statusTexts.length >= 4) {
-    for (let i = 0; i < 4; i++) {
+  if (progressBars.length >= STATUS_BAR_COUNT && statusTexts.length >= STATUS_BAR_COUNT) {
+    for (let i = 0; i < STATUS_BAR_COUNT; i++) {
       progressBars[i].style.width = values[i] + '%';
       statusTexts[i].textContent = Math.round(values[i]) + '%';
     }
@@ -78,15 +90,12 @@ export function updateSuitZoom(zoomValue) {
 }
 
 export function updateArcReactor(powerLevel) {
-  const reactor = document.querySelector('.reactor-core');
+  const reactor = dom.reactorCore;
   if (!reactor) return;
 
   const powerInt = parseInt(powerLevel);
   const colorValue = parseInt(dom.colorSlider.value);
 
-  reactor.classList.remove('power-max', 'power-high', 'power-medium', 'power-low', 'power-critical');
-
-  // Get suit color and interpolate from white (0% power) to suit color (100% power)
   const { color: suitColor } = calculateFrameColor(colorValue);
   const { color, glowIntensity } = calculateReactorFromSuitColor(suitColor, powerInt);
 
@@ -102,17 +111,14 @@ export function updateArcReactor(powerLevel) {
 }
 
 function calculateReactorFromSuitColor(suitColor, powerLevel) {
-  // Parse suit color RGB values
   const match = suitColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
   const [suitR, suitG, suitB] = match ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])] : [0, 255, 255];
 
-  // Interpolate from white (0% power) to suit color (100% power)
   const factor = powerLevel / 100;
   const r = Math.round(255 - (255 - suitR) * factor);
   const g = Math.round(255 - (255 - suitG) * factor);
   const b = Math.round(255 - (255 - suitB) * factor);
 
-  // Glow: 3px at 0% to 30px at 100%, with exponential curve for more punch at high power
   const glowIntensity = 3 + Math.pow(factor, 1.5) * 27;
 
   return { color: `rgb(${r}, ${g}, ${b})`, glowIntensity };
@@ -126,44 +132,21 @@ export function updateSuitColor(colorValue) {
   document.documentElement.style.setProperty('--suit-glow', `0 0 8px ${glowColor}`);
 }
 
-export function calculateFrameColor(colorValue) {
+function calculateFrameColor(colorValue) {
+  const normalizedColorValue = Math.max(0, Math.min(100, parseInt(colorValue)));
   let r, g, b;
+  let prevMax = 0;
 
-  if (colorValue <= 14) {
-    const factor = colorValue / 14;
-    r = 0;
-    g = Math.round(255 - 175 * factor);
-    b = 255;
-  } else if (colorValue <= 28) {
-    const factor = (colorValue - 14) / 14;
-    r = Math.round(0 + 128 * factor);
-    g = Math.round(80 - 80 * factor);
-    b = 255;
-  } else if (colorValue <= 42) {
-    const factor = (colorValue - 28) / 14;
-    r = Math.round(128 + 127 * factor);
-    g = 0;
-    b = 255;
-  } else if (colorValue <= 57) {
-    const factor = (colorValue - 42) / 15;
-    r = 255;
-    g = 0;
-    b = Math.round(255 - 255 * factor);
-  } else if (colorValue <= 71) {
-    const factor = (colorValue - 57) / 14;
-    r = 255;
-    g = Math.round(0 + 165 * factor);
-    b = 0;
-  } else if (colorValue <= 85) {
-    const factor = (colorValue - 71) / 14;
-    r = 255;
-    g = Math.round(165 + 90 * factor);
-    b = 0;
-  } else {
-    const factor = (colorValue - 85) / 15;
-    r = Math.round(255 - 255 * factor);
-    g = 255;
-    b = Math.round(0 + 128 * factor);
+  for (const stop of COLOR_STOPS) {
+    if (normalizedColorValue <= stop.max) {
+      const range = stop.max - prevMax;
+      const factor = (normalizedColorValue - prevMax) / range;
+      r = Math.round(stop.from[0] + (stop.to[0] - stop.from[0]) * factor);
+      g = Math.round(stop.from[1] + (stop.to[1] - stop.from[1]) * factor);
+      b = Math.round(stop.from[2] + (stop.to[2] - stop.from[2]) * factor);
+      break;
+    }
+    prevMax = stop.max;
   }
 
   const color = `rgb(${r}, ${g}, ${b})`;
@@ -182,7 +165,5 @@ function updateReactorTooltip(powerInt) {
   else if (powerInt >= 70) status = 'HIGH OUTPUT';
   else if (powerInt < 30) status = 'CRITICAL LOW';
 
-  tooltipContent[
-    'chest'
-  ] = `ARC REACTOR<br>• Power Output: ${powerOutput} TW<br>• Efficiency: ${efficiency}%<br>• Core Temperature: ${temperature}°C<br>• Status: ${status}`;
+  state.reactorTooltip = `ARC REACTOR<br>• Power Output: ${powerOutput} TW<br>• Efficiency: ${efficiency}%<br>• Core Temperature: ${temperature}°C<br>• Status: ${status}`;
 }

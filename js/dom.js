@@ -18,7 +18,7 @@ export const dom = {
   statusTexts: null,
   suitSchematic: null,
   schematicContainer: null,
-  // HUD Mode elements
+  reactorCore: null,
   hudToggle: null,
   hudOverlay: null,
   hudBackBtn: null,
@@ -55,7 +55,7 @@ export function initializeDOMReferences() {
   dom.statusTexts = document.querySelectorAll('.status-row span:last-child');
   dom.suitSchematic = document.querySelector('.suit-schematic');
   dom.schematicContainer = document.querySelector('.schematic-container');
-  // HUD Mode elements
+  dom.reactorCore = document.querySelector('.reactor-core');
   dom.hudToggle = document.getElementById('hudToggle');
   dom.hudOverlay = document.getElementById('hudOverlay');
   dom.hudBackBtn = document.getElementById('hudBackBtn');

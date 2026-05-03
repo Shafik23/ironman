@@ -5,6 +5,15 @@ import { updateSuitColor, updateProgressBars } from './config.js';
 import { jarvisAnnounce, jarvisPhrases } from './jarvis.js';
 import { events } from './events.js';
 
+window.addEventListener('beforeunload', () => {
+  if (state.partyColorCycleInterval) {
+    clearInterval(state.partyColorCycleInterval);
+  }
+  if (state.partyStatusInterval) {
+    clearInterval(state.partyStatusInterval);
+  }
+});
+
 export function setupMusicToggle() {
   dom.musicToggle.addEventListener('click', () => {
     if (state.isPartyMode) {
@@ -32,7 +41,6 @@ function startPartyMode() {
     .then(() => {
       dom.musicToggle.textContent = 'Party Mode: ON';
       dom.musicToggle.classList.add('active');
-      state.isMusicPlaying = true;
       state.isPartyMode = true;
 
       dom.suitSchematic.classList.add('dancing');
@@ -48,16 +56,14 @@ function startPartyMode() {
     .catch(error => {
       console.log('Audio autoplay prevented:', error);
       addTelemetryEntry('Audio source unavailable - check connection');
-      state.isMusicPlaying = false;
       state.isPartyMode = false;
     });
 }
 
-export function stopPartyMode() {
+export function stopPartyMode(reason) {
   dom.backgroundMusic.pause();
   dom.musicToggle.textContent = 'Party Mode: OFF';
   dom.musicToggle.classList.remove('active');
-  state.isMusicPlaying = false;
   state.isPartyMode = false;
 
   dom.suitSchematic.classList.remove('dancing');
@@ -66,7 +72,7 @@ export function stopPartyMode() {
   stopColorCycling();
   stopStatusFluctuations();
 
-  events.emit('party:stopped');
+  events.emit('party:stopped', { reason });
   addTelemetryEntry('Party mode disabled - Systems returning to normal');
   jarvisAnnounce(jarvisPhrases.partyMode.off);
 }
