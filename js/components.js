@@ -8,7 +8,9 @@ export function setupComponentSelection() {
   subscribeSuitModel(({ state: model, changes }) => {
     if (
       changes.includes('selectedModule') ||
+      changes.includes('activeModules') ||
       changes.includes('modules') ||
+      changes.includes('loadout') ||
       changes.includes('modes.diagnostics')
     ) {
       renderComponentsFromModel(model);
@@ -22,16 +24,15 @@ export function setupComponentSelection() {
       const componentName = item.querySelector('.component-name').textContent;
       const wasSelected = Boolean(getSuitModel().modules[componentType]?.selected);
       const isSelected = !wasSelected;
+      const model = setSuitComponentSelection(componentType, isSelected, { source: 'component-list' });
+      const summary = model.loadout;
+      const statusText = isSelected ? 'online' : 'offline';
 
-      setSuitComponentSelection(componentType, isSelected, { source: 'component-list' });
-
-      if (wasSelected) {
-        addTelemetryEntry(`${componentName} deselected`);
-        announceComponentChange(componentType, false);
-      } else {
-        addTelemetryEntry(`${componentName} selected for configuration`);
-        announceComponentChange(componentType, true);
+      addTelemetryEntry(`${componentName} ${statusText} - Loadout ${summary.activeCount}/${summary.totalModules}`);
+      if (summary.overLimit) {
+        addTelemetryEntry(`Warning: loadout arc draw ${summary.powerDraw}% exceeds stable budget`);
       }
+      announceComponentChange(componentType, isSelected);
     });
 
     item.addEventListener('mouseenter', () => {
@@ -75,4 +76,28 @@ function renderComponentsFromModel(model) {
     const moduleState = componentType ? model.modules[componentType] : null;
     part.classList.toggle('highlighted', Boolean(moduleState?.selected));
   });
+
+  updateLoadoutSummary(model.loadout);
+}
+
+function updateLoadoutSummary(summary) {
+  if (!summary) return;
+
+  if (dom.loadoutActiveCount) {
+    dom.loadoutActiveCount.textContent = `${summary.activeCount}/${summary.totalModules}`;
+  }
+
+  if (dom.loadoutPowerDraw) {
+    dom.loadoutPowerDraw.textContent = `${summary.powerDraw}%`;
+  }
+
+  if (dom.loadoutPowerFill) {
+    dom.loadoutPowerFill.style.width = `${summary.powerPercent}%`;
+    dom.loadoutPowerFill.classList.toggle('overdraw', summary.overLimit);
+  }
+
+  if (dom.loadoutStatus) {
+    dom.loadoutStatus.textContent = summary.overLimit ? 'ARC OVERDRAW' : 'STABLE';
+    dom.loadoutStatus.classList.toggle('overdraw', summary.overLimit);
+  }
 }

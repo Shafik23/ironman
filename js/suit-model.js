@@ -1,4 +1,4 @@
-import { componentMapping } from './constants.js';
+import { componentMapping, LOADOUT_POWER_LIMIT, modulePowerDraw } from './constants.js';
 import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 
@@ -14,15 +14,29 @@ function clampPercent(value) {
   return Math.max(PERCENT_MIN, Math.min(PERCENT_MAX, parsed));
 }
 
-function createModuleState(selectedModule = null) {
+function createModuleState(activeModules = []) {
+  const activeSet = new Set(activeModules);
   return MODULE_IDS.reduce((modules, moduleId) => {
-    const isSelected = moduleId === selectedModule;
+    const isSelected = activeSet.has(moduleId);
     modules[moduleId] = {
       selected: isSelected,
       online: isSelected
     };
     return modules;
   }, {});
+}
+
+function calculateLoadout(activeModules) {
+  const powerDraw = activeModules.reduce((total, moduleId) => total + (modulePowerDraw[moduleId] || 0), 0);
+
+  return {
+    activeCount: activeModules.length,
+    totalModules: MODULE_IDS.length,
+    powerDraw,
+    powerLimit: LOADOUT_POWER_LIMIT,
+    powerPercent: Math.min(powerDraw, LOADOUT_POWER_LIMIT),
+    overLimit: powerDraw > LOADOUT_POWER_LIMIT
+  };
 }
 
 function createDefaultSuitModel() {
@@ -34,7 +48,9 @@ function createDefaultSuitModel() {
     memoryLoad: 20,
     integrity: 100,
     selectedModule: null,
+    activeModules: [],
     modules: createModuleState(),
+    loadout: calculateLoadout([]),
     alerts: [],
     modes: {
       diagnostics: false,
@@ -53,6 +69,8 @@ function cloneModel(model) {
     modules: Object.fromEntries(
       Object.entries(model.modules).map(([moduleId, moduleState]) => [moduleId, { ...moduleState }])
     ),
+    activeModules: [...model.activeModules],
+    loadout: { ...model.loadout },
     alerts: [...model.alerts],
     modes: { ...model.modes }
   };
@@ -92,15 +110,21 @@ function commitSuitModel(nextModel, { source = 'suit-model', changes = [] } = {}
 }
 
 function normalizeSuitModel(model) {
-  const selectedModule = MODULE_IDS.includes(model.selectedModule) ? model.selectedModule : null;
-  const modules = MODULE_IDS.reduce((nextModules, moduleId) => {
-    const isSelected = moduleId === selectedModule;
-    nextModules[moduleId] = {
-      selected: isSelected,
-      online: Boolean(model.modules?.[moduleId]?.online) || isSelected
-    };
-    return nextModules;
-  }, {});
+  const activeSet = new Set(
+    Array.isArray(model.activeModules)
+      ? model.activeModules.filter(moduleId => MODULE_IDS.includes(moduleId))
+      : []
+  );
+
+  MODULE_IDS.forEach(moduleId => {
+    if (model.modules?.[moduleId]?.selected || model.modules?.[moduleId]?.online) {
+      activeSet.add(moduleId);
+    }
+  });
+
+  const activeModules = MODULE_IDS.filter(moduleId => activeSet.has(moduleId));
+  const selectedModule = activeModules.includes(model.selectedModule) ? model.selectedModule : activeModules[0] || null;
+  const modules = createModuleState(activeModules);
 
   return {
     power: clampPercent(model.power),
@@ -110,7 +134,9 @@ function normalizeSuitModel(model) {
     memoryLoad: clampPercent(model.memoryLoad),
     integrity: clampPercent(model.integrity),
     selectedModule,
+    activeModules,
     modules,
+    loadout: calculateLoadout(activeModules),
     alerts: Array.isArray(model.alerts) ? [...model.alerts] : [],
     modes: {
       diagnostics: Boolean(model.modes?.diagnostics),
@@ -195,19 +221,40 @@ export function setSuitComponentSelection(component, selected, { source = 'compo
     return getSuitModel();
   }
 
-  const nextSelectedModule = selected ? component : suitModel.selectedModule === component ? null : suitModel.selectedModule;
-  const nextModules = createModuleState(nextSelectedModule);
+  const activeSet = new Set(suitModel.activeModules);
+  if (selected) {
+    activeSet.add(component);
+  } else {
+    activeSet.delete(component);
+  }
+
+  const activeModules = MODULE_IDS.filter(moduleId => activeSet.has(moduleId));
+  const nextSelectedModule = selected
+    ? component
+    : suitModel.selectedModule === component
+      ? activeModules[0] || null
+      : suitModel.selectedModule;
+  const nextModules = createModuleState(activeModules);
 
   const state = commitSuitModel(
     {
       ...suitModel,
       selectedModule: nextSelectedModule,
+      activeModules,
       modules: nextModules
     },
-    { source, changes: ['selectedModule', 'modules'] }
+    { source, changes: ['selectedModule', 'activeModules', 'modules', 'loadout'] }
   );
 
-  events.emit(EventTypes.COMPONENT_SELECTION, { component, selected: Boolean(selected), source });
+  events.emit(EventTypes.COMPONENT_SELECTION, {
+    component,
+    selected: Boolean(selected),
+    activeModules: state.activeModules,
+    powerDraw: state.loadout.powerDraw,
+    powerLimit: state.loadout.powerLimit,
+    overLimit: state.loadout.overLimit,
+    source
+  });
   return state;
 }
 
@@ -225,7 +272,9 @@ export function resetSuitSystems({ source = 'initialize' } = {}) {
       'memoryLoad',
       'integrity',
       'selectedModule',
+      'activeModules',
       'modules',
+      'loadout',
       'alerts',
       'modes.diagnostics',
       'modes.party',

@@ -61,7 +61,7 @@ export function startTelemetryUpdates() {
     ),
     events.on(EventTypes.INITIALIZE_COLOR, () => addTelemetryEntry('Suit color reset to default')),
     events.on(EventTypes.INITIALIZE_ZOOM, ({ value }) => addTelemetryEntry(`Zoom calibration complete at ${value}%`)),
-    events.on(EventTypes.INITIALIZE_MODULES, () => addTelemetryEntry('All system modules deselected')),
+    events.on(EventTypes.INITIALIZE_MODULES, () => addTelemetryEntry('Module loadout returned to standby')),
     events.on(EventTypes.INITIALIZE_COMPLETE, () => addTelemetryEntry('All systems initialized successfully')),
 
     events.on(EventTypes.DIAGNOSTICS_START, () => {
