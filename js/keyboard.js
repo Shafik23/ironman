@@ -1,5 +1,6 @@
 import { dom, getCommandButton } from './dom.js';
 import { COMMANDS } from './constants.js';
+import { isSuitModeActive } from './suit-model.js';
 
 function shouldIgnoreShortcut(event) {
   if (event.altKey || event.ctrlKey || event.metaKey) {
@@ -17,6 +18,10 @@ function shouldIgnoreShortcut(event) {
 export function setupKeyboardShortcuts() {
   document.addEventListener('keydown', e => {
     if (shouldIgnoreShortcut(e)) {
+      return;
+    }
+
+    if (isSuitModeActive('hud') && !['Escape', 'h', 'H'].includes(e.key)) {
       return;
     }
 
