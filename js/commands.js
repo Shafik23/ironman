@@ -5,6 +5,7 @@ import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { resetModuleLoadout, syncModuleLoadout } from './components.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -96,8 +97,7 @@ function performSystemInitialization() {
     statusTexts[3].textContent = '100%';
   }
 
-  dom.componentItems.forEach(comp => comp.classList.remove('selected'));
-  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+  resetModuleLoadout({ emitEvents: true });
 }
 
 function executeRunDiagnostics() {
@@ -151,6 +151,7 @@ function executeRunDiagnostics() {
       status.element.textContent = status.text;
       status.element.className = status.className;
     });
+    syncModuleLoadout();
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 

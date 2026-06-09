@@ -7,6 +7,17 @@ export const componentMapping = {
   thrusters: 'thrusters'
 };
 
+export const modulePowerDraw = {
+  helmet: 8,
+  chest: 22,
+  arms: 18,
+  legs: 20,
+  repulsors: 24,
+  thrusters: 28
+};
+
+export const LOADOUT_POWER_LIMIT = 100;
+
 export const tooltipContent = {
   helmet: 'HELMET SYSTEMS<br>• HUD Display<br>• Life Support<br>• Communications<br>• Targeting System',
   chest:

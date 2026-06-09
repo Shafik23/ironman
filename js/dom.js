@@ -19,6 +19,10 @@ export const dom = {
   suitSchematic: null,
   schematicContainer: null,
   reactorCore: null,
+  loadoutActiveCount: null,
+  loadoutPowerDraw: null,
+  loadoutPowerFill: null,
+  loadoutStatus: null,
   hudToggle: null,
   hudOverlay: null,
   hudBackBtn: null,
@@ -56,6 +60,10 @@ export function initializeDOMReferences() {
   dom.suitSchematic = document.querySelector('.suit-schematic');
   dom.schematicContainer = document.querySelector('.schematic-container');
   dom.reactorCore = document.querySelector('.reactor-core');
+  dom.loadoutActiveCount = document.getElementById('loadoutActiveCount');
+  dom.loadoutPowerDraw = document.getElementById('loadoutPowerDraw');
+  dom.loadoutPowerFill = document.getElementById('loadoutPowerFill');
+  dom.loadoutStatus = document.getElementById('loadoutStatus');
   dom.hudToggle = document.getElementById('hudToggle');
   dom.hudOverlay = document.getElementById('hudOverlay');
   dom.hudBackBtn = document.getElementById('hudBackBtn');

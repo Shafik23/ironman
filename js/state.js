@@ -4,5 +4,6 @@ export const state = {
   partyColorCycleInterval: null,
   partyStatusInterval: null,
   isHudMode: false,
-  reactorTooltip: null
+  reactorTooltip: null,
+  activeModules: new Set()
 };
