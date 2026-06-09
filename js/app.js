@@ -1,13 +1,14 @@
 import { dom, initializeDOMReferences } from './dom.js';
 import { setupComponentSelection } from './components.js';
 import { setupSchematicInteraction, hideTooltip } from './schematic.js';
-import { setupConfigurationSliders, updateSuitZoom } from './config.js';
+import { setupConfigurationSliders, updateArcReactor, updateProgressBars, updateSuitZoom } from './config.js';
 import { setupCommandButtons, executeInitializeSystemsQuiet } from './commands.js';
 import { setupMusicToggle } from './party.js';
 import { startTelemetryUpdates, addTelemetryEntry } from './telemetry.js';
 import { setupKeyboardShortcuts } from './keyboard.js';
 import { initializeJarvis, toggleJarvis } from './jarvis.js';
 import { setupHudMode } from './hud.js';
+import { startSuitSystems } from './systems.js';
 
 function initializeApp() {
   initializeDOMReferences();
@@ -31,6 +32,10 @@ function initializeApp() {
   setupHudMode();
 
   executeInitializeSystemsQuiet();
+  startSuitSystems(stats => {
+    updateProgressBars();
+    updateArcReactor(stats.effectivePower);
+  });
 }
 
 function setupJarvisToggle() {

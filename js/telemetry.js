@@ -63,6 +63,19 @@ export function startTelemetryUpdates() {
     events.on('system:initialize:modules', () => addTelemetryEntry('All system modules deselected')),
     events.on('system:initialize:complete', () => addTelemetryEntry('All systems initialized successfully')),
 
+    events.on('systems:warnings:changed', ({ warnings }) => {
+      if (warnings.length > 0) {
+        addTelemetryEntry(`Warning state updated: ${warnings.join(' / ')}`);
+      } else {
+        addTelemetryEntry('Warning state cleared - coupled systems nominal');
+      }
+    }),
+    events.on('systems:integrity:damaged', ({ integrity, coreTemperature }) => {
+      addTelemetryEntry(
+        `Warning: integrity reduced to ${Math.round(integrity)}% at ${Math.round(coreTemperature)}C core temperature`
+      );
+    }),
+
     events.on('diagnostics:start', () => {
       addTelemetryEntry('Comprehensive diagnostics initiated');
       addTelemetryEntry('Scanning all system components...');

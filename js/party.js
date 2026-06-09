@@ -96,27 +96,9 @@ function stopColorCycling() {
 }
 
 function startStatusFluctuations() {
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  const originalValues = [];
-  for (let i = 0; i < 4; i++) {
-    originalValues.push({
-      width: progressBars[i].style.width,
-      text: statusTexts[i].textContent
-    });
-  }
-
   state.partyStatusInterval = setInterval(() => {
     if (!state.isDiagnosticsRunning) {
-      for (let i = 0; i < 4; i++) {
-        const baseValue = parseInt(originalValues[i].text);
-        const variation = (Math.random() - 0.5) * 30;
-        const newValue = Math.max(10, Math.min(100, baseValue + variation));
-
-        progressBars[i].style.width = newValue + '%';
-        statusTexts[i].textContent = Math.round(newValue) + '%';
-      }
+      updateProgressBars({ jitter: true });
     }
   }, 200);
 }

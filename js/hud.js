@@ -6,6 +6,7 @@ import { state } from './state.js';
 import { events } from './events.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
+import { getSuitSystemStats } from './systems.js';
 import {
   initializeHudElements,
   startHudSimulation,
@@ -30,9 +31,15 @@ export function setupHudMode() {
   }
 
   // Subscribe to power changes to sync HUD gauge
-  events.on('power:changed', ({ value }) => {
+  events.on('power:changed', () => {
     if (state.isHudMode) {
-      updateHudPower(value);
+      updateHudPower(getSuitSystemStats().effectivePower);
+    }
+  });
+
+  events.on('systems:tick', ({ stats }) => {
+    if (state.isHudMode) {
+      updateHudPower(stats.effectivePower);
     }
   });
 
@@ -59,9 +66,7 @@ export function setupHudMode() {
 
   // Sync power on HUD activation (get current slider value)
   events.on('hud:activated', () => {
-    if (dom.powerSlider) {
-      updateHudPower(dom.powerSlider.value);
-    }
+    updateHudPower(getSuitSystemStats().effectivePower);
   });
 }
 

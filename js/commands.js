@@ -5,6 +5,7 @@ import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { coolSuitSystems, resetSuitSystems, setSuitPowerTarget } from './systems.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -77,24 +78,9 @@ function performSystemInitialization() {
 
   dom.powerSlider.value = 50;
   dom.powerValue.textContent = '50%';
+  resetSuitSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
+  updateProgressBars();
   updateArcReactor(50);
-
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  if (progressBars.length >= 4 && statusTexts.length >= 4) {
-    progressBars[0].style.width = '20%';
-    statusTexts[0].textContent = '20%';
-
-    progressBars[1].style.width = '20%';
-    statusTexts[1].textContent = '20%';
-
-    progressBars[2].style.width = '50%';
-    statusTexts[2].textContent = '50%';
-
-    progressBars[3].style.width = '100%';
-    statusTexts[3].textContent = '100%';
-  }
 
   dom.componentItems.forEach(comp => comp.classList.remove('selected'));
   dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
@@ -110,14 +96,6 @@ function executeRunDiagnostics() {
 
   events.emit('diagnostics:start');
 
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  const originalCpuWidth = progressBars[0].style.width;
-  const originalMemoryWidth = progressBars[1].style.width;
-  const originalCpuText = statusTexts[0].textContent;
-  const originalMemoryText = statusTexts[1].textContent;
-
   const originalStatuses = [];
   dom.componentItems.forEach(item => {
     const statusElement = item.querySelector('.component-status');
@@ -130,22 +108,13 @@ function executeRunDiagnostics() {
     statusElement.className = 'component-status diag';
   });
 
-  progressBars[0].style.width = '100%';
-  progressBars[1].style.width = '100%';
-  statusTexts[0].textContent = '100%';
-  statusTexts[1].textContent = '100%';
-
   dom.suitSchematic.classList.add('diagnostic-scan');
+  updateProgressBars();
 
   events.emit('diagnostics:boost');
 
   setTimeout(() => {
     state.isDiagnosticsRunning = false;
-
-    progressBars[0].style.width = originalCpuWidth;
-    progressBars[1].style.width = originalMemoryWidth;
-    statusTexts[0].textContent = originalCpuText;
-    statusTexts[1].textContent = originalMemoryText;
 
     originalStatuses.forEach(status => {
       status.element.textContent = status.text;
@@ -153,6 +122,7 @@ function executeRunDiagnostics() {
     });
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
+    updateProgressBars();
 
     events.emit('diagnostics:complete');
   }, 15000);
@@ -182,6 +152,8 @@ function executeEmergencyShutdown() {
   setTimeout(() => {
     dom.powerSlider.value = 0;
     dom.powerValue.textContent = '0%';
+    setSuitPowerTarget(0);
+    coolSuitSystems(28);
     updateProgressBars();
     updateArcReactor(0);
 
