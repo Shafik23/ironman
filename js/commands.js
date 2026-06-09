@@ -26,6 +26,8 @@ function getHoseAudio() {
 
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
+    if (!button.dataset.command) return;
+
     button.addEventListener('click', e => {
       const command = e.currentTarget.dataset.command;
 

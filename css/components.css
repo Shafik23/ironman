@@ -309,6 +309,11 @@
     color: var(--text-primary);
 }
 
+.command-btn.mission {
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+}
+
 .command-btn.danger {
     background: var(--danger-red);
     color: var(--text-primary);
@@ -325,6 +330,10 @@
 
 .command-btn.secondary:hover {
     box-shadow: 0 5px 15px var(--secondary-blue);
+}
+
+.command-btn.mission:hover {
+    box-shadow: 0 5px 15px var(--accent-gold);
 }
 
 .command-btn.danger:hover {

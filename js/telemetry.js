@@ -117,6 +117,22 @@ export function startTelemetryUpdates() {
       addTelemetryEntry('Power output reduced to minimum safe levels');
       addTelemetryEntry('Non-critical systems powered down');
       addTelemetryEntry('Emergency shutdown complete - Manual restart required');
+    }),
+
+    events.on(EventTypes.MISSION_START, ({ totalThreats, duration }) => {
+      addTelemetryEntry(`HUD mission started - Drone intercept: ${totalThreats} threats / ${duration}s`);
+      addTelemetryEntry('Radar control transferred to combat targeting');
+    }),
+    events.on(EventTypes.MISSION_THREAT_NEUTRALIZED, ({ neutralized, totalThreats }) => {
+      addTelemetryEntry(`Drone threat neutralized (${neutralized}/${totalThreats})`);
+    }),
+    events.on(EventTypes.MISSION_SUCCESS, () => {
+      addTelemetryEntry('HUD mission complete - Airspace secured');
+      addTelemetryEntry('Radar returned to patrol sweep');
+    }),
+    events.on(EventTypes.MISSION_FAILURE, ({ reason }) => {
+      addTelemetryEntry(`HUD mission failed - ${reason}`);
+      addTelemetryEntry('Combat targeting disengaged');
     })
   ];
 }

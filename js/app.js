@@ -9,6 +9,7 @@ import { setupKeyboardShortcuts } from './keyboard.js';
 import { initializeJarvis, toggleJarvis } from './jarvis.js';
 import { setupHudMode } from './hud.js';
 import { startSuitSystems } from './systems.js';
+import { setupMissionLoop } from './mission.js';
 
 function initializeApp() {
   initializeDOMReferences();
@@ -29,6 +30,7 @@ function initializeApp() {
 
   // Initialize HUD Mode
   setupHudMode();
+  setupMissionLoop();
 
   executeInitializeSystemsQuiet();
   startSuitSystems(stats => {

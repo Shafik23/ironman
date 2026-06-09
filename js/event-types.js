@@ -42,5 +42,10 @@ export const EventTypes = Object.freeze({
 
   SYSTEMS_TICK: 'systems:tick',
   SYSTEMS_WARNINGS_CHANGED: 'systems:warnings:changed',
-  SYSTEMS_INTEGRITY_DAMAGED: 'systems:integrity:damaged'
+  SYSTEMS_INTEGRITY_DAMAGED: 'systems:integrity:damaged',
+
+  MISSION_START: 'mission:start',
+  MISSION_THREAT_NEUTRALIZED: 'mission:threat:neutralized',
+  MISSION_SUCCESS: 'mission:success',
+  MISSION_FAILURE: 'mission:failure'
 });

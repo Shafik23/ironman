@@ -422,6 +422,7 @@
                     <div class="panel-header">COMMANDS</div>
                     <button class="command-btn primary" data-command="initialize">INITIALIZE SYSTEMS</button>
                     <button class="command-btn secondary" data-command="diagnostics">RUN DIAGNOSTICS</button>
+                    <button class="command-btn mission" id="missionStartBtn">START HUD MISSION</button>
                     <button class="command-btn danger" data-command="shutdown">EMERGENCY SHUTDOWN</button>
                 </div>
 
@@ -532,6 +533,30 @@
                 <div class="target-lock-indicator hidden" id="targetLock">
                     <span>TARGET LOCKED</span>
                 </div>
+            </div>
+
+            <!-- Mission Control -->
+            <div class="hud-mission-panel" id="hudMissionPanel">
+                <div class="mission-kicker">MISSION</div>
+                <div class="mission-title">DRONE INTERCEPT</div>
+                <div class="mission-readouts">
+                    <div class="mission-readout">
+                        <span>STATE</span>
+                        <strong id="hudMissionState">STANDBY</strong>
+                    </div>
+                    <div class="mission-readout">
+                        <span>TIMER</span>
+                        <strong id="hudMissionTimer">00:45</strong>
+                    </div>
+                    <div class="mission-readout">
+                        <span>THREATS</span>
+                        <strong id="hudMissionCount">0/0</strong>
+                    </div>
+                </div>
+                <div class="mission-progress-track">
+                    <div class="mission-progress-fill" id="hudMissionProgress"></div>
+                </div>
+                <button class="hud-mission-action" id="hudMissionAction">ENGAGE</button>
             </div>
 
             <!-- Left Side: Power Gauges -->
