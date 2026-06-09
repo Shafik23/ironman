@@ -1,8 +1,10 @@
 import { dom } from './dom.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { COMMANDS, SUIT_ZOOM } from './constants.js';
 import {
   getSuitModel,
   isSuitModeActive,
@@ -23,42 +25,48 @@ function getHoseAudio() {
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
     button.addEventListener('click', e => {
-      const buttonText = e.target.textContent;
+      const command = e.currentTarget.dataset.command;
 
-      e.target.style.transform = 'scale(0.95)';
+      e.currentTarget.style.transform = 'scale(0.95)';
       setTimeout(() => {
-        e.target.style.transform = '';
+        e.currentTarget.style.transform = '';
       }, 150);
 
-      switch (buttonText) {
-        case 'INITIALIZE SYSTEMS':
-          executeInitializeSystems();
-          break;
-        case 'RUN DIAGNOSTICS':
-          executeRunDiagnostics();
-          break;
-        case 'EMERGENCY SHUTDOWN':
-          executeEmergencyShutdown();
-          break;
-      }
+      executeCommand(command);
     });
   });
 }
 
+export function executeCommand(command) {
+  switch (command) {
+    case COMMANDS.INITIALIZE:
+      executeInitializeSystems();
+      break;
+    case COMMANDS.DIAGNOSTICS:
+      executeRunDiagnostics();
+      break;
+    case COMMANDS.SHUTDOWN:
+      executeEmergencyShutdown();
+      break;
+    default:
+      console.warn(`Unknown suit command: ${command}`);
+  }
+}
+
 export function executeInitializeSystems() {
-  events.emit('system:initialize:start');
+  events.emit(EventTypes.INITIALIZE_START);
 
   performSystemInitialization();
 
   setTimeout(() => {
-    events.emit('system:initialize:power', { value: 50 });
-    events.emit('system:initialize:cpu', { value: 20 });
-    events.emit('system:initialize:memory', { value: 20 });
-    events.emit('system:initialize:integrity', { value: 100 });
-    events.emit('system:initialize:color');
-    events.emit('system:initialize:zoom', { value: 100 });
-    events.emit('system:initialize:modules');
-    events.emit('system:initialize:complete');
+    events.emit(EventTypes.INITIALIZE_POWER, { value: 50 });
+    events.emit(EventTypes.INITIALIZE_CPU, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_MEMORY, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_INTEGRITY, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_COLOR);
+    events.emit(EventTypes.INITIALIZE_ZOOM, { value: SUIT_ZOOM.DEFAULT });
+    events.emit(EventTypes.INITIALIZE_MODULES);
+    events.emit(EventTypes.INITIALIZE_COMPLETE);
   }, 2000);
 }
 
@@ -72,7 +80,6 @@ function performSystemInitialization() {
   }
 
   dom.backgroundMusic.currentTime = 0;
-
   resetSuitSystems({ source: 'initialize' });
 }
 
@@ -84,7 +91,7 @@ function executeRunDiagnostics() {
 
   const originalModel = getSuitModel();
   setSuitMode('diagnostics', true, { source: 'diagnostics' });
-  events.emit('diagnostics:start');
+  events.emit(EventTypes.DIAGNOSTICS_START);
 
   dom.componentItems.forEach(item => {
     const statusElement = item.querySelector('.component-status');
@@ -102,7 +109,7 @@ function executeRunDiagnostics() {
 
   dom.suitSchematic.classList.add('diagnostic-scan');
 
-  events.emit('diagnostics:boost');
+  events.emit(EventTypes.DIAGNOSTICS_BOOST);
 
   setTimeout(() => {
     setSuitStatusLoads(
@@ -118,13 +125,13 @@ function executeRunDiagnostics() {
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
-    events.emit('diagnostics:complete');
+    events.emit(EventTypes.DIAGNOSTICS_COMPLETE);
   }, 15000);
 }
 
 function executeEmergencyShutdown() {
   setSuitMode('emergency', true, { source: 'shutdown' });
-  events.emit('shutdown:start');
+  events.emit(EventTypes.SHUTDOWN_START);
 
   if (isSuitModeActive('party')) {
     stopPartyMode('shutdown');
@@ -147,6 +154,6 @@ function executeEmergencyShutdown() {
   setTimeout(() => {
     setSuitPower(0, { source: 'shutdown' });
 
-    events.emit('shutdown:complete');
+    events.emit(EventTypes.SHUTDOWN_COMPLETE);
   }, 2000);
 }

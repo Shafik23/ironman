@@ -3,6 +3,7 @@
 
 import { dom } from './dom.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { getSuitModel, isSuitModeActive, setSuitMode, subscribeSuitModel } from './suit-model.js';
 import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
@@ -37,7 +38,7 @@ export function setupHudMode() {
   });
 
   // Auto-disable HUD on emergency shutdown
-  events.on('shutdown:start', () => {
+  events.on(EventTypes.SHUTDOWN_START, () => {
     if (isSuitModeActive('hud')) {
       deactivateHudMode();
       addTelemetryEntry('HUD Mode auto-disabled for emergency protocols');
@@ -45,7 +46,7 @@ export function setupHudMode() {
   });
 
   // Sync HUD activation from the canonical suit model.
-  events.on('hud:activated', () => {
+  events.on(EventTypes.HUD_ACTIVATED, () => {
     updateHudFromModel(getSuitModel());
   });
 }
@@ -83,7 +84,7 @@ function activateHudMode() {
   startHudSimulation();
 
   // Emit event for telemetry
-  events.emit('hud:activated');
+  events.emit(EventTypes.HUD_ACTIVATED);
   addTelemetryEntry('HUD Overlay Mode activated - First-person view engaged');
 }
 
@@ -115,7 +116,7 @@ function deactivateHudMode() {
   resetHudSimulation();
 
   // Emit event for telemetry
-  events.emit('hud:deactivated');
+  events.emit(EventTypes.HUD_DEACTIVATED);
   addTelemetryEntry('HUD Overlay Mode deactivated - Returning to schematic view');
 }
 

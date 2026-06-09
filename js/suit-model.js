@@ -1,5 +1,6 @@
 import { componentMapping } from './constants.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 
 const MODULE_IDS = Object.freeze(Object.keys(componentMapping));
 const PERCENT_MIN = 0;
@@ -86,7 +87,7 @@ function commitSuitModel(nextModel, { source = 'suit-model', changes = [] } = {}
     }
   });
 
-  events.emit('suit-model:changed', payload);
+  events.emit(EventTypes.SUIT_MODEL_CHANGED, payload);
   return payload.state;
 }
 
@@ -144,7 +145,7 @@ export function setSuitPower(value, { source = 'config', deriveStatus = true } =
     changes: deriveStatus ? ['power', 'cpuLoad', 'memoryLoad', 'integrity'] : ['power']
   });
 
-  events.emit('power:changed', { value: state.power, source });
+  events.emit(EventTypes.CONFIG_POWER_CHANGED, { value: state.power, source });
   return state;
 }
 
@@ -157,7 +158,7 @@ export function setSuitColor(value, { source = 'config' } = {}) {
     { source, changes: ['color'] }
   );
 
-  events.emit('color:changed', { value: state.color, source });
+  events.emit(EventTypes.CONFIG_COLOR_CHANGED, { value: state.color, source });
   return state;
 }
 
@@ -170,7 +171,7 @@ export function setSuitZoom(value, { source = 'config' } = {}) {
     { source, changes: ['zoom'] }
   );
 
-  events.emit('zoom:changed', { value: state.zoom, source });
+  events.emit(EventTypes.CONFIG_ZOOM_CHANGED, { value: state.zoom, source });
   return state;
 }
 
@@ -206,8 +207,7 @@ export function setSuitComponentSelection(component, selected, { source = 'compo
     { source, changes: ['selectedModule', 'modules'] }
   );
 
-  events.emit('component:selection', { component, selected: Boolean(selected), source });
-  events.emit(selected ? 'component:selected' : 'component:deselected', { component, source });
+  events.emit(EventTypes.COMPONENT_SELECTION, { component, selected: Boolean(selected), source });
   return state;
 }
 
@@ -233,9 +233,9 @@ export function resetSuitSystems({ source = 'initialize' } = {}) {
     ]
   });
 
-  events.emit('power:changed', { value: state.power, source });
-  events.emit('color:changed', { value: state.color, source });
-  events.emit('zoom:changed', { value: state.zoom, source });
+  events.emit(EventTypes.CONFIG_POWER_CHANGED, { value: state.power, source });
+  events.emit(EventTypes.CONFIG_COLOR_CHANGED, { value: state.color, source });
+  events.emit(EventTypes.CONFIG_ZOOM_CHANGED, { value: state.zoom, source });
   return state;
 }
 
