@@ -1,7 +1,7 @@
 // Flight Controls - Yaw motion and heading management
 // Handles arrow key inputs for turning left/right during HUD flight mode
 
-import { state } from '../state.js';
+import { isSuitModeActive } from '../suit-model.js';
 
 // Flight state
 const flightState = {
@@ -90,7 +90,7 @@ export function getHeading() {
  */
 function handleKeyDown(e) {
   // Only process in HUD mode
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -147,7 +147,7 @@ function updateYawInput() {
  * Main flight update loop - called at ~60fps
  */
 function updateFlight() {
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   const deltaTime = UPDATE_RATE / 1000; // Convert to seconds
 

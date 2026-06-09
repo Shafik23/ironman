@@ -71,6 +71,21 @@
                     </div>
                 </div>
 
+                <div class="loadout-summary">
+                    <div class="loadout-row">
+                        <span>ACTIVE MODULES</span>
+                        <span id="loadoutActiveCount">0/6</span>
+                    </div>
+                    <div class="loadout-row">
+                        <span>ARC DRAW</span>
+                        <span id="loadoutPowerDraw">0%</span>
+                    </div>
+                    <div class="loadout-meter">
+                        <div id="loadoutPowerFill" class="loadout-meter-fill" style="width: 0%;"></div>
+                    </div>
+                    <div id="loadoutStatus" class="loadout-status">STABLE</div>
+                </div>
+
                 <div class="system-status">
                     <div class="panel-header">SYSTEM STATUS</div>
                     <div class="status-grid">
@@ -405,9 +420,9 @@
             <div class="panel right-panel">
                 <div class="command-panel">
                     <div class="panel-header">COMMANDS</div>
-                    <button class="command-btn primary">INITIALIZE SYSTEMS</button>
-                    <button class="command-btn secondary">RUN DIAGNOSTICS</button>
-                    <button class="command-btn danger">EMERGENCY SHUTDOWN</button>
+                    <button class="command-btn primary" data-command="initialize">INITIALIZE SYSTEMS</button>
+                    <button class="command-btn secondary" data-command="diagnostics">RUN DIAGNOSTICS</button>
+                    <button class="command-btn danger" data-command="shutdown">EMERGENCY SHUTDOWN</button>
                 </div>
 
                 <div class="customization-panel">

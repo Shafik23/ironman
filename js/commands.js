@@ -1,11 +1,19 @@
 import { dom } from './dom.js';
-import { state } from './state.js';
-import { updateProgressBars, updateArcReactor, updateSuitColor, updateSuitZoom } from './config.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
-import { coolSuitSystems, resetSuitSystems, setSuitPowerTarget } from './systems.js';
+import { COMMANDS, SUIT_ZOOM } from './constants.js';
+import { coolSuitSystems, resetSuitSystems as resetThermalSystems, setSuitPowerTarget } from './systems.js';
+import {
+  getSuitModel,
+  isSuitModeActive,
+  resetSuitSystems,
+  setSuitMode,
+  setSuitPower,
+  setSuitStatusLoads
+} from './suit-model.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -18,42 +26,48 @@ function getHoseAudio() {
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
     button.addEventListener('click', e => {
-      const buttonText = e.target.textContent;
+      const command = e.currentTarget.dataset.command;
 
-      e.target.style.transform = 'scale(0.95)';
+      e.currentTarget.style.transform = 'scale(0.95)';
       setTimeout(() => {
-        e.target.style.transform = '';
+        e.currentTarget.style.transform = '';
       }, 150);
 
-      switch (buttonText) {
-        case 'INITIALIZE SYSTEMS':
-          executeInitializeSystems();
-          break;
-        case 'RUN DIAGNOSTICS':
-          executeRunDiagnostics();
-          break;
-        case 'EMERGENCY SHUTDOWN':
-          executeEmergencyShutdown();
-          break;
-      }
+      executeCommand(command);
     });
   });
 }
 
+export function executeCommand(command) {
+  switch (command) {
+    case COMMANDS.INITIALIZE:
+      executeInitializeSystems();
+      break;
+    case COMMANDS.DIAGNOSTICS:
+      executeRunDiagnostics();
+      break;
+    case COMMANDS.SHUTDOWN:
+      executeEmergencyShutdown();
+      break;
+    default:
+      console.warn(`Unknown suit command: ${command}`);
+  }
+}
+
 export function executeInitializeSystems() {
-  events.emit('system:initialize:start');
+  events.emit(EventTypes.INITIALIZE_START);
 
   performSystemInitialization();
 
   setTimeout(() => {
-    events.emit('system:initialize:power', { value: 50 });
-    events.emit('system:initialize:cpu', { value: 20 });
-    events.emit('system:initialize:memory', { value: 20 });
-    events.emit('system:initialize:integrity', { value: 100 });
-    events.emit('system:initialize:color');
-    events.emit('system:initialize:zoom', { value: 100 });
-    events.emit('system:initialize:modules');
-    events.emit('system:initialize:complete');
+    events.emit(EventTypes.INITIALIZE_POWER, { value: 50 });
+    events.emit(EventTypes.INITIALIZE_CPU, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_MEMORY, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_INTEGRITY, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_COLOR);
+    events.emit(EventTypes.INITIALIZE_ZOOM, { value: SUIT_ZOOM.DEFAULT });
+    events.emit(EventTypes.INITIALIZE_MODULES);
+    events.emit(EventTypes.INITIALIZE_COMPLETE);
   }, 2000);
 }
 
@@ -62,76 +76,65 @@ export function executeInitializeSystemsQuiet() {
 }
 
 function performSystemInitialization() {
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode();
   }
 
   dom.backgroundMusic.currentTime = 0;
-
-  dom.colorSlider.value = 0;
-  dom.colorValue.textContent = '0%';
-  updateSuitColor(0);
-
-  dom.zoomSlider.value = 100;
-  dom.zoomValue.textContent = '100%';
-  updateSuitZoom(100);
-
-  dom.powerSlider.value = 50;
-  dom.powerValue.textContent = '50%';
-  resetSuitSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
-  updateProgressBars();
-  updateArcReactor(50);
-
-  dom.componentItems.forEach(comp => comp.classList.remove('selected'));
-  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+  resetSuitSystems({ source: 'initialize' });
+  resetThermalSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
 }
 
 function executeRunDiagnostics() {
-  if (state.isDiagnosticsRunning) {
+  if (isSuitModeActive('diagnostics')) {
     addTelemetryEntry('Diagnostics already running - scan request ignored');
     return;
   }
 
-  state.isDiagnosticsRunning = true;
+  const originalModel = getSuitModel();
+  setSuitMode('diagnostics', true, { source: 'diagnostics' });
+  events.emit(EventTypes.DIAGNOSTICS_START);
 
-  events.emit('diagnostics:start');
-
-  const originalStatuses = [];
   dom.componentItems.forEach(item => {
     const statusElement = item.querySelector('.component-status');
-    originalStatuses.push({
-      element: statusElement,
-      text: statusElement.textContent,
-      className: statusElement.className
-    });
     statusElement.textContent = 'DIAG';
     statusElement.className = 'component-status diag';
   });
 
-  dom.suitSchematic.classList.add('diagnostic-scan');
-  updateProgressBars();
+  setSuitStatusLoads(
+    {
+      cpuLoad: 100,
+      memoryLoad: 100
+    },
+    { source: 'diagnostics' }
+  );
 
-  events.emit('diagnostics:boost');
+  dom.suitSchematic.classList.add('diagnostic-scan');
+
+  events.emit(EventTypes.DIAGNOSTICS_BOOST);
 
   setTimeout(() => {
-    state.isDiagnosticsRunning = false;
-
-    originalStatuses.forEach(status => {
-      status.element.textContent = status.text;
-      status.element.className = status.className;
-    });
+    setSuitStatusLoads(
+      {
+        cpuLoad: originalModel.cpuLoad,
+        memoryLoad: originalModel.memoryLoad,
+        integrity: originalModel.integrity
+      },
+      { source: 'diagnostics' }
+    );
+    setSuitMode('diagnostics', false, { source: 'diagnostics' });
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
-    updateProgressBars();
 
-    events.emit('diagnostics:complete');
+    events.emit(EventTypes.DIAGNOSTICS_COMPLETE);
   }, 15000);
 }
 
 function executeEmergencyShutdown() {
-  events.emit('shutdown:start');
+  setSuitMode('emergency', true, { source: 'shutdown' });
+  events.emit(EventTypes.SHUTDOWN_START);
 
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode('shutdown');
   }
 
@@ -148,15 +151,12 @@ function executeEmergencyShutdown() {
   }
 
   triggerEmergencyShutdownEffect(dom);
+  coolSuitSystems(24);
 
   setTimeout(() => {
-    dom.powerSlider.value = 0;
-    dom.powerValue.textContent = '0%';
     setSuitPowerTarget(0);
-    coolSuitSystems(28);
-    updateProgressBars();
-    updateArcReactor(0);
+    setSuitPower(0, { source: 'shutdown', deriveStatus: false });
 
-    events.emit('shutdown:complete');
+    events.emit(EventTypes.SHUTDOWN_COMPLETE);
   }, 2000);
 }

@@ -1,6 +1,8 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
+import { getSuitModel, isSuitModeActive, setSuitStatusLoads } from './suit-model.js';
 
 const TICK_MS = 1000;
 const DEFAULT_HEAT = 34;
@@ -92,8 +94,8 @@ export function tickSuitSystems(elapsedSeconds = 1, options = {}) {
   const systems = ensureSuitSystems();
   const targetPower = systems.targetPower;
   const activeComponents = getActiveComponentCount();
-  const diagnosticsLoad = state.isDiagnosticsRunning ? 28 : 0;
-  const partyLoad = state.isPartyMode ? 14 : 0;
+  const diagnosticsLoad = isSuitModeActive('diagnostics') ? 28 : 0;
+  const partyLoad = isSuitModeActive('party') ? 14 : 0;
   const heatStress = Math.max(0, systems.heat - 72);
   const thermalThrottle = systems.heat > 86 ? Math.min(35, (systems.heat - 86) * 1.45) : 0;
   const integrityThrottle = systems.integrity < 55 ? (55 - systems.integrity) * 0.35 : 0;
@@ -165,7 +167,7 @@ function applyIntegrityEffects(systems, activeComponents, elapsedSeconds) {
   const currentBucket = Math.floor(systems.integrity / 5) * 5;
   if (systems.integrity < previousIntegrity && currentBucket < previousBucket) {
     systems.lastIntegrityBucket = currentBucket;
-    events.emit('systems:integrity:damaged', {
+    events.emit(EventTypes.SYSTEMS_INTEGRITY_DAMAGED, {
       integrity: systems.integrity,
       heat: systems.heat,
       coreTemperature: calculateCoreTemperature(systems.heat)
@@ -210,7 +212,7 @@ function updateWarnings({ emitChanges }) {
 
   if (emitChanges && signature !== systems.lastWarningSignature) {
     systems.lastWarningSignature = signature;
-    events.emit('systems:warnings:changed', {
+    events.emit(EventTypes.SYSTEMS_WARNINGS_CHANGED, {
       warnings,
       stats: { ...systems, warnings: [...warnings] }
     });
@@ -221,7 +223,16 @@ function updateWarnings({ emitChanges }) {
 
 function notifyTick() {
   const systems = ensureSuitSystems();
-  events.emit('systems:tick', {
+  setSuitStatusLoads(
+    {
+      cpuLoad: systems.cpuLoad,
+      memoryLoad: systems.memoryUsage,
+      integrity: systems.integrity
+    },
+    { source: 'systems' }
+  );
+
+  events.emit(EventTypes.SYSTEMS_TICK, {
     stats: { ...systems, warnings: [...systems.warnings] }
   });
 
@@ -231,8 +242,7 @@ function notifyTick() {
 }
 
 function getActiveComponentCount() {
-  if (!dom.componentItems) return 0;
-  return [...dom.componentItems].filter(item => item.classList.contains('selected')).length;
+  return getSuitModel().activeModules.length;
 }
 
 function getSliderPower() {
