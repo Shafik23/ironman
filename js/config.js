@@ -1,9 +1,15 @@
 import { dom } from './dom.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announcePowerLevel } from './jarvis.js';
-import { events } from './events.js';
 import { debounce } from './utils/timing.js';
 import { state } from './state.js';
+import {
+  getSuitModel,
+  setSuitColor as setSuitModelColor,
+  setSuitPower,
+  setSuitZoom as setSuitModelZoom,
+  subscribeSuitModel
+} from './suit-model.js';
 
 const COLOR_STOPS = [
   { max: 14, from: [0, 255, 255], to: [0, 80, 255] },
@@ -18,44 +24,75 @@ const COLOR_STOPS = [
 const STATUS_BAR_COUNT = 4;
 
 export function setupConfigurationSliders() {
-  const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
+  const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value, 10)), 500);
+
+  subscribeSuitModel(({ state: model, changes }) => {
+    renderConfigurationFromModel(model, changes);
+  });
+  renderConfigurationFromModel(getSuitModel());
 
   dom.powerSlider.addEventListener('input', e => {
-    dom.powerValue.textContent = e.target.value + '%';
-    updateProgressBars();
-    updateArcReactor(e.target.value);
-    events.emit('power:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
-    debouncedAnnounce(e.target.value);
+    const model = setSuitPower(e.target.value, { source: 'power-slider' });
+    addTelemetryEntry(`Power output adjusted to ${model.power}%`);
+    debouncedAnnounce(model.power);
   });
 
   dom.colorSlider.addEventListener('input', e => {
-    dom.colorValue.textContent = e.target.value + '%';
-    updateSuitColor(e.target.value);
-    updateArcReactor(dom.powerSlider.value);
-    events.emit('color:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
+    const model = setSuitModelColor(e.target.value, { source: 'color-slider' });
+    addTelemetryEntry(`Suit color adjusted to ${model.color}%`);
   });
 
   dom.zoomSlider.addEventListener('input', e => {
-    dom.zoomValue.textContent = e.target.value + '%';
-    updateSuitZoom(e.target.value);
-    events.emit('zoom:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit schematic zoom adjusted to ${e.target.value}%`);
+    const model = setSuitModelZoom(e.target.value, { source: 'zoom-slider' });
+    addTelemetryEntry(`Suit schematic zoom adjusted to ${model.zoom}%`);
   });
 }
 
-export function updateProgressBars() {
-  const powerLevel = parseInt(dom.powerSlider.value);
+function renderConfigurationFromModel(model = getSuitModel(), changes = []) {
+  const changed = changes.length ? new Set(changes) : null;
+
+  syncSlider(dom.powerSlider, dom.powerValue, model.power);
+  syncSlider(dom.colorSlider, dom.colorValue, model.color);
+  syncSlider(dom.zoomSlider, dom.zoomValue, model.zoom);
+
+  if (!changed || changed.has('color')) {
+    updateSuitColor(model.color);
+  }
+
+  if (!changed || changed.has('power') || changed.has('color')) {
+    updateArcReactor(model.power, model.color);
+  }
+
+  if (!changed || changed.has('zoom')) {
+    updateSuitZoom(model.zoom);
+  }
+
+  if (
+    !changed ||
+    changed.has('power') ||
+    changed.has('cpuLoad') ||
+    changed.has('memoryLoad') ||
+    changed.has('integrity')
+  ) {
+    updateProgressBars(model);
+  }
+}
+
+function syncSlider(slider, valueElement, value) {
+  if (slider && parseInt(slider.value, 10) !== value) {
+    slider.value = value;
+  }
+
+  if (valueElement) {
+    valueElement.textContent = value + '%';
+  }
+}
+
+export function updateProgressBars(model = getSuitModel()) {
   const progressBars = dom.progressBars;
   const statusTexts = dom.statusTexts;
 
-  const cpuLoad = Math.min(powerLevel + 10, 100);
-  const memory = Math.min(powerLevel * 0.6, 100);
-  const power = powerLevel;
-  const integrity = Math.min(powerLevel + 5, 100);
-
-  const values = [cpuLoad, memory, power, integrity];
+  const values = [model.cpuLoad, model.memoryLoad, model.power, model.integrity];
 
   if (progressBars.length >= STATUS_BAR_COUNT && statusTexts.length >= STATUS_BAR_COUNT) {
     for (let i = 0; i < STATUS_BAR_COUNT; i++) {
@@ -89,14 +126,14 @@ export function updateSuitZoom(zoomValue) {
   dom.suitSchematic.setAttribute('viewBox', `${viewX} ${viewY} ${viewWidth} ${viewHeight}`);
 }
 
-export function updateArcReactor(powerLevel) {
+export function updateArcReactor(powerLevel = getSuitModel().power, colorValue = getSuitModel().color) {
   const reactor = dom.reactorCore;
   if (!reactor) return;
 
-  const powerInt = parseInt(powerLevel);
-  const colorValue = parseInt(dom.colorSlider.value);
+  const powerInt = parseInt(powerLevel, 10);
+  const colorInt = parseInt(colorValue, 10);
 
-  const { color: suitColor } = calculateFrameColor(colorValue);
+  const { color: suitColor } = calculateFrameColor(colorInt);
   const { color, glowIntensity } = calculateReactorFromSuitColor(suitColor, powerInt);
 
   reactor.style.fill = color;
@@ -112,7 +149,9 @@ export function updateArcReactor(powerLevel) {
 
 function calculateReactorFromSuitColor(suitColor, powerLevel) {
   const match = suitColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
-  const [suitR, suitG, suitB] = match ? [parseInt(match[1]), parseInt(match[2]), parseInt(match[3])] : [0, 255, 255];
+  const [suitR, suitG, suitB] = match
+    ? [parseInt(match[1], 10), parseInt(match[2], 10), parseInt(match[3], 10)]
+    : [0, 255, 255];
 
   const factor = powerLevel / 100;
   const r = Math.round(255 - (255 - suitR) * factor);
@@ -125,7 +164,7 @@ function calculateReactorFromSuitColor(suitColor, powerLevel) {
 }
 
 export function updateSuitColor(colorValue) {
-  const colorInt = parseInt(colorValue);
+  const colorInt = parseInt(colorValue, 10);
   const { color, glowColor } = calculateFrameColor(colorInt);
 
   document.documentElement.style.setProperty('--suit-cyan', color);
@@ -133,7 +172,7 @@ export function updateSuitColor(colorValue) {
 }
 
 function calculateFrameColor(colorValue) {
-  const normalizedColorValue = Math.max(0, Math.min(100, parseInt(colorValue)));
+  const normalizedColorValue = Math.max(0, Math.min(100, parseInt(colorValue, 10)));
   let r, g, b;
   let prevMax = 0;
 

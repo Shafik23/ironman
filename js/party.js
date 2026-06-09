@@ -1,9 +1,10 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
-import { updateSuitColor, updateProgressBars } from './config.js';
+import { updateProgressBars } from './config.js';
 import { jarvisAnnounce, jarvisPhrases } from './jarvis.js';
 import { events } from './events.js';
+import { isSuitModeActive, setSuitColor as setSuitModelColor, setSuitMode } from './suit-model.js';
 
 window.addEventListener('beforeunload', () => {
   if (state.partyColorCycleInterval) {
@@ -16,7 +17,7 @@ window.addEventListener('beforeunload', () => {
 
 export function setupMusicToggle() {
   dom.musicToggle.addEventListener('click', () => {
-    if (state.isPartyMode) {
+    if (isSuitModeActive('party')) {
       stopPartyMode();
     } else {
       startPartyMode();
@@ -24,7 +25,7 @@ export function setupMusicToggle() {
   });
 
   dom.backgroundMusic.addEventListener('ended', () => {
-    if (state.isPartyMode) {
+    if (isSuitModeActive('party')) {
       stopPartyMode();
     }
   });
@@ -41,7 +42,7 @@ function startPartyMode() {
     .then(() => {
       dom.musicToggle.textContent = 'Party Mode: ON';
       dom.musicToggle.classList.add('active');
-      state.isPartyMode = true;
+      setSuitMode('party', true, { source: 'party' });
 
       dom.suitSchematic.classList.add('dancing');
       dom.suitSchematic.classList.add('party-mode');
@@ -56,7 +57,7 @@ function startPartyMode() {
     .catch(error => {
       console.log('Audio autoplay prevented:', error);
       addTelemetryEntry('Audio source unavailable - check connection');
-      state.isPartyMode = false;
+      setSuitMode('party', false, { source: 'party' });
     });
 }
 
@@ -64,7 +65,7 @@ export function stopPartyMode(reason) {
   dom.backgroundMusic.pause();
   dom.musicToggle.textContent = 'Party Mode: OFF';
   dom.musicToggle.classList.remove('active');
-  state.isPartyMode = false;
+  setSuitMode('party', false, { source: 'party' });
 
   dom.suitSchematic.classList.remove('dancing');
   dom.suitSchematic.classList.remove('party-mode');
@@ -81,10 +82,7 @@ function startColorCycling() {
   let colorPosition = 0;
   state.partyColorCycleInterval = setInterval(() => {
     colorPosition = (colorPosition + 0.5) % 100;
-    updateSuitColor(colorPosition);
-
-    dom.colorSlider.value = Math.round(colorPosition);
-    dom.colorValue.textContent = Math.round(colorPosition) + '%';
+    setSuitModelColor(Math.round(colorPosition), { source: 'party' });
   }, 50);
 }
 
@@ -108,7 +106,7 @@ function startStatusFluctuations() {
   }
 
   state.partyStatusInterval = setInterval(() => {
-    if (!state.isDiagnosticsRunning) {
+    if (!isSuitModeActive('diagnostics')) {
       for (let i = 0; i < 4; i++) {
         const baseValue = parseInt(originalValues[i].text);
         const variation = (Math.random() - 0.5) * 30;

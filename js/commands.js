@@ -1,10 +1,16 @@
 import { dom } from './dom.js';
-import { state } from './state.js';
-import { updateProgressBars, updateArcReactor, updateSuitColor, updateSuitZoom } from './config.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import {
+  getSuitModel,
+  isSuitModeActive,
+  resetSuitSystems,
+  setSuitMode,
+  setSuitPower,
+  setSuitStatusLoads
+} from './suit-model.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -61,96 +67,54 @@ export function executeInitializeSystemsQuiet() {
 }
 
 function performSystemInitialization() {
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode();
   }
 
   dom.backgroundMusic.currentTime = 0;
 
-  dom.colorSlider.value = 0;
-  dom.colorValue.textContent = '0%';
-  updateSuitColor(0);
-
-  dom.zoomSlider.value = 100;
-  dom.zoomValue.textContent = '100%';
-  updateSuitZoom(100);
-
-  dom.powerSlider.value = 50;
-  dom.powerValue.textContent = '50%';
-  updateArcReactor(50);
-
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  if (progressBars.length >= 4 && statusTexts.length >= 4) {
-    progressBars[0].style.width = '20%';
-    statusTexts[0].textContent = '20%';
-
-    progressBars[1].style.width = '20%';
-    statusTexts[1].textContent = '20%';
-
-    progressBars[2].style.width = '50%';
-    statusTexts[2].textContent = '50%';
-
-    progressBars[3].style.width = '100%';
-    statusTexts[3].textContent = '100%';
-  }
-
-  dom.componentItems.forEach(comp => comp.classList.remove('selected'));
-  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+  resetSuitSystems({ source: 'initialize' });
 }
 
 function executeRunDiagnostics() {
-  if (state.isDiagnosticsRunning) {
+  if (isSuitModeActive('diagnostics')) {
     addTelemetryEntry('Diagnostics already running - scan request ignored');
     return;
   }
 
-  state.isDiagnosticsRunning = true;
-
+  const originalModel = getSuitModel();
+  setSuitMode('diagnostics', true, { source: 'diagnostics' });
   events.emit('diagnostics:start');
 
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  const originalCpuWidth = progressBars[0].style.width;
-  const originalMemoryWidth = progressBars[1].style.width;
-  const originalCpuText = statusTexts[0].textContent;
-  const originalMemoryText = statusTexts[1].textContent;
-
-  const originalStatuses = [];
   dom.componentItems.forEach(item => {
     const statusElement = item.querySelector('.component-status');
-    originalStatuses.push({
-      element: statusElement,
-      text: statusElement.textContent,
-      className: statusElement.className
-    });
     statusElement.textContent = 'DIAG';
     statusElement.className = 'component-status diag';
   });
 
-  progressBars[0].style.width = '100%';
-  progressBars[1].style.width = '100%';
-  statusTexts[0].textContent = '100%';
-  statusTexts[1].textContent = '100%';
+  setSuitStatusLoads(
+    {
+      cpuLoad: 100,
+      memoryLoad: 100
+    },
+    { source: 'diagnostics' }
+  );
 
   dom.suitSchematic.classList.add('diagnostic-scan');
 
   events.emit('diagnostics:boost');
 
   setTimeout(() => {
-    state.isDiagnosticsRunning = false;
-
-    progressBars[0].style.width = originalCpuWidth;
-    progressBars[1].style.width = originalMemoryWidth;
-    statusTexts[0].textContent = originalCpuText;
-    statusTexts[1].textContent = originalMemoryText;
-
-    originalStatuses.forEach(status => {
-      status.element.textContent = status.text;
-      status.element.className = status.className;
-    });
+    setSuitStatusLoads(
+      {
+        cpuLoad: originalModel.cpuLoad,
+        memoryLoad: originalModel.memoryLoad,
+        power: originalModel.power,
+        integrity: originalModel.integrity
+      },
+      { source: 'diagnostics' }
+    );
+    setSuitMode('diagnostics', false, { source: 'diagnostics' });
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
@@ -159,9 +123,10 @@ function executeRunDiagnostics() {
 }
 
 function executeEmergencyShutdown() {
+  setSuitMode('emergency', true, { source: 'shutdown' });
   events.emit('shutdown:start');
 
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode('shutdown');
   }
 
@@ -180,10 +145,7 @@ function executeEmergencyShutdown() {
   triggerEmergencyShutdownEffect(dom);
 
   setTimeout(() => {
-    dom.powerSlider.value = 0;
-    dom.powerValue.textContent = '0%';
-    updateProgressBars();
-    updateArcReactor(0);
+    setSuitPower(0, { source: 'shutdown' });
 
     events.emit('shutdown:complete');
   }, 2000);

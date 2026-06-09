@@ -1,60 +1,36 @@
 import { dom } from './dom.js';
 import { componentMapping } from './constants.js';
-import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
-import { events } from './events.js';
+import { getSuitModel, isSuitModeActive, setSuitComponentSelection, subscribeSuitModel } from './suit-model.js';
 
 export function setupComponentSelection() {
+  subscribeSuitModel(({ state: model, changes }) => {
+    if (
+      changes.includes('selectedModule') ||
+      changes.includes('modules') ||
+      changes.includes('modes.diagnostics')
+    ) {
+      renderComponentsFromModel(model);
+    }
+  });
+  renderComponentsFromModel(getSuitModel());
+
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
       const componentName = item.querySelector('.component-name').textContent;
+      const wasSelected = Boolean(getSuitModel().modules[componentType]?.selected);
+      const isSelected = !wasSelected;
 
-      const wasSelected = item.classList.contains('selected');
+      setSuitComponentSelection(componentType, isSelected, { source: 'component-list' });
 
       if (wasSelected) {
-        item.classList.remove('selected');
-        if (correspondingPart) {
-          correspondingPart.classList.remove('highlighted');
-        }
-
-        if (!state.isDiagnosticsRunning) {
-          const statusElement = item.querySelector('.component-status');
-          statusElement.textContent = 'OFFLINE';
-          statusElement.className = 'component-status offline';
-        }
-
         addTelemetryEntry(`${componentName} deselected`);
         announceComponentChange(componentType, false);
-        events.emit('component:selection', { component: componentType, selected: false });
       } else {
-        dom.componentItems.forEach(comp => {
-          comp.classList.remove('selected');
-          if (!state.isDiagnosticsRunning) {
-            const compStatus = comp.querySelector('.component-status');
-            compStatus.textContent = 'OFFLINE';
-            compStatus.className = 'component-status offline';
-          }
-        });
-        dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
-
-        item.classList.add('selected');
-
-        if (!state.isDiagnosticsRunning) {
-          const statusElement = item.querySelector('.component-status');
-          statusElement.textContent = 'ONLINE';
-          statusElement.className = 'component-status online';
-        }
-
-        if (correspondingPart) {
-          correspondingPart.classList.add('highlighted');
-        }
-
         addTelemetryEntry(`${componentName} selected for configuration`);
         announceComponentChange(componentType, true);
-        events.emit('component:selection', { component: componentType, selected: true });
       }
     });
 
@@ -73,5 +49,30 @@ export function setupComponentSelection() {
         correspondingPart.style.filter = '';
       }
     });
+  });
+}
+
+function renderComponentsFromModel(model) {
+  const diagnosticsRunning = isSuitModeActive('diagnostics');
+
+  dom.componentItems.forEach(item => {
+    const componentType = item.dataset.component;
+    const moduleState = model.modules[componentType];
+    const isSelected = Boolean(moduleState?.selected);
+    const isOnline = Boolean(moduleState?.online);
+
+    item.classList.toggle('selected', isSelected);
+
+    if (!diagnosticsRunning) {
+      const statusElement = item.querySelector('.component-status');
+      statusElement.textContent = isOnline ? 'ONLINE' : 'OFFLINE';
+      statusElement.className = `component-status ${isOnline ? 'online' : 'offline'}`;
+    }
+  });
+
+  dom.schematicParts.forEach(part => {
+    const componentType = Object.keys(componentMapping).find(key => componentMapping[key] === part.dataset.part);
+    const moduleState = componentType ? model.modules[componentType] : null;
+    part.classList.toggle('highlighted', Boolean(moduleState?.selected));
   });
 }
