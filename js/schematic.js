@@ -1,6 +1,7 @@
 import { dom } from './dom.js';
 import { componentMapping, tooltipContent } from './constants.js';
 import { state } from './state.js';
+import { getDiagnosticTooltip } from './diagnostics.js';
 
 export function setupSchematicInteraction() {
   dom.schematicParts.forEach(part => {
@@ -30,8 +31,9 @@ export function setupSchematicInteraction() {
 }
 
 function showTooltip(event, partType) {
-  const content =
+  const baseContent =
     partType === 'chest' && state.reactorTooltip ? state.reactorTooltip : tooltipContent[partType] || 'Unknown Component';
+  const content = baseContent + getDiagnosticTooltip(partType);
   dom.tooltip.innerHTML = content;
   dom.tooltip.classList.add('visible');
   updateTooltipPosition(event);

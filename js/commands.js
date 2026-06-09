@@ -5,6 +5,7 @@ import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { applyDiagnosticResults, clearDiagnosticFindings, runDiagnosticSweep, summarizeDiagnosticResults } from './diagnostics.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -65,6 +66,8 @@ function performSystemInitialization() {
     stopPartyMode();
   }
 
+  const clearedDiagnosticFindings = clearDiagnosticFindings({ resetStatuses: true });
+
   dom.backgroundMusic.currentTime = 0;
 
   dom.colorSlider.value = 0;
@@ -98,6 +101,10 @@ function performSystemInitialization() {
 
   dom.componentItems.forEach(comp => comp.classList.remove('selected'));
   dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+
+  if (clearedDiagnosticFindings) {
+    events.emit('diagnostics:reset', { reason: 'initialization recalibration' });
+  }
 }
 
 function executeRunDiagnostics() {
@@ -154,7 +161,12 @@ function executeRunDiagnostics() {
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
-    events.emit('diagnostics:complete');
+    const results = runDiagnosticSweep();
+    const summary = summarizeDiagnosticResults(results);
+
+    applyDiagnosticResults(results);
+    results.forEach(result => events.emit('diagnostics:module', result));
+    events.emit('diagnostics:complete', { results, summary });
   }, 15000);
 }
 

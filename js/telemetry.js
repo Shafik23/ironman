@@ -72,12 +72,20 @@ export function startTelemetryUpdates() {
       addTelemetryEntry('All system modules entered diagnostic mode');
       addTelemetryEntry('Deep system analysis in progress...');
     }),
-    events.on('diagnostics:complete', () => {
+    events.on('diagnostics:module', ({ module, severity, message }) => {
+      addTelemetryEntry(`${module}: ${severity.toUpperCase()} - ${message}`);
+    }),
+    events.on('diagnostics:complete', ({ summary }) => {
       addTelemetryEntry('Diagnostic scan complete');
       addTelemetryEntry('CPU and Memory restored to normal levels');
-      addTelemetryEntry('All system modules returned to normal status');
-      addTelemetryEntry('All systems nominal - No issues detected');
+      addTelemetryEntry(`Diagnostic matrix: ${summary.totalFindings} findings, highest severity ${summary.highestSeverity}`);
+      if (summary.totalFindings === 0) {
+        addTelemetryEntry('All systems nominal - No issues detected');
+      }
     }),
+    events.on('diagnostics:reset', ({ reason } = {}) =>
+      addTelemetryEntry(`Diagnostic findings cleared by ${reason || 'system recalibration'}`)
+    ),
 
     events.on('shutdown:start', () => {
       addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');

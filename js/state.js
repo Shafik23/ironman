@@ -4,5 +4,7 @@ export const state = {
   partyColorCycleInterval: null,
   partyStatusInterval: null,
   isHudMode: false,
-  reactorTooltip: null
+  reactorTooltip: null,
+  diagnosticFindings: {},
+  diagnosticScanCount: 0
 };

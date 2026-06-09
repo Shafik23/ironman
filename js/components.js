@@ -4,10 +4,15 @@ import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
 import { events } from './events.js';
+import { clearDiagnosticFindings } from './diagnostics.js';
 
 export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
+      if (clearDiagnosticFindings({ resetStatuses: true })) {
+        events.emit('diagnostics:reset', { reason: 'module reconfiguration' });
+      }
+
       const componentType = item.dataset.component;
       const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
       const componentName = item.querySelector('.component-name').textContent;
