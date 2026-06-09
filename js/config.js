@@ -4,6 +4,7 @@ import { announcePowerLevel } from './jarvis.js';
 import { events } from './events.js';
 import { debounce } from './utils/timing.js';
 import { state } from './state.js';
+import { SUIT_ZOOM } from './constants.js';
 
 const COLOR_STOPS = [
   { max: 14, from: [0, 255, 255], to: [0, 80, 255] },
@@ -19,6 +20,9 @@ const STATUS_BAR_COUNT = 4;
 
 export function setupConfigurationSliders() {
   const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
+
+  dom.zoomSlider.min = SUIT_ZOOM.MIN;
+  dom.zoomSlider.max = SUIT_ZOOM.MAX;
 
   dom.powerSlider.addEventListener('input', e => {
     dom.powerValue.textContent = e.target.value + '%';
@@ -66,19 +70,13 @@ export function updateProgressBars() {
 }
 
 export function updateSuitZoom(zoomValue) {
-  const suitBounds = {
-    left: 95,
-    right: 305,
-    top: 25,
-    bottom: 485
-  };
-
+  const suitBounds = SUIT_ZOOM.BOUNDS;
   const suitWidth = suitBounds.right - suitBounds.left;
   const suitHeight = suitBounds.bottom - suitBounds.top;
   const suitCenterX = (suitBounds.left + suitBounds.right) / 2;
   const suitCenterY = (suitBounds.top + suitBounds.bottom) / 2;
 
-  const zoomFactor = (zoomValue / 100) * 0.8;
+  const zoomFactor = (zoomValue / SUIT_ZOOM.DEFAULT) * SUIT_ZOOM.VIEWBOX_SCALE;
 
   const viewWidth = suitWidth / zoomFactor;
   const viewHeight = suitHeight / zoomFactor;
