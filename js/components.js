@@ -4,6 +4,7 @@ import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 
 export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
@@ -28,7 +29,7 @@ export function setupComponentSelection() {
 
         addTelemetryEntry(`${componentName} deselected`);
         announceComponentChange(componentType, false);
-        events.emit('component:selection', { component: componentType, selected: false });
+        events.emit(EventTypes.COMPONENT_SELECTION, { component: componentType, selected: false });
       } else {
         dom.componentItems.forEach(comp => {
           comp.classList.remove('selected');
@@ -54,7 +55,7 @@ export function setupComponentSelection() {
 
         addTelemetryEntry(`${componentName} selected for configuration`);
         announceComponentChange(componentType, true);
-        events.emit('component:selection', { component: componentType, selected: true });
+        events.emit(EventTypes.COMPONENT_SELECTION, { component: componentType, selected: true });
       }
     });
 
