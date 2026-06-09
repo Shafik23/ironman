@@ -32,7 +32,16 @@ export const dom = {
   hudHelmetStatus: null,
   hudChestStatus: null,
   hudArmsStatus: null,
-  hudLegsStatus: null
+  hudLegsStatus: null,
+  missionStartBtn: null,
+  hudMissionPanel: null,
+  hudMissionState: null,
+  hudMissionTimer: null,
+  hudMissionProgress: null,
+  hudMissionCount: null,
+  hudMissionAction: null,
+  radarThreats: null,
+  targetLock: null
 };
 
 export function initializeDOMReferences() {
@@ -70,4 +79,13 @@ export function initializeDOMReferences() {
   dom.hudChestStatus = document.getElementById('hudChestStatus');
   dom.hudArmsStatus = document.getElementById('hudArmsStatus');
   dom.hudLegsStatus = document.getElementById('hudLegsStatus');
+  dom.missionStartBtn = document.getElementById('missionStartBtn');
+  dom.hudMissionPanel = document.getElementById('hudMissionPanel');
+  dom.hudMissionState = document.getElementById('hudMissionState');
+  dom.hudMissionTimer = document.getElementById('hudMissionTimer');
+  dom.hudMissionProgress = document.getElementById('hudMissionProgress');
+  dom.hudMissionCount = document.getElementById('hudMissionCount');
+  dom.hudMissionAction = document.getElementById('hudMissionAction');
+  dom.radarThreats = document.getElementById('radarThreats');
+  dom.targetLock = document.getElementById('targetLock');
 }

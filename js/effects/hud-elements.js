@@ -214,6 +214,19 @@ function updateRadarThreats() {
   });
 }
 
+export function suspendRadarThreatSimulation() {
+  const radarThreatsGroup = document.getElementById('radarThreats');
+  radarThreats = [];
+
+  if (radarThreatsGroup) {
+    radarThreatsGroup.innerHTML = '';
+  }
+}
+
+export function resumeRadarThreatSimulation() {
+  createRadarThreats();
+}
+
 export function updateHudPower(value) {
   const percentage = parseInt(value, 10);
 
