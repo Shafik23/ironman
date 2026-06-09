@@ -4,6 +4,7 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
 import {
@@ -30,27 +31,21 @@ export function setupHudMode() {
   }
 
   // Subscribe to power changes to sync HUD gauge
-  events.on('power:changed', ({ value }) => {
+  events.on(EventTypes.CONFIG_POWER_CHANGED, ({ value }) => {
     if (state.isHudMode) {
       updateHudPower(value);
     }
   });
 
   // Subscribe to component selection for status updates
-  events.on('component:selected', ({ component }) => {
+  events.on(EventTypes.COMPONENT_SELECTION, ({ component, selected }) => {
     if (state.isHudMode) {
-      updateHudSystemStatus(component, true);
-    }
-  });
-
-  events.on('component:deselected', ({ component }) => {
-    if (state.isHudMode) {
-      updateHudSystemStatus(component, false);
+      updateHudSystemStatus(component, selected);
     }
   });
 
   // Auto-disable HUD on emergency shutdown
-  events.on('shutdown:start', () => {
+  events.on(EventTypes.SHUTDOWN_START, () => {
     if (state.isHudMode) {
       deactivateHudMode();
       addTelemetryEntry('HUD Mode auto-disabled for emergency protocols');
@@ -58,7 +53,7 @@ export function setupHudMode() {
   });
 
   // Sync power on HUD activation (get current slider value)
-  events.on('hud:activated', () => {
+  events.on(EventTypes.HUD_ACTIVATED, () => {
     if (dom.powerSlider) {
       updateHudPower(dom.powerSlider.value);
     }
@@ -98,7 +93,7 @@ function activateHudMode() {
   startHudSimulation();
 
   // Emit event for telemetry
-  events.emit('hud:activated');
+  events.emit(EventTypes.HUD_ACTIVATED);
   addTelemetryEntry('HUD Overlay Mode activated - First-person view engaged');
 }
 
@@ -130,7 +125,7 @@ function deactivateHudMode() {
   resetHudSimulation();
 
   // Emit event for telemetry
-  events.emit('hud:deactivated');
+  events.emit(EventTypes.HUD_DEACTIVATED);
   addTelemetryEntry('HUD Overlay Mode deactivated - Returning to schematic view');
 }
 

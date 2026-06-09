@@ -2,6 +2,7 @@ import { dom } from './dom.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announcePowerLevel } from './jarvis.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { debounce } from './utils/timing.js';
 import { state } from './state.js';
 
@@ -24,7 +25,7 @@ export function setupConfigurationSliders() {
     dom.powerValue.textContent = e.target.value + '%';
     updateProgressBars();
     updateArcReactor(e.target.value);
-    events.emit('power:changed', { value: parseInt(e.target.value) });
+    events.emit(EventTypes.CONFIG_POWER_CHANGED, { value: parseInt(e.target.value) });
     addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
     debouncedAnnounce(e.target.value);
   });
@@ -33,14 +34,14 @@ export function setupConfigurationSliders() {
     dom.colorValue.textContent = e.target.value + '%';
     updateSuitColor(e.target.value);
     updateArcReactor(dom.powerSlider.value);
-    events.emit('color:changed', { value: parseInt(e.target.value) });
+    events.emit(EventTypes.CONFIG_COLOR_CHANGED, { value: parseInt(e.target.value) });
     addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
   });
 
   dom.zoomSlider.addEventListener('input', e => {
     dom.zoomValue.textContent = e.target.value + '%';
     updateSuitZoom(e.target.value);
-    events.emit('zoom:changed', { value: parseInt(e.target.value) });
+    events.emit(EventTypes.CONFIG_ZOOM_CHANGED, { value: parseInt(e.target.value) });
     addTelemetryEntry(`Suit schematic zoom adjusted to ${e.target.value}%`);
   });
 }

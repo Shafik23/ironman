@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { updateProgressBars, updateArcReactor, updateSuitColor, updateSuitZoom } from './config.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
 
@@ -40,19 +41,19 @@ export function setupCommandButtons() {
 }
 
 export function executeInitializeSystems() {
-  events.emit('system:initialize:start');
+  events.emit(EventTypes.INITIALIZE_START);
 
   performSystemInitialization();
 
   setTimeout(() => {
-    events.emit('system:initialize:power', { value: 50 });
-    events.emit('system:initialize:cpu', { value: 20 });
-    events.emit('system:initialize:memory', { value: 20 });
-    events.emit('system:initialize:integrity', { value: 100 });
-    events.emit('system:initialize:color');
-    events.emit('system:initialize:zoom', { value: 100 });
-    events.emit('system:initialize:modules');
-    events.emit('system:initialize:complete');
+    events.emit(EventTypes.INITIALIZE_POWER, { value: 50 });
+    events.emit(EventTypes.INITIALIZE_CPU, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_MEMORY, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_INTEGRITY, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_COLOR);
+    events.emit(EventTypes.INITIALIZE_ZOOM, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_MODULES);
+    events.emit(EventTypes.INITIALIZE_COMPLETE);
   }, 2000);
 }
 
@@ -108,7 +109,7 @@ function executeRunDiagnostics() {
 
   state.isDiagnosticsRunning = true;
 
-  events.emit('diagnostics:start');
+  events.emit(EventTypes.DIAGNOSTICS_START);
 
   const progressBars = dom.progressBars;
   const statusTexts = dom.statusTexts;
@@ -137,7 +138,7 @@ function executeRunDiagnostics() {
 
   dom.suitSchematic.classList.add('diagnostic-scan');
 
-  events.emit('diagnostics:boost');
+  events.emit(EventTypes.DIAGNOSTICS_BOOST);
 
   setTimeout(() => {
     state.isDiagnosticsRunning = false;
@@ -154,12 +155,12 @@ function executeRunDiagnostics() {
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
-    events.emit('diagnostics:complete');
+    events.emit(EventTypes.DIAGNOSTICS_COMPLETE);
   }, 15000);
 }
 
 function executeEmergencyShutdown() {
-  events.emit('shutdown:start');
+  events.emit(EventTypes.SHUTDOWN_START);
 
   if (state.isPartyMode) {
     stopPartyMode('shutdown');
@@ -185,6 +186,6 @@ function executeEmergencyShutdown() {
     updateProgressBars();
     updateArcReactor(0);
 
-    events.emit('shutdown:complete');
+    events.emit(EventTypes.SHUTDOWN_COMPLETE);
   }, 2000);
 }

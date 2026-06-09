@@ -4,6 +4,7 @@ import { addTelemetryEntry } from './telemetry.js';
 import { updateSuitColor, updateProgressBars } from './config.js';
 import { jarvisAnnounce, jarvisPhrases } from './jarvis.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 
 window.addEventListener('beforeunload', () => {
   if (state.partyColorCycleInterval) {
@@ -49,7 +50,7 @@ function startPartyMode() {
       startColorCycling();
       startStatusFluctuations();
 
-      events.emit('party:started');
+      events.emit(EventTypes.PARTY_STARTED);
       addTelemetryEntry('🎉 PARTY MODE ACTIVATED - MAXIMUM OVERDRIVE! 🎉');
       jarvisAnnounce(jarvisPhrases.partyMode.on, true);
     })
@@ -72,7 +73,7 @@ export function stopPartyMode(reason) {
   stopColorCycling();
   stopStatusFluctuations();
 
-  events.emit('party:stopped', { reason });
+  events.emit(EventTypes.PARTY_STOPPED, { reason });
   addTelemetryEntry('Party mode disabled - Systems returning to normal');
   jarvisAnnounce(jarvisPhrases.partyMode.off);
 }
