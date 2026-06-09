@@ -1,5 +1,6 @@
 import { dom } from './dom.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { events } from './events.js';
 
 let synthesis = null;
 let recognition = null;
@@ -169,6 +170,7 @@ export function announcePowerLevel(level) {
 
 export function toggleJarvis() {
   jarvisActive = !jarvisActive;
+  events.emit('jarvis:changed', { enabled: jarvisActive });
 
   if (dom.jarvisToggle) {
     dom.jarvisToggle.textContent = `J.A.R.V.I.S.: ${jarvisActive ? 'ONLINE' : 'OFFLINE'}`;

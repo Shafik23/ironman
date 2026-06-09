@@ -8,6 +8,7 @@ import { startTelemetryUpdates, addTelemetryEntry } from './telemetry.js';
 import { setupKeyboardShortcuts } from './keyboard.js';
 import { initializeJarvis, toggleJarvis } from './jarvis.js';
 import { setupHudMode } from './hud.js';
+import { setupPersistence } from './persistence.js';
 
 function initializeApp() {
   initializeDOMReferences();
@@ -31,6 +32,7 @@ function initializeApp() {
   setupHudMode();
 
   executeInitializeSystemsQuiet();
+  setupPersistence();
 }
 
 function setupJarvisToggle() {

@@ -7,6 +7,13 @@ export const componentMapping = {
   thrusters: 'thrusters'
 };
 
+export const DEFAULT_OPERATIONAL_STATE = {
+  color: 0,
+  power: 50,
+  zoom: 100,
+  selectedComponent: null
+};
+
 export const tooltipContent = {
   helmet: 'HELMET SYSTEMS<br>• HUD Display<br>• Life Support<br>• Communications<br>• Targeting System',
   chest:

@@ -21,28 +21,49 @@ export function setupConfigurationSliders() {
   const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
 
   dom.powerSlider.addEventListener('input', e => {
-    dom.powerValue.textContent = e.target.value + '%';
-    updateProgressBars();
-    updateArcReactor(e.target.value);
-    events.emit('power:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
-    debouncedAnnounce(e.target.value);
+    const value = setPowerLevel(e.target.value);
+    events.emit('power:changed', { value });
+    addTelemetryEntry(`Power output adjusted to ${value}%`);
+    debouncedAnnounce(value);
   });
 
   dom.colorSlider.addEventListener('input', e => {
-    dom.colorValue.textContent = e.target.value + '%';
-    updateSuitColor(e.target.value);
-    updateArcReactor(dom.powerSlider.value);
-    events.emit('color:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
+    const value = setSuitColorLevel(e.target.value);
+    events.emit('color:changed', { value });
+    addTelemetryEntry(`Suit color adjusted to ${value}%`);
   });
 
   dom.zoomSlider.addEventListener('input', e => {
-    dom.zoomValue.textContent = e.target.value + '%';
-    updateSuitZoom(e.target.value);
-    events.emit('zoom:changed', { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit schematic zoom adjusted to ${e.target.value}%`);
+    const value = setSuitZoomLevel(e.target.value);
+    events.emit('zoom:changed', { value });
+    addTelemetryEntry(`Suit schematic zoom adjusted to ${value}%`);
   });
+}
+
+export function setPowerLevel(value) {
+  const powerLevel = clampNumber(value, 0, 100);
+  dom.powerSlider.value = powerLevel;
+  dom.powerValue.textContent = powerLevel + '%';
+  updateProgressBars();
+  updateArcReactor(powerLevel);
+  return powerLevel;
+}
+
+export function setSuitColorLevel(value) {
+  const colorLevel = clampNumber(value, 0, 100);
+  dom.colorSlider.value = colorLevel;
+  dom.colorValue.textContent = colorLevel + '%';
+  updateSuitColor(colorLevel);
+  updateArcReactor(dom.powerSlider.value);
+  return colorLevel;
+}
+
+export function setSuitZoomLevel(value) {
+  const zoomLevel = clampNumber(value, 25, 200);
+  dom.zoomSlider.value = zoomLevel;
+  dom.zoomValue.textContent = zoomLevel + '%';
+  updateSuitZoom(zoomLevel);
+  return zoomLevel;
 }
 
 export function updateProgressBars() {
@@ -166,4 +187,10 @@ function updateReactorTooltip(powerInt) {
   else if (powerInt < 30) status = 'CRITICAL LOW';
 
   state.reactorTooltip = `ARC REACTOR<br>• Power Output: ${powerOutput} TW<br>• Efficiency: ${efficiency}%<br>• Core Temperature: ${temperature}°C<br>• Status: ${status}`;
+}
+
+function clampNumber(value, min, max) {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return min;
+  return Math.max(min, Math.min(max, parsed));
 }

@@ -73,7 +73,7 @@ function toggleHudMode() {
   }
 }
 
-function activateHudMode() {
+export function activateHudMode() {
   state.isHudMode = true;
 
   // Show HUD overlay
@@ -102,7 +102,7 @@ function activateHudMode() {
   addTelemetryEntry('HUD Overlay Mode activated - First-person view engaged');
 }
 
-function deactivateHudMode() {
+export function deactivateHudMode() {
   state.isHudMode = false;
 
   // Hide HUD overlay

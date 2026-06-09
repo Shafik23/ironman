@@ -1,10 +1,12 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
-import { updateProgressBars, updateArcReactor, updateSuitColor, updateSuitZoom } from './config.js';
+import { setPowerLevel, setSuitColorLevel, setSuitZoomLevel } from './config.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { setSelectedComponent } from './components.js';
+import { DEFAULT_OPERATIONAL_STATE } from './constants.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -43,6 +45,7 @@ export function executeInitializeSystems() {
   events.emit('system:initialize:start');
 
   performSystemInitialization();
+  events.emit('system:initialize:reset-persistence');
 
   setTimeout(() => {
     events.emit('system:initialize:power', { value: 50 });
@@ -67,17 +70,9 @@ function performSystemInitialization() {
 
   dom.backgroundMusic.currentTime = 0;
 
-  dom.colorSlider.value = 0;
-  dom.colorValue.textContent = '0%';
-  updateSuitColor(0);
-
-  dom.zoomSlider.value = 100;
-  dom.zoomValue.textContent = '100%';
-  updateSuitZoom(100);
-
-  dom.powerSlider.value = 50;
-  dom.powerValue.textContent = '50%';
-  updateArcReactor(50);
+  setSuitColorLevel(DEFAULT_OPERATIONAL_STATE.color);
+  setSuitZoomLevel(DEFAULT_OPERATIONAL_STATE.zoom);
+  setPowerLevel(DEFAULT_OPERATIONAL_STATE.power);
 
   const progressBars = dom.progressBars;
   const statusTexts = dom.statusTexts;
@@ -96,8 +91,7 @@ function performSystemInitialization() {
     statusTexts[3].textContent = '100%';
   }
 
-  dom.componentItems.forEach(comp => comp.classList.remove('selected'));
-  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+  setSelectedComponent(DEFAULT_OPERATIONAL_STATE.selectedComponent);
 }
 
 function executeRunDiagnostics() {
@@ -180,10 +174,7 @@ function executeEmergencyShutdown() {
   triggerEmergencyShutdownEffect(dom);
 
   setTimeout(() => {
-    dom.powerSlider.value = 0;
-    dom.powerValue.textContent = '0%';
-    updateProgressBars();
-    updateArcReactor(0);
+    setPowerLevel(0);
 
     events.emit('shutdown:complete');
   }, 2000);

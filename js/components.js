@@ -9,52 +9,21 @@ export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
-      const componentName = item.querySelector('.component-name').textContent;
-
       const wasSelected = item.classList.contains('selected');
 
       if (wasSelected) {
-        item.classList.remove('selected');
-        if (correspondingPart) {
-          correspondingPart.classList.remove('highlighted');
-        }
-
-        if (!state.isDiagnosticsRunning) {
-          const statusElement = item.querySelector('.component-status');
-          statusElement.textContent = 'OFFLINE';
-          statusElement.className = 'component-status offline';
-        }
-
-        addTelemetryEntry(`${componentName} deselected`);
-        announceComponentChange(componentType, false);
-        events.emit('component:selection', { component: componentType, selected: false });
-      } else {
-        dom.componentItems.forEach(comp => {
-          comp.classList.remove('selected');
-          if (!state.isDiagnosticsRunning) {
-            const compStatus = comp.querySelector('.component-status');
-            compStatus.textContent = 'OFFLINE';
-            compStatus.className = 'component-status offline';
-          }
+        setSelectedComponent(null, {
+          changedComponent: componentType,
+          emitEvent: true,
+          telemetry: true,
+          announce: true
         });
-        dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
-
-        item.classList.add('selected');
-
-        if (!state.isDiagnosticsRunning) {
-          const statusElement = item.querySelector('.component-status');
-          statusElement.textContent = 'ONLINE';
-          statusElement.className = 'component-status online';
-        }
-
-        if (correspondingPart) {
-          correspondingPart.classList.add('highlighted');
-        }
-
-        addTelemetryEntry(`${componentName} selected for configuration`);
-        announceComponentChange(componentType, true);
-        events.emit('component:selection', { component: componentType, selected: true });
+      } else {
+        setSelectedComponent(componentType, {
+          emitEvent: true,
+          telemetry: true,
+          announce: true
+        });
       }
     });
 
@@ -74,4 +43,65 @@ export function setupComponentSelection() {
       }
     });
   });
+}
+
+export function setSelectedComponent(componentType, options = {}) {
+  const { changedComponent = componentType, emitEvent = false, telemetry = false, announce = false } = options;
+  const item = componentType ? findComponentItem(componentType) : null;
+  const selectedComponent = item ? componentType : null;
+  const eventComponent = changedComponent || selectedComponent;
+
+  dom.componentItems.forEach(comp => {
+    comp.classList.remove('selected');
+    if (!state.isDiagnosticsRunning) {
+      const compStatus = comp.querySelector('.component-status');
+      compStatus.textContent = 'OFFLINE';
+      compStatus.className = 'component-status offline';
+    }
+  });
+
+  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+
+  if (item) {
+    item.classList.add('selected');
+
+    if (!state.isDiagnosticsRunning) {
+      const statusElement = item.querySelector('.component-status');
+      statusElement.textContent = 'ONLINE';
+      statusElement.className = 'component-status online';
+    }
+
+    const correspondingPart = document.querySelector(`[data-part="${componentMapping[selectedComponent]}"]`);
+    if (correspondingPart) {
+      correspondingPart.classList.add('highlighted');
+    }
+  }
+
+  if (telemetry && eventComponent) {
+    const eventItem = findComponentItem(eventComponent);
+    const componentName = eventItem?.querySelector('.component-name')?.textContent || eventComponent;
+    addTelemetryEntry(
+      selectedComponent ? `${componentName} selected for configuration` : `${componentName} deselected`
+    );
+  }
+
+  if (announce && eventComponent) {
+    announceComponentChange(eventComponent, Boolean(selectedComponent));
+  }
+
+  if (emitEvent && eventComponent) {
+    const selected = Boolean(selectedComponent);
+    events.emit('component:selection', { component: eventComponent, selected });
+    events.emit(selected ? 'component:selected' : 'component:deselected', { component: eventComponent });
+  }
+
+  return selectedComponent;
+}
+
+export function getSelectedComponent() {
+  return document.querySelector('.component-item.selected')?.dataset.component || null;
+}
+
+function findComponentItem(componentType) {
+  return Array.from(dom.componentItems).find(item => item.dataset.component === componentType) || null;
 }
