@@ -2,10 +2,10 @@
 // Handles toggle logic, state management, and event integration
 
 import { dom } from './dom.js';
-import { state } from './state.js';
 import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { getSuitModel, isSuitModeActive, setSuitMode, subscribeSuitModel } from './suit-model.js';
 import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
 import {
   initializeHudElements,
@@ -30,38 +30,29 @@ export function setupHudMode() {
     dom.hudBackBtn.addEventListener('click', deactivateHudMode);
   }
 
-  // Subscribe to power changes to sync HUD gauge
-  events.on(EventTypes.CONFIG_POWER_CHANGED, ({ value }) => {
-    if (state.isHudMode) {
-      updateHudPower(value);
-    }
-  });
-
-  // Subscribe to component selection for status updates
-  events.on(EventTypes.COMPONENT_SELECTION, ({ component, selected }) => {
-    if (state.isHudMode) {
-      updateHudSystemStatus(component, selected);
+  // Subscribe to canonical model changes to sync HUD gauges and subsystem states.
+  subscribeSuitModel(({ state: model, changes }) => {
+    if (isSuitModeActive('hud') && shouldRefreshHud(changes)) {
+      updateHudFromModel(model);
     }
   });
 
   // Auto-disable HUD on emergency shutdown
   events.on(EventTypes.SHUTDOWN_START, () => {
-    if (state.isHudMode) {
+    if (isSuitModeActive('hud')) {
       deactivateHudMode();
       addTelemetryEntry('HUD Mode auto-disabled for emergency protocols');
     }
   });
 
-  // Sync power on HUD activation (get current slider value)
+  // Sync HUD activation from the canonical suit model.
   events.on(EventTypes.HUD_ACTIVATED, () => {
-    if (dom.powerSlider) {
-      updateHudPower(dom.powerSlider.value);
-    }
+    updateHudFromModel(getSuitModel());
   });
 }
 
 function toggleHudMode() {
-  if (state.isHudMode) {
+  if (isSuitModeActive('hud')) {
     deactivateHudMode();
   } else {
     activateHudMode();
@@ -69,7 +60,7 @@ function toggleHudMode() {
 }
 
 function activateHudMode() {
-  state.isHudMode = true;
+  setSuitMode('hud', true, { source: 'hud' });
 
   // Show HUD overlay
   if (dom.hudOverlay) {
@@ -98,7 +89,7 @@ function activateHudMode() {
 }
 
 function deactivateHudMode() {
-  state.isHudMode = false;
+  setSuitMode('hud', false, { source: 'hud' });
 
   // Hide HUD overlay
   if (dom.hudOverlay) {
@@ -134,4 +125,18 @@ export function toggleHud() {
   if (dom.hudToggle) {
     dom.hudToggle.click();
   }
+}
+
+function shouldRefreshHud(changes) {
+  return changes.some(change =>
+    ['power', 'selectedModule', 'modules'].includes(change)
+  );
+}
+
+function updateHudFromModel(model) {
+  updateHudPower(model.power);
+
+  ['helmet', 'chest', 'arms', 'legs'].forEach(component => {
+    updateHudSystemStatus(component, Boolean(model.modules[component]?.online));
+  });
 }

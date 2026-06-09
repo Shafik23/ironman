@@ -1,8 +1,6 @@
 import { dom } from './dom.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announcePowerLevel } from './jarvis.js';
-import { events } from './events.js';
-import { EventTypes } from './event-types.js';
 import { debounce } from './utils/timing.js';
 import { state } from './state.js';
 import { SUIT_ZOOM } from './constants.js';
@@ -10,48 +8,90 @@ import {
   calculateFrameColor,
   calculateReactorFromSuitColor,
   calculateReactorTooltip,
-  calculateStatusValues,
   calculateSuitViewBox
 } from './simulation.js';
+import {
+  getSuitModel,
+  setSuitColor as setSuitModelColor,
+  setSuitPower,
+  setSuitZoom as setSuitModelZoom,
+  subscribeSuitModel
+} from './suit-model.js';
 
 const STATUS_BAR_COUNT = 4;
 
 export function setupConfigurationSliders() {
-  const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
+  const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value, 10)), 500);
+
+  subscribeSuitModel(({ state: model, changes }) => {
+    renderConfigurationFromModel(model, changes);
+  });
+  renderConfigurationFromModel(getSuitModel());
 
   dom.zoomSlider.min = SUIT_ZOOM.MIN;
   dom.zoomSlider.max = SUIT_ZOOM.MAX;
 
   dom.powerSlider.addEventListener('input', e => {
-    dom.powerValue.textContent = e.target.value + '%';
-    updateProgressBars();
-    updateArcReactor(e.target.value);
-    events.emit(EventTypes.CONFIG_POWER_CHANGED, { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Power output adjusted to ${e.target.value}%`);
-    debouncedAnnounce(e.target.value);
+    const model = setSuitPower(e.target.value, { source: 'power-slider' });
+    addTelemetryEntry(`Power output adjusted to ${model.power}%`);
+    debouncedAnnounce(model.power);
   });
 
   dom.colorSlider.addEventListener('input', e => {
-    dom.colorValue.textContent = e.target.value + '%';
-    updateSuitColor(e.target.value);
-    updateArcReactor(dom.powerSlider.value);
-    events.emit(EventTypes.CONFIG_COLOR_CHANGED, { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit color adjusted to ${e.target.value}%`);
+    const model = setSuitModelColor(e.target.value, { source: 'color-slider' });
+    addTelemetryEntry(`Suit color adjusted to ${model.color}%`);
   });
 
   dom.zoomSlider.addEventListener('input', e => {
-    dom.zoomValue.textContent = e.target.value + '%';
-    updateSuitZoom(e.target.value);
-    events.emit(EventTypes.CONFIG_ZOOM_CHANGED, { value: parseInt(e.target.value) });
-    addTelemetryEntry(`Suit schematic zoom adjusted to ${e.target.value}%`);
+    const model = setSuitModelZoom(e.target.value, { source: 'zoom-slider' });
+    addTelemetryEntry(`Suit schematic zoom adjusted to ${model.zoom}%`);
   });
 }
 
-export function updateProgressBars() {
-  const powerLevel = parseInt(dom.powerSlider.value);
+function renderConfigurationFromModel(model = getSuitModel(), changes = []) {
+  const changed = changes.length ? new Set(changes) : null;
+
+  syncSlider(dom.powerSlider, dom.powerValue, model.power);
+  syncSlider(dom.colorSlider, dom.colorValue, model.color);
+  syncSlider(dom.zoomSlider, dom.zoomValue, model.zoom);
+
+  if (!changed || changed.has('color')) {
+    updateSuitColor(model.color);
+  }
+
+  if (!changed || changed.has('power') || changed.has('color')) {
+    updateArcReactor(model.power, model.color);
+  }
+
+  if (!changed || changed.has('zoom')) {
+    updateSuitZoom(model.zoom);
+  }
+
+  if (
+    !changed ||
+    changed.has('power') ||
+    changed.has('cpuLoad') ||
+    changed.has('memoryLoad') ||
+    changed.has('integrity')
+  ) {
+    updateProgressBars(model);
+  }
+}
+
+function syncSlider(slider, valueElement, value) {
+  if (slider && parseInt(slider.value, 10) !== value) {
+    slider.value = value;
+  }
+
+  if (valueElement) {
+    valueElement.textContent = value + '%';
+  }
+}
+
+export function updateProgressBars(model = getSuitModel()) {
   const progressBars = dom.progressBars;
   const statusTexts = dom.statusTexts;
-  const values = calculateStatusValues(powerLevel);
+  const values = [model.cpuLoad, model.memoryLoad, model.power, model.integrity];
 
   if (progressBars.length >= STATUS_BAR_COUNT && statusTexts.length >= STATUS_BAR_COUNT) {
     for (let i = 0; i < STATUS_BAR_COUNT; i++) {
@@ -67,14 +107,14 @@ export function updateSuitZoom(zoomValue) {
   dom.suitSchematic.setAttribute('viewBox', `${viewX} ${viewY} ${viewWidth} ${viewHeight}`);
 }
 
-export function updateArcReactor(powerLevel) {
+export function updateArcReactor(powerLevel = getSuitModel().power, colorValue = getSuitModel().color) {
   const reactor = dom.reactorCore;
   if (!reactor) return;
 
-  const powerInt = parseInt(powerLevel);
-  const colorValue = parseInt(dom.colorSlider.value);
+  const powerInt = parseInt(powerLevel, 10);
+  const colorInt = parseInt(colorValue, 10);
 
-  const { color: suitColor } = calculateFrameColor(colorValue);
+  const { color: suitColor } = calculateFrameColor(colorInt);
   const { color, glowIntensity } = calculateReactorFromSuitColor(suitColor, powerInt);
 
   reactor.style.fill = color;
@@ -89,7 +129,7 @@ export function updateArcReactor(powerLevel) {
 }
 
 export function updateSuitColor(colorValue) {
-  const colorInt = parseInt(colorValue);
+  const colorInt = parseInt(colorValue, 10);
   const { color, glowColor } = calculateFrameColor(colorInt);
 
   document.documentElement.style.setProperty('--suit-cyan', color);

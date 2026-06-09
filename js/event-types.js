@@ -7,6 +7,8 @@
 // - PARTY_STOPPED: { reason?: 'shutdown' | string }
 
 export const EventTypes = Object.freeze({
+  SUIT_MODEL_CHANGED: 'suit-model:changed',
+
   CONFIG_POWER_CHANGED: 'power:changed',
   CONFIG_COLOR_CHANGED: 'color:changed',
   CONFIG_ZOOM_CHANGED: 'zoom:changed',
