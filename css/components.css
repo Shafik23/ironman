@@ -100,6 +100,23 @@
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
 }
 
+.component-item.diagnostic-advisory {
+    border-color: var(--primary-cyan);
+    background: rgba(0, 255, 255, 0.08);
+}
+
+.component-item.diagnostic-warning {
+    border-color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+    box-shadow: inset 0 0 12px rgba(255, 215, 0, 0.2);
+}
+
+.component-item.diagnostic-critical {
+    border-color: var(--danger-red);
+    background: rgba(255, 68, 68, 0.12);
+    box-shadow: inset 0 0 14px rgba(255, 68, 68, 0.25);
+}
+
 .component-icon {
     font-size: 1.2rem;
     color: var(--primary-cyan);
@@ -132,6 +149,26 @@
 
 .component-status.diag {
     background: var(--secondary-blue);
+    color: var(--text-primary);
+}
+
+.component-status.nominal {
+    background: var(--success-green);
+    color: var(--bg-dark);
+}
+
+.component-status.advisory {
+    background: var(--primary-cyan);
+    color: var(--bg-dark);
+}
+
+.component-status.warning {
+    background: var(--accent-gold);
+    color: var(--bg-dark);
+}
+
+.component-status.critical {
+    background: var(--danger-red);
     color: var(--text-primary);
 }
 

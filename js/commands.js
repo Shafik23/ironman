@@ -6,6 +6,7 @@ import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { COMMANDS, SUIT_ZOOM } from './constants.js';
 import { coolSuitSystems, resetSuitSystems as resetThermalSystems, setSuitPowerTarget } from './systems.js';
+import { applyDiagnosticResults, clearDiagnosticFindings, runDiagnosticSweep, summarizeDiagnosticResults } from './diagnostics.js';
 import {
   getSuitModel,
   isSuitModeActive,
@@ -80,9 +81,15 @@ function performSystemInitialization() {
     stopPartyMode();
   }
 
+  const clearedDiagnosticFindings = clearDiagnosticFindings({ resetStatuses: true });
+
   dom.backgroundMusic.currentTime = 0;
   resetSuitSystems({ source: 'initialize' });
   resetThermalSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
+
+  if (clearedDiagnosticFindings) {
+    events.emit(EventTypes.DIAGNOSTICS_RESET, { reason: 'initialization recalibration' });
+  }
 }
 
 function executeRunDiagnostics() {
@@ -126,7 +133,12 @@ function executeRunDiagnostics() {
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
-    events.emit(EventTypes.DIAGNOSTICS_COMPLETE);
+    const results = runDiagnosticSweep();
+    const summary = summarizeDiagnosticResults(results);
+
+    applyDiagnosticResults(results);
+    results.forEach(result => events.emit(EventTypes.DIAGNOSTICS_MODULE, result));
+    events.emit(EventTypes.DIAGNOSTICS_COMPLETE, { results, summary });
   }, 15000);
 }
 

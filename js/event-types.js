@@ -27,6 +27,8 @@ export const EventTypes = Object.freeze({
 
   DIAGNOSTICS_START: 'diagnostics:start',
   DIAGNOSTICS_BOOST: 'diagnostics:boost',
+  DIAGNOSTICS_MODULE: 'diagnostics:module',
+  DIAGNOSTICS_RESET: 'diagnostics:reset',
   DIAGNOSTICS_COMPLETE: 'diagnostics:complete',
 
   SHUTDOWN_START: 'shutdown:start',

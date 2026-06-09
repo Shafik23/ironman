@@ -2,6 +2,9 @@ import { dom, getSchematicPart } from './dom.js';
 import { componentMapping } from './constants.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
+import { events } from './events.js';
+import { EventTypes } from './event-types.js';
+import { clearDiagnosticFindings } from './diagnostics.js';
 import { getSuitModel, isSuitModeActive, setSuitComponentSelection, subscribeSuitModel } from './suit-model.js';
 
 export function setupComponentSelection() {
@@ -20,6 +23,10 @@ export function setupComponentSelection() {
 
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
+      if (clearDiagnosticFindings({ resetStatuses: true })) {
+        events.emit(EventTypes.DIAGNOSTICS_RESET, { reason: 'module reconfiguration' });
+      }
+
       const componentType = item.dataset.component;
       const componentName = item.querySelector('.component-name').textContent;
       const wasSelected = Boolean(getSuitModel().modules[componentType]?.selected);
