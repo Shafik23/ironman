@@ -7,6 +7,13 @@ export const componentMapping = {
   thrusters: 'thrusters'
 };
 
+export const DEFAULT_OPERATIONAL_STATE = {
+  color: 0,
+  power: 50,
+  zoom: 100,
+  activeModules: []
+};
+
 export const modulePowerDraw = {
   helmet: 8,
   chest: 22,

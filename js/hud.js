@@ -66,7 +66,7 @@ function toggleHudMode() {
   }
 }
 
-function activateHudMode() {
+export function activateHudMode() {
   setSuitMode('hud', true, { source: 'hud' });
 
   // Show HUD overlay
@@ -95,7 +95,7 @@ function activateHudMode() {
   addTelemetryEntry('HUD Overlay Mode activated - First-person view engaged');
 }
 
-function deactivateHudMode() {
+export function deactivateHudMode() {
   setSuitMode('hud', false, { source: 'hud' });
 
   // Hide HUD overlay
