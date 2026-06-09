@@ -1,7 +1,7 @@
 import { dom, initializeDOMReferences } from './dom.js';
 import { setupComponentSelection } from './components.js';
 import { setupSchematicInteraction, hideTooltip } from './schematic.js';
-import { setupConfigurationSliders, updateSuitZoom } from './config.js';
+import { setupConfigurationSliders } from './config.js';
 import { setupCommandButtons, executeInitializeSystemsQuiet } from './commands.js';
 import { setupMusicToggle } from './party.js';
 import { startTelemetryUpdates, addTelemetryEntry } from './telemetry.js';
@@ -17,7 +17,6 @@ function initializeApp() {
   setupComponentSelection();
   setupSchematicInteraction();
   setupConfigurationSliders();
-  updateSuitZoom(dom.zoomSlider.value);
   setupCommandButtons();
   setupMusicToggle();
   setupKeyboardShortcuts();

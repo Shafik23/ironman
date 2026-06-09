@@ -36,7 +36,10 @@ export const dom = {
   hudHelmetStatus: null,
   hudChestStatus: null,
   hudArmsStatus: null,
-  hudLegsStatus: null
+  hudLegsStatus: null,
+  commandButtonsByCommand: null,
+  componentItemsByType: null,
+  schematicPartsByType: null
 };
 
 export function initializeDOMReferences() {
@@ -55,6 +58,7 @@ export function initializeDOMReferences() {
   dom.colorValue = document.getElementById('colorValue');
   dom.zoomValue = document.getElementById('zoomValue');
   dom.commandButtons = document.querySelectorAll('.command-btn');
+  dom.commandButtonsByCommand = mapElementsByDataset(dom.commandButtons, 'command');
   dom.progressBars = document.querySelectorAll('.progress-fill');
   dom.statusTexts = document.querySelectorAll('.status-row span:last-child');
   dom.suitSchematic = document.querySelector('.suit-schematic');
@@ -78,4 +82,23 @@ export function initializeDOMReferences() {
   dom.hudChestStatus = document.getElementById('hudChestStatus');
   dom.hudArmsStatus = document.getElementById('hudArmsStatus');
   dom.hudLegsStatus = document.getElementById('hudLegsStatus');
+
+  dom.componentItemsByType = mapElementsByDataset(dom.componentItems, 'component');
+  dom.schematicPartsByType = mapElementsByDataset(dom.schematicParts, 'part');
+}
+
+function mapElementsByDataset(elements, key) {
+  return new Map([...elements].filter(element => element.dataset[key]).map(element => [element.dataset[key], element]));
+}
+
+export function getCommandButton(command) {
+  return dom.commandButtonsByCommand?.get(command) || null;
+}
+
+export function getComponentItem(component) {
+  return dom.componentItemsByType?.get(component) || null;
+}
+
+export function getSchematicPart(part) {
+  return dom.schematicPartsByType?.get(part) || null;
 }

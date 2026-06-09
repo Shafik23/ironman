@@ -1,133 +1,88 @@
-import { dom } from './dom.js';
-import { componentMapping, LOADOUT_POWER_LIMIT, modulePowerDraw } from './constants.js';
-import { state } from './state.js';
+import { dom, getSchematicPart } from './dom.js';
+import { componentMapping } from './constants.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
-import { events } from './events.js';
+import { getSuitModel, isSuitModeActive, setSuitComponentSelection, subscribeSuitModel } from './suit-model.js';
 
 export function setupComponentSelection() {
+  subscribeSuitModel(({ state: model, changes }) => {
+    if (
+      changes.includes('selectedModule') ||
+      changes.includes('activeModules') ||
+      changes.includes('modules') ||
+      changes.includes('loadout') ||
+      changes.includes('modes.diagnostics')
+    ) {
+      renderComponentsFromModel(model);
+    }
+  });
+  renderComponentsFromModel(getSuitModel());
+
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
-      toggleModule(item.dataset.component);
+      const componentType = item.dataset.component;
+      const componentName = item.querySelector('.component-name').textContent;
+      const wasSelected = Boolean(getSuitModel().modules[componentType]?.selected);
+      const isSelected = !wasSelected;
+      const model = setSuitComponentSelection(componentType, isSelected, { source: 'component-list' });
+      const summary = model.loadout;
+      const statusText = isSelected ? 'online' : 'offline';
+
+      addTelemetryEntry(`${componentName} ${statusText} - Loadout ${summary.activeCount}/${summary.totalModules}`);
+      if (summary.overLimit) {
+        addTelemetryEntry(`Warning: loadout arc draw ${summary.powerDraw}% exceeds stable budget`);
+      }
+      announceComponentChange(componentType, isSelected);
     });
 
     item.addEventListener('mouseenter', () => {
-      const correspondingPart = getCorrespondingPart(item.dataset.component);
+      const componentType = item.dataset.component;
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.5))';
       }
     });
 
     item.addEventListener('mouseleave', () => {
-      const correspondingPart = getCorrespondingPart(item.dataset.component);
+      const componentType = item.dataset.component;
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = '';
       }
     });
   });
-
-  syncLoadoutFromState();
 }
 
-export function toggleModule(componentType) {
-  const item = getComponentItem(componentType);
-  if (!item) return;
+function renderComponentsFromModel(model) {
+  const diagnosticsRunning = isSuitModeActive('diagnostics');
 
-  const shouldActivate = !state.activeModules.has(componentType);
-  setModuleActive(componentType, shouldActivate);
-}
-
-export function resetModuleLoadout({ emitEvents = false } = {}) {
-  const previouslyActive = [...state.activeModules];
-
-  state.activeModules.clear();
-  syncLoadoutFromState();
-
-  if (emitEvents) {
-    previouslyActive.forEach(componentType => {
-      events.emit('component:deselected', { component: componentType });
-    });
-
-    emitLoadoutEvent({
-      componentType: null,
-      isActive: false,
-      summary: getLoadoutSummary()
-    });
-  }
-}
-
-export function syncModuleLoadout() {
-  syncLoadoutFromState();
-}
-
-function setModuleActive(componentType, isActive) {
-  const item = getComponentItem(componentType);
-  const correspondingPart = getCorrespondingPart(componentType);
-  if (!item) return;
-
-  if (isActive) {
-    state.activeModules.add(componentType);
-  } else {
-    state.activeModules.delete(componentType);
-  }
-
-  item.classList.toggle('selected', isActive);
-
-  if (correspondingPart) {
-    correspondingPart.classList.toggle('highlighted', isActive);
-    if (!isActive) {
-      correspondingPart.style.filter = '';
-    }
-  }
-
-  if (!state.isDiagnosticsRunning) {
-    updateComponentStatus(item, isActive);
-  }
-
-  const componentName = item.querySelector('.component-name').textContent;
-  const summary = getLoadoutSummary();
-  const statusText = isActive ? 'online' : 'offline';
-
-  addTelemetryEntry(`${componentName} ${statusText} - Loadout ${summary.activeCount}/${summary.totalModules}`);
-  if (summary.overLimit) {
-    addTelemetryEntry(`Warning: loadout arc draw ${summary.powerDraw}% exceeds stable budget`);
-  }
-  announceComponentChange(componentType, isActive);
-  emitLoadoutEvent({ componentType, isActive, summary });
-  events.emit(isActive ? 'component:selected' : 'component:deselected', { component: componentType });
-
-  updateLoadoutSummary(summary);
-}
-
-function syncLoadoutFromState() {
   dom.componentItems.forEach(item => {
     const componentType = item.dataset.component;
-    const isActive = state.activeModules.has(componentType);
-    const correspondingPart = getCorrespondingPart(componentType);
+    const moduleState = model.modules[componentType];
+    const isSelected = Boolean(moduleState?.selected);
+    const isOnline = Boolean(moduleState?.online);
 
-    item.classList.toggle('selected', isActive);
-    if (!state.isDiagnosticsRunning) {
-      updateComponentStatus(item, isActive);
-    }
+    item.classList.toggle('selected', isSelected);
 
-    if (correspondingPart) {
-      correspondingPart.classList.toggle('highlighted', isActive);
-      if (!isActive) {
-        correspondingPart.style.filter = '';
-      }
+    if (!diagnosticsRunning) {
+      const statusElement = item.querySelector('.component-status');
+      statusElement.textContent = isOnline ? 'ONLINE' : 'OFFLINE';
+      statusElement.className = `component-status ${isOnline ? 'online' : 'offline'}`;
     }
   });
 
-  updateLoadoutSummary();
+  dom.schematicParts.forEach(part => {
+    const componentType = Object.keys(componentMapping).find(key => componentMapping[key] === part.dataset.part);
+    const moduleState = componentType ? model.modules[componentType] : null;
+    part.classList.toggle('highlighted', Boolean(moduleState?.selected));
+  });
+
+  updateLoadoutSummary(model.loadout);
 }
 
-function updateComponentStatus(item, isActive) {
-  const statusElement = item.querySelector('.component-status');
-  statusElement.textContent = isActive ? 'ONLINE' : 'OFFLINE';
-  statusElement.className = `component-status ${isActive ? 'online' : 'offline'}`;
-}
+function updateLoadoutSummary(summary) {
+  if (!summary) return;
 
-function updateLoadoutSummary(summary = getLoadoutSummary()) {
   if (dom.loadoutActiveCount) {
     dom.loadoutActiveCount.textContent = `${summary.activeCount}/${summary.totalModules}`;
   }
@@ -145,36 +100,4 @@ function updateLoadoutSummary(summary = getLoadoutSummary()) {
     dom.loadoutStatus.textContent = summary.overLimit ? 'ARC OVERDRAW' : 'STABLE';
     dom.loadoutStatus.classList.toggle('overdraw', summary.overLimit);
   }
-}
-
-function emitLoadoutEvent({ componentType, isActive, summary }) {
-  events.emit('component:selection', {
-    component: componentType,
-    selected: isActive,
-    activeModules: [...state.activeModules],
-    powerDraw: summary.powerDraw,
-    powerLimit: LOADOUT_POWER_LIMIT,
-    overLimit: summary.overLimit
-  });
-}
-
-function getLoadoutSummary() {
-  const activeModules = [...state.activeModules];
-  const powerDraw = activeModules.reduce((total, componentType) => total + (modulePowerDraw[componentType] || 0), 0);
-
-  return {
-    activeCount: activeModules.length,
-    totalModules: dom.componentItems.length,
-    powerDraw,
-    powerPercent: Math.min(powerDraw, LOADOUT_POWER_LIMIT),
-    overLimit: powerDraw > LOADOUT_POWER_LIMIT
-  };
-}
-
-function getComponentItem(componentType) {
-  return document.querySelector(`[data-component="${componentType}"]`);
-}
-
-function getCorrespondingPart(componentType) {
-  return document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
 }
