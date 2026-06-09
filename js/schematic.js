@@ -1,4 +1,4 @@
-import { dom } from './dom.js';
+import { dom, getComponentItem } from './dom.js';
 import { componentMapping, tooltipContent } from './constants.js';
 import { state } from './state.js';
 import { getDiagnosticTooltip } from './diagnostics.js';
@@ -21,7 +21,7 @@ export function setupSchematicInteraction() {
       const partType = part.dataset.part;
       const componentType = Object.keys(componentMapping).find(key => componentMapping[key] === partType);
       if (componentType) {
-        const correspondingComponent = document.querySelector(`[data-component="${componentType}"]`);
+        const correspondingComponent = getComponentItem(componentType);
         if (correspondingComponent) {
           correspondingComponent.click();
         }

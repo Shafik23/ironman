@@ -7,6 +7,36 @@ export const componentMapping = {
   thrusters: 'thrusters'
 };
 
+export const modulePowerDraw = {
+  helmet: 8,
+  chest: 22,
+  arms: 18,
+  legs: 20,
+  repulsors: 24,
+  thrusters: 28
+};
+
+export const LOADOUT_POWER_LIMIT = 100;
+
+export const COMMANDS = {
+  INITIALIZE: 'initialize',
+  DIAGNOSTICS: 'diagnostics',
+  SHUTDOWN: 'shutdown'
+};
+
+export const SUIT_ZOOM = {
+  DEFAULT: 100,
+  MIN: 25,
+  MAX: 200,
+  VIEWBOX_SCALE: 0.8,
+  BOUNDS: {
+    left: 95,
+    right: 305,
+    top: 25,
+    bottom: 485
+  }
+};
+
 export const tooltipContent = {
   helmet: 'HELMET SYSTEMS<br>• HUD Display<br>• Life Support<br>• Communications<br>• Targeting System',
   chest:

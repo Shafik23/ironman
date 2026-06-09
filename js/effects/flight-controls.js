@@ -1,12 +1,14 @@
-// Flight Controls - Yaw motion and heading management
-// Handles arrow key inputs for turning left/right during HUD flight mode
+// Flight Controls - HUD flight input and heading management
+// Handles flight keys during HUD mode only.
 
-import { state } from '../state.js';
+import { isSuitModeActive } from '../suit-model.js';
 
 // Flight state
 const flightState = {
   heading: 42,           // Current heading in degrees (0-360)
   yawInput: 0,           // Current yaw input: -1 (left), 0 (none), 1 (right)
+  pitchInput: 0,         // Current pitch input: -1 (dive), 0 (level), 1 (climb)
+  isBoosting: false,     // Boost thrusters engaged
   yawRate: 35,           // Degrees per second of yaw rotation
   worldRotation: 0,      // Cumulative world rotation (scrolls continuously while turning)
   worldRotationRate: 50  // How fast the world scrolls while turning (degrees per second)
@@ -15,7 +17,10 @@ const flightState = {
 // Track which keys are currently pressed
 const keysPressed = {
   left: false,
-  right: false
+  right: false,
+  climb: false,
+  dive: false,
+  boost: false
 };
 
 // Callbacks for external updates
@@ -61,7 +66,12 @@ export function stopFlightControls() {
   // Reset yaw input and offset when stopping
   keysPressed.left = false;
   keysPressed.right = false;
+  keysPressed.climb = false;
+  keysPressed.dive = false;
+  keysPressed.boost = false;
   flightState.yawInput = 0;
+  flightState.pitchInput = 0;
+  flightState.isBoosting = false;
 
   // Smoothly return offset to center (will happen on next start)
 }
@@ -72,7 +82,14 @@ export function stopFlightControls() {
 export function resetFlightState() {
   flightState.heading = 42;
   flightState.yawInput = 0;
+  flightState.pitchInput = 0;
+  flightState.isBoosting = false;
   flightState.worldRotation = 0;
+  keysPressed.left = false;
+  keysPressed.right = false;
+  keysPressed.climb = false;
+  keysPressed.dive = false;
+  keysPressed.boost = false;
 
   if (onHeadingChange) onHeadingChange(flightState.heading);
   if (onYawOffsetChange) onYawOffsetChange(0);
@@ -86,11 +103,22 @@ export function getHeading() {
 }
 
 /**
+ * Get active flight input for the HUD simulation.
+ */
+export function getFlightInput() {
+  return {
+    yawInput: flightState.yawInput,
+    pitchInput: flightState.pitchInput,
+    isBoosting: flightState.isBoosting
+  };
+}
+
+/**
  * Handle keydown events for flight controls
  */
 function handleKeyDown(e) {
   // Only process in HUD mode
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -105,9 +133,26 @@ function handleKeyDown(e) {
       e.preventDefault();
       keysPressed.right = true;
       break;
+    case 'ArrowUp':
+    case 'w':
+    case 'W':
+      e.preventDefault();
+      keysPressed.climb = true;
+      break;
+    case 'ArrowDown':
+    case 's':
+    case 'S':
+      e.preventDefault();
+      keysPressed.dive = true;
+      break;
+    case 'Shift':
+    case ' ':
+      e.preventDefault();
+      keysPressed.boost = true;
+      break;
   }
 
-  updateYawInput();
+  updateFlightInput();
 }
 
 /**
@@ -125,15 +170,29 @@ function handleKeyUp(e) {
     case 'D':
       keysPressed.right = false;
       break;
+    case 'ArrowUp':
+    case 'w':
+    case 'W':
+      keysPressed.climb = false;
+      break;
+    case 'ArrowDown':
+    case 's':
+    case 'S':
+      keysPressed.dive = false;
+      break;
+    case 'Shift':
+    case ' ':
+      keysPressed.boost = false;
+      break;
   }
 
-  updateYawInput();
+  updateFlightInput();
 }
 
 /**
- * Update yaw input based on currently pressed keys
+ * Update flight input based on currently pressed keys
  */
-function updateYawInput() {
+function updateFlightInput() {
   if (keysPressed.left && !keysPressed.right) {
     flightState.yawInput = -1; // Turning left (heading decreases)
   } else if (keysPressed.right && !keysPressed.left) {
@@ -141,13 +200,23 @@ function updateYawInput() {
   } else {
     flightState.yawInput = 0;  // No turn or both keys (cancel out)
   }
+
+  if (keysPressed.climb && !keysPressed.dive) {
+    flightState.pitchInput = 1;
+  } else if (keysPressed.dive && !keysPressed.climb) {
+    flightState.pitchInput = -1;
+  } else {
+    flightState.pitchInput = 0;
+  }
+
+  flightState.isBoosting = keysPressed.boost;
 }
 
 /**
  * Main flight update loop - called at ~60fps
  */
 function updateFlight() {
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   const deltaTime = UPDATE_RATE / 1000; // Convert to seconds
 
