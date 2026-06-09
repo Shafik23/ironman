@@ -19,6 +19,10 @@ export const dom = {
   suitSchematic: null,
   schematicContainer: null,
   reactorCore: null,
+  loadoutActiveCount: null,
+  loadoutPowerDraw: null,
+  loadoutPowerFill: null,
+  loadoutStatus: null,
   hudToggle: null,
   hudOverlay: null,
   hudBackBtn: null,
@@ -41,7 +45,10 @@ export const dom = {
   hudMissionCount: null,
   hudMissionAction: null,
   radarThreats: null,
-  targetLock: null
+  targetLock: null,
+  commandButtonsByCommand: null,
+  componentItemsByType: null,
+  schematicPartsByType: null
 };
 
 export function initializeDOMReferences() {
@@ -60,11 +67,16 @@ export function initializeDOMReferences() {
   dom.colorValue = document.getElementById('colorValue');
   dom.zoomValue = document.getElementById('zoomValue');
   dom.commandButtons = document.querySelectorAll('.command-btn');
+  dom.commandButtonsByCommand = mapElementsByDataset(dom.commandButtons, 'command');
   dom.progressBars = document.querySelectorAll('.progress-fill');
   dom.statusTexts = document.querySelectorAll('.status-row span:last-child');
   dom.suitSchematic = document.querySelector('.suit-schematic');
   dom.schematicContainer = document.querySelector('.schematic-container');
   dom.reactorCore = document.querySelector('.reactor-core');
+  dom.loadoutActiveCount = document.getElementById('loadoutActiveCount');
+  dom.loadoutPowerDraw = document.getElementById('loadoutPowerDraw');
+  dom.loadoutPowerFill = document.getElementById('loadoutPowerFill');
+  dom.loadoutStatus = document.getElementById('loadoutStatus');
   dom.hudToggle = document.getElementById('hudToggle');
   dom.hudOverlay = document.getElementById('hudOverlay');
   dom.hudBackBtn = document.getElementById('hudBackBtn');
@@ -88,4 +100,23 @@ export function initializeDOMReferences() {
   dom.hudMissionAction = document.getElementById('hudMissionAction');
   dom.radarThreats = document.getElementById('radarThreats');
   dom.targetLock = document.getElementById('targetLock');
+
+  dom.componentItemsByType = mapElementsByDataset(dom.componentItems, 'component');
+  dom.schematicPartsByType = mapElementsByDataset(dom.schematicParts, 'part');
+}
+
+function mapElementsByDataset(elements, key) {
+  return new Map([...elements].filter(element => element.dataset[key]).map(element => [element.dataset[key], element]));
+}
+
+export function getCommandButton(command) {
+  return dom.commandButtonsByCommand?.get(command) || null;
+}
+
+export function getComponentItem(component) {
+  return dom.componentItemsByType?.get(component) || null;
+}
+
+export function getSchematicPart(part) {
+  return dom.schematicPartsByType?.get(part) || null;
 }

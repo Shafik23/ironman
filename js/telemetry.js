@@ -1,6 +1,7 @@
 import { dom } from './dom.js';
 import { jarvisAnnounce, isJarvisActive } from './jarvis.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 
 export function addTelemetryEntry(message) {
   const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false });
@@ -51,62 +52,85 @@ export function startTelemetryUpdates() {
   stopTelemetryUpdates();
 
   telemetryUnsubscribers = [
-    events.on('system:initialize:start', () => addTelemetryEntry('System initialization sequence started')),
-    events.on('system:initialize:power', ({ value }) => addTelemetryEntry(`Power output initialized to ${value}%`)),
-    events.on('system:initialize:cpu', ({ value }) => addTelemetryEntry(`CPU load initialized to ${value}%`)),
-    events.on('system:initialize:memory', ({ value }) => addTelemetryEntry(`Memory usage initialized to ${value}%`)),
-    events.on('system:initialize:integrity', ({ value }) =>
+    events.on(EventTypes.INITIALIZE_START, () => addTelemetryEntry('System initialization sequence started')),
+    events.on(EventTypes.INITIALIZE_POWER, ({ value }) => addTelemetryEntry(`Power output initialized to ${value}%`)),
+    events.on(EventTypes.INITIALIZE_CPU, ({ value }) => addTelemetryEntry(`CPU load initialized to ${value}%`)),
+    events.on(EventTypes.INITIALIZE_MEMORY, ({ value }) => addTelemetryEntry(`Memory usage initialized to ${value}%`)),
+    events.on(EventTypes.INITIALIZE_INTEGRITY, ({ value }) =>
       addTelemetryEntry(`System integrity initialized to ${value}%`)
     ),
-    events.on('system:initialize:color', () => addTelemetryEntry('Suit color reset to default')),
-    events.on('system:initialize:zoom', ({ value }) => addTelemetryEntry(`Zoom calibration complete at ${value}%`)),
-    events.on('system:initialize:modules', () => addTelemetryEntry('All system modules deselected')),
-    events.on('system:initialize:complete', () => addTelemetryEntry('All systems initialized successfully')),
+    events.on(EventTypes.INITIALIZE_COLOR, () => addTelemetryEntry('Suit color reset to default')),
+    events.on(EventTypes.INITIALIZE_ZOOM, ({ value }) => addTelemetryEntry(`Zoom calibration complete at ${value}%`)),
+    events.on(EventTypes.INITIALIZE_MODULES, () => addTelemetryEntry('Module loadout returned to standby')),
+    events.on(EventTypes.INITIALIZE_COMPLETE, () => addTelemetryEntry('All systems initialized successfully')),
 
-    events.on('diagnostics:start', () => {
+    events.on(EventTypes.SYSTEMS_WARNINGS_CHANGED, ({ warnings }) => {
+      if (warnings.length > 0) {
+        addTelemetryEntry(`Warning state updated: ${warnings.join(' / ')}`);
+      } else {
+        addTelemetryEntry('Warning state cleared - coupled systems nominal');
+      }
+    }),
+    events.on(EventTypes.SYSTEMS_INTEGRITY_DAMAGED, ({ integrity, coreTemperature }) => {
+      addTelemetryEntry(
+        `Warning: integrity reduced to ${Math.round(integrity)}% at ${Math.round(coreTemperature)}C core temperature`
+      );
+    }),
+
+    events.on(EventTypes.DIAGNOSTICS_START, () => {
       addTelemetryEntry('Comprehensive diagnostics initiated');
       addTelemetryEntry('Scanning all system components...');
     }),
-    events.on('diagnostics:boost', () => {
+    events.on(EventTypes.DIAGNOSTICS_BOOST, () => {
       addTelemetryEntry('CPU and Memory boosted for intensive scanning');
       addTelemetryEntry('All system modules entered diagnostic mode');
       addTelemetryEntry('Deep system analysis in progress...');
     }),
-    events.on('diagnostics:complete', () => {
+    events.on(EventTypes.DIAGNOSTICS_MODULE, ({ module, severity, message }) => {
+      addTelemetryEntry(`${module}: ${severity.toUpperCase()} - ${message}`);
+    }),
+    events.on(EventTypes.DIAGNOSTICS_COMPLETE, ({ summary } = {}) => {
       addTelemetryEntry('Diagnostic scan complete');
       addTelemetryEntry('CPU and Memory restored to normal levels');
-      addTelemetryEntry('All system modules returned to normal status');
-      addTelemetryEntry('All systems nominal - No issues detected');
+      if (summary) {
+        addTelemetryEntry(`Diagnostic matrix: ${summary.totalFindings} findings, highest severity ${summary.highestSeverity}`);
+      }
+      if (!summary || summary.totalFindings === 0) {
+        addTelemetryEntry('All systems nominal - No issues detected');
+      }
     }),
+    events.on(EventTypes.DIAGNOSTICS_RESET, ({ reason } = {}) =>
+      addTelemetryEntry(`Diagnostic findings cleared by ${reason || 'system recalibration'}`)
+    ),
 
-    events.on('shutdown:start', () => {
+    events.on(EventTypes.SHUTDOWN_START, () => {
       addTelemetryEntry('EMERGENCY SHUTDOWN PROTOCOL ACTIVATED');
       addTelemetryEntry('Deploying fire suppression systems...');
     }),
-    events.on('party:stopped', ({ reason } = {}) => {
+    events.on(EventTypes.PARTY_STOPPED, ({ reason } = {}) => {
       if (reason === 'shutdown') {
         addTelemetryEntry('Party mode emergency shutdown');
       }
     }),
-    events.on('shutdown:complete', () => {
+    events.on(EventTypes.SHUTDOWN_COMPLETE, () => {
       addTelemetryEntry('Fire extinguisher spray deployed');
       addTelemetryEntry('Power output reduced to minimum safe levels');
       addTelemetryEntry('Non-critical systems powered down');
       addTelemetryEntry('Emergency shutdown complete - Manual restart required');
     }),
 
-    events.on('mission:start', ({ totalThreats, duration }) => {
+    events.on(EventTypes.MISSION_START, ({ totalThreats, duration }) => {
       addTelemetryEntry(`HUD mission started - Drone intercept: ${totalThreats} threats / ${duration}s`);
       addTelemetryEntry('Radar control transferred to combat targeting');
     }),
-    events.on('mission:threat:neutralized', ({ neutralized, totalThreats }) => {
+    events.on(EventTypes.MISSION_THREAT_NEUTRALIZED, ({ neutralized, totalThreats }) => {
       addTelemetryEntry(`Drone threat neutralized (${neutralized}/${totalThreats})`);
     }),
-    events.on('mission:success', () => {
+    events.on(EventTypes.MISSION_SUCCESS, () => {
       addTelemetryEntry('HUD mission complete - Airspace secured');
       addTelemetryEntry('Radar returned to patrol sweep');
     }),
-    events.on('mission:failure', ({ reason }) => {
+    events.on(EventTypes.MISSION_FAILURE, ({ reason }) => {
       addTelemetryEntry(`HUD mission failed - ${reason}`);
       addTelemetryEntry('Combat targeting disengaged');
     })

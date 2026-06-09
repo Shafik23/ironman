@@ -1,6 +1,8 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
+import { isSuitModeActive } from './suit-model.js';
 import {
   suspendRadarThreatSimulation,
   resumeRadarThreatSimulation
@@ -27,13 +29,13 @@ export function setupMissionLoop() {
     fireAtLockedThreat();
   });
 
-  events.on('hud:deactivated', () => {
+  events.on(EventTypes.HUD_DEACTIVATED, () => {
     if (state.mission.status === 'active') {
       failMission('HUD link lost');
     }
   });
 
-  events.on('shutdown:start', () => {
+  events.on(EventTypes.SHUTDOWN_START, () => {
     if (state.mission.status === 'active') {
       failMission('Emergency shutdown');
     }
@@ -54,7 +56,7 @@ function handleMissionAction() {
 function startMission() {
   if (state.mission.status === 'active') return;
 
-  if (!state.isHudMode) {
+  if (!isSuitModeActive('hud')) {
     dom.hudToggle?.click();
   }
 
@@ -68,7 +70,7 @@ function startMission() {
   startThreatMotion();
   updateMissionUI();
 
-  events.emit('mission:start', {
+  events.emit(EventTypes.MISSION_START, {
     totalThreats: state.mission.totalThreats,
     duration: MISSION_DURATION
   });
@@ -232,7 +234,7 @@ function neutralizeThreat(threatId) {
   state.mission.threats = state.mission.threats.filter(candidate => candidate.id !== threatId);
   state.mission.neutralized += 1;
 
-  events.emit('mission:threat:neutralized', {
+  events.emit(EventTypes.MISSION_THREAT_NEUTRALIZED, {
     neutralized: state.mission.neutralized,
     totalThreats: state.mission.totalThreats
   });
@@ -256,7 +258,7 @@ function completeMission() {
   dom.targetLock?.classList.add('hidden');
   updateMissionUI();
 
-  events.emit('mission:success', {
+  events.emit(EventTypes.MISSION_SUCCESS, {
     neutralized: state.mission.neutralized,
     totalThreats: state.mission.totalThreats
   });
@@ -273,7 +275,7 @@ function failMission(reason) {
   dom.targetLock?.classList.add('hidden');
   updateMissionUI(reason);
 
-  events.emit('mission:failure', { reason });
+  events.emit(EventTypes.MISSION_FAILURE, { reason });
 }
 
 function clearMissionThreats() {

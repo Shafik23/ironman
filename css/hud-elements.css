@@ -555,7 +555,10 @@
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 50px;
+    justify-content: center;
+    gap: 24px;
+    width: calc(100% - 80px);
+    flex-wrap: wrap;
 }
 
 .hud-warnings {
@@ -568,9 +571,14 @@
 
 /* Flight Controls Hint */
 .hud-flight-controls-hint {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
     font-size: 0.65rem;
     color: rgba(0, 255, 255, 0.5);
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     opacity: 0.7;
     transition: opacity 0.3s ease;

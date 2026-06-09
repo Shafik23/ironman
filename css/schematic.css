@@ -95,6 +95,25 @@
     animation: highlight-pulse 1s ease-in-out infinite alternate;
 }
 
+.schematic-part.diagnostic-advisory .part-outline {
+    stroke: var(--primary-cyan);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 14px var(--primary-cyan));
+}
+
+.schematic-part.diagnostic-warning .part-outline {
+    stroke: var(--accent-gold);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 18px var(--accent-gold));
+}
+
+.schematic-part.diagnostic-critical .part-outline {
+    stroke: var(--danger-red);
+    stroke-width: 3;
+    filter: drop-shadow(0 0 20px var(--danger-red));
+    animation: highlight-pulse 0.7s ease-in-out infinite alternate;
+}
+
 /* Special handling for repulsor interaction circles */
 .schematic-part.highlighted .repulsor-interaction {
     stroke: var(--accent-gold) !important;
