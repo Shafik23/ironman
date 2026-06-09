@@ -7,7 +7,7 @@ import {
   startFlightControls,
   stopFlightControls,
   resetFlightState,
-  getHeading
+  getFlightInput
 } from './flight-controls.js';
 import { setCityscapeYawOffset } from './cityscape.js';
 
@@ -19,7 +19,20 @@ let flightControlsInitialized = false;
 const simState = {
   altitude: 10000,
   speed: 750,
-  heading: 42
+  heading: 42,
+  power: 85,
+  flightWarning: ''
+};
+
+const FLIGHT_CONFIG = {
+  minAltitude: 250,
+  maxAltitude: 50000,
+  minSpeed: 120,
+  stallSpeed: 220,
+  accelerationResponse: 0.12,
+  baseClimbFpm: 4600,
+  baseDiveFpm: 6200,
+  lowAltitudeWarning: 1200
 };
 
 // Compass configuration
@@ -62,7 +75,7 @@ export function startHudSimulation() {
   startFlightControls();
 
   simulationInterval = setInterval(() => {
-    updateFlightData();
+    updateFlightData(0.1);
     updateRadarThreats();
   }, 100);
 }
@@ -77,13 +90,100 @@ export function stopHudSimulation() {
   }
 }
 
-function updateFlightData() {
-  // Static values for now - will be made dynamic based on user input later
+function updateFlightData(deltaTime) {
+  const controls = getFlightInput();
+  const powerFactor = Math.max(0, Math.min(1, simState.power / 100));
+  const boostAvailable = controls.isBoosting && powerFactor >= 0.3;
+  const climbCapability = Math.max(0.25, powerFactor);
+  const maxCruiseSpeed = 260 + powerFactor * 650;
+  const boostBonus = boostAvailable ? 260 * powerFactor : 0;
+  const pitchSpeedEffect = controls.pitchInput > 0
+    ? -95 * controls.pitchInput
+    : 85 * Math.abs(controls.pitchInput);
+  const targetSpeed = clamp(
+    maxCruiseSpeed + boostBonus + pitchSpeedEffect,
+    FLIGHT_CONFIG.minSpeed,
+    1250
+  );
+
+  simState.speed += (targetSpeed - simState.speed) * FLIGHT_CONFIG.accelerationResponse;
+  simState.speed = clamp(simState.speed, FLIGHT_CONFIG.minSpeed, 1250);
+
+  const climbFpm = FLIGHT_CONFIG.baseClimbFpm * climbCapability * (boostAvailable ? 1.35 : 1);
+  const diveFpm = FLIGHT_CONFIG.baseDiveFpm * (0.75 + powerFactor * 0.25);
+  let verticalFpm = 0;
+
+  if (controls.pitchInput > 0) {
+    verticalFpm = climbFpm;
+  } else if (controls.pitchInput < 0) {
+    verticalFpm = -diveFpm;
+  }
+
+  if (simState.speed < FLIGHT_CONFIG.stallSpeed) {
+    verticalFpm -= (FLIGHT_CONFIG.stallSpeed - simState.speed) * 7;
+  }
+
+  simState.altitude = clamp(
+    simState.altitude + (verticalFpm / 60) * deltaTime,
+    FLIGHT_CONFIG.minAltitude,
+    FLIGHT_CONFIG.maxAltitude
+  );
+
+  updateFlightWarning(controls, boostAvailable);
+  updateThrusterReadouts(controls, boostAvailable, targetSpeed);
+  renderFlightReadouts();
+}
+
+function renderFlightReadouts() {
   if (dom.hudAltitude) {
     dom.hudAltitude.textContent = Math.round(simState.altitude).toLocaleString();
   }
   if (dom.hudSpeed) {
     dom.hudSpeed.textContent = Math.round(simState.speed);
+  }
+}
+
+function updateFlightWarning(controls, boostAvailable) {
+  if (controls.isBoosting && !boostAvailable) {
+    simState.flightWarning = 'BOOST LIMITED: ARC OUTPUT BELOW 30%';
+  } else if (simState.speed < FLIGHT_CONFIG.stallSpeed) {
+    simState.flightWarning = 'STALL WARNING: INCREASE THRUST';
+  } else if (simState.altitude <= FLIGHT_CONFIG.lowAltitudeWarning && controls.pitchInput <= 0) {
+    simState.flightWarning = 'TERRAIN ALERT: CLIMB';
+  } else {
+    simState.flightWarning = '';
+  }
+
+  renderHudWarnings();
+}
+
+function updateThrusterReadouts(controls, boostAvailable, targetSpeed) {
+  const thrusterBar = document.getElementById('hudThrusterBar');
+  const repulsorBar = document.getElementById('hudRepulsorBar');
+  const thrusterStatus = document.getElementById('hudThrusterStatus');
+  const targetRatio = clamp(targetSpeed / 1250, 0, 1);
+  const repulsorRatio = boostAvailable ? 1 : clamp(0.35 + simState.power / 180, 0.35, 0.9);
+
+  if (thrusterBar) {
+    thrusterBar.style.width = `${Math.round(targetRatio * 100)}%`;
+  }
+
+  if (repulsorBar) {
+    repulsorBar.style.width = `${Math.round(repulsorRatio * 100)}%`;
+  }
+
+  if (thrusterStatus) {
+    if (boostAvailable) {
+      thrusterStatus.textContent = 'BOOST';
+    } else if (controls.isBoosting) {
+      thrusterStatus.textContent = 'LIMITED';
+    } else if (controls.pitchInput > 0) {
+      thrusterStatus.textContent = 'CLIMB';
+    } else if (controls.pitchInput < 0) {
+      thrusterStatus.textContent = 'DIVE';
+    } else {
+      thrusterStatus.textContent = 'ONLINE';
+    }
   }
 }
 
@@ -216,6 +316,7 @@ function updateRadarThreats() {
 
 export function updateHudPower(value) {
   const percentage = parseInt(value, 10);
+  simState.power = percentage;
 
   // Update power value display
   if (dom.hudPowerValue) {
@@ -240,19 +341,21 @@ export function updateHudPower(value) {
     }
   }
 
-  // Update warnings based on power
-  if (dom.hudWarnings) {
-    if (percentage < 20) {
-      dom.hudWarnings.textContent = 'WARNING: CRITICAL POWER LEVEL';
-      dom.hudWarnings.classList.add('hud-warning-active');
-    } else if (percentage < 40) {
-      dom.hudWarnings.textContent = 'CAUTION: LOW POWER';
-      dom.hudWarnings.classList.remove('hud-warning-active');
-    } else {
-      dom.hudWarnings.textContent = '';
-      dom.hudWarnings.classList.remove('hud-warning-active');
-    }
+  renderHudWarnings();
+}
+
+function renderHudWarnings() {
+  if (!dom.hudWarnings) return;
+
+  let powerWarning = '';
+  if (simState.power < 20) {
+    powerWarning = 'WARNING: CRITICAL POWER LEVEL';
+  } else if (simState.power < 40) {
+    powerWarning = 'CAUTION: LOW POWER';
   }
+
+  dom.hudWarnings.textContent = [powerWarning, simState.flightWarning].filter(Boolean).join(' | ');
+  dom.hudWarnings.classList.toggle('hud-warning-active', simState.power < 20 || Boolean(simState.flightWarning));
 }
 
 export function updateHudSystemStatus(component, isOnline) {
@@ -278,6 +381,10 @@ export function resetHudSimulation() {
   simState.altitude = 10000;
   simState.speed = 750;
   simState.heading = 42;
+  simState.flightWarning = '';
+  if (dom.powerSlider) {
+    simState.power = parseInt(dom.powerSlider.value, 10);
+  }
 
   // Reset flight controls state
   resetFlightState();
@@ -287,7 +394,16 @@ export function resetHudSimulation() {
 
   // Reset cityscape yaw offset
   setCityscapeYawOffset(0);
+
+  const powerFactor = Math.max(0, Math.min(1, simState.power / 100));
+  updateThrusterReadouts(getFlightInput(), false, 260 + powerFactor * 650);
+  renderFlightReadouts();
+  renderHudWarnings();
 }
 
 // Export for future use when making heading dynamic
 export { updateCompass };
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}

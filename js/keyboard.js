@@ -1,7 +1,12 @@
 import { dom } from './dom.js';
+import { state } from './state.js';
 
 export function setupKeyboardShortcuts() {
   document.addEventListener('keydown', e => {
+    if (state.isHudMode && e.key !== 'Escape' && e.key !== 'h' && e.key !== 'H') {
+      return;
+    }
+
     switch (e.key) {
       case '1':
       case '2':
