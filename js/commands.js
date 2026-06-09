@@ -5,6 +5,7 @@ import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { COMMANDS, SUIT_ZOOM } from './constants.js';
+import { coolSuitSystems, resetSuitSystems as resetThermalSystems, setSuitPowerTarget } from './systems.js';
 import {
   getSuitModel,
   isSuitModeActive,
@@ -81,6 +82,7 @@ function performSystemInitialization() {
 
   dom.backgroundMusic.currentTime = 0;
   resetSuitSystems({ source: 'initialize' });
+  resetThermalSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
 }
 
 function executeRunDiagnostics() {
@@ -116,7 +118,6 @@ function executeRunDiagnostics() {
       {
         cpuLoad: originalModel.cpuLoad,
         memoryLoad: originalModel.memoryLoad,
-        power: originalModel.power,
         integrity: originalModel.integrity
       },
       { source: 'diagnostics' }
@@ -150,9 +151,11 @@ function executeEmergencyShutdown() {
   }
 
   triggerEmergencyShutdownEffect(dom);
+  coolSuitSystems(24);
 
   setTimeout(() => {
-    setSuitPower(0, { source: 'shutdown' });
+    setSuitPowerTarget(0);
+    setSuitPower(0, { source: 'shutdown', deriveStatus: false });
 
     events.emit(EventTypes.SHUTDOWN_COMPLETE);
   }, 2000);

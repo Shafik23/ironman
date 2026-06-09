@@ -36,5 +36,9 @@ export const EventTypes = Object.freeze({
   PARTY_STOPPED: 'party:stopped',
 
   HUD_ACTIVATED: 'hud:activated',
-  HUD_DEACTIVATED: 'hud:deactivated'
+  HUD_DEACTIVATED: 'hud:deactivated',
+
+  SYSTEMS_TICK: 'systems:tick',
+  SYSTEMS_WARNINGS_CHANGED: 'systems:warnings:changed',
+  SYSTEMS_INTEGRITY_DAMAGED: 'systems:integrity:damaged'
 });

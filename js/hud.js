@@ -7,6 +7,7 @@ import { EventTypes } from './event-types.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { getSuitModel, isSuitModeActive, setSuitMode, subscribeSuitModel } from './suit-model.js';
 import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
+import { getSuitSystemStats } from './systems.js';
 import {
   initializeHudElements,
   startHudSimulation,
@@ -30,10 +31,16 @@ export function setupHudMode() {
     dom.hudBackBtn.addEventListener('click', deactivateHudMode);
   }
 
-  // Subscribe to canonical model changes to sync HUD gauges and subsystem states.
+  // Subscribe to canonical model changes to sync HUD subsystem states.
   subscribeSuitModel(({ state: model, changes }) => {
     if (isSuitModeActive('hud') && shouldRefreshHud(changes)) {
       updateHudFromModel(model);
+    }
+  });
+
+  events.on(EventTypes.SYSTEMS_TICK, ({ stats }) => {
+    if (isSuitModeActive('hud')) {
+      updateHudPower(stats.effectivePower);
     }
   });
 
@@ -129,12 +136,12 @@ export function toggleHud() {
 
 function shouldRefreshHud(changes) {
   return changes.some(change =>
-    ['power', 'selectedModule', 'modules'].includes(change)
+    ['power', 'selectedModule', 'activeModules', 'modules'].includes(change)
   );
 }
 
 function updateHudFromModel(model) {
-  updateHudPower(model.power);
+  updateHudPower(getSuitSystemStats().effectivePower);
 
   ['helmet', 'chest', 'arms', 'legs'].forEach(component => {
     updateHudSystemStatus(component, Boolean(model.modules[component]?.online));

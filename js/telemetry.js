@@ -64,6 +64,19 @@ export function startTelemetryUpdates() {
     events.on(EventTypes.INITIALIZE_MODULES, () => addTelemetryEntry('Module loadout returned to standby')),
     events.on(EventTypes.INITIALIZE_COMPLETE, () => addTelemetryEntry('All systems initialized successfully')),
 
+    events.on(EventTypes.SYSTEMS_WARNINGS_CHANGED, ({ warnings }) => {
+      if (warnings.length > 0) {
+        addTelemetryEntry(`Warning state updated: ${warnings.join(' / ')}`);
+      } else {
+        addTelemetryEntry('Warning state cleared - coupled systems nominal');
+      }
+    }),
+    events.on(EventTypes.SYSTEMS_INTEGRITY_DAMAGED, ({ integrity, coreTemperature }) => {
+      addTelemetryEntry(
+        `Warning: integrity reduced to ${Math.round(integrity)}% at ${Math.round(coreTemperature)}C core temperature`
+      );
+    }),
+
     events.on(EventTypes.DIAGNOSTICS_START, () => {
       addTelemetryEntry('Comprehensive diagnostics initiated');
       addTelemetryEntry('Scanning all system components...');

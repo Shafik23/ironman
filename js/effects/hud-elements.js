@@ -2,6 +2,7 @@
 // Handles dynamic HUD element updates (altitude, speed, radar, etc.)
 
 import { dom } from '../dom.js';
+import { getSuitSystemStats } from '../systems.js';
 import {
   initFlightControls,
   startFlightControls,
@@ -215,7 +216,8 @@ function updateRadarThreats() {
 }
 
 export function updateHudPower(value) {
-  const percentage = parseInt(value, 10);
+  const stats = getSuitSystemStats();
+  const percentage = Math.round(parseFloat(value));
 
   // Update power value display
   if (dom.hudPowerValue) {
@@ -240,14 +242,15 @@ export function updateHudPower(value) {
     }
   }
 
-  // Update warnings based on power
+  // Update warnings from the coupled suit model.
   if (dom.hudWarnings) {
-    if (percentage < 20) {
-      dom.hudWarnings.textContent = 'WARNING: CRITICAL POWER LEVEL';
-      dom.hudWarnings.classList.add('hud-warning-active');
-    } else if (percentage < 40) {
-      dom.hudWarnings.textContent = 'CAUTION: LOW POWER';
-      dom.hudWarnings.classList.remove('hud-warning-active');
+    if (stats.warnings.length > 0) {
+      const warningText = stats.warnings.slice(0, 2).join(' / ').toUpperCase();
+      dom.hudWarnings.textContent = `WARNING: ${warningText}`;
+      dom.hudWarnings.classList.toggle(
+        'hud-warning-active',
+        stats.warnings.some(warning => /critical|overheat|integrity/i.test(warning))
+      );
     } else {
       dom.hudWarnings.textContent = '';
       dom.hudWarnings.classList.remove('hud-warning-active');
