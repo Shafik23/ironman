@@ -1,35 +1,50 @@
-import { dom } from './dom.js';
+import { dom, getSchematicPart } from './dom.js';
 import { componentMapping } from './constants.js';
-import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { announceComponentChange } from './jarvis.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
+import { clearDiagnosticFindings } from './diagnostics.js';
+import { getSuitModel, isSuitModeActive, setSuitComponentSelection, subscribeSuitModel } from './suit-model.js';
 
 export function setupComponentSelection() {
+  subscribeSuitModel(({ state: model, changes }) => {
+    if (
+      changes.includes('selectedModule') ||
+      changes.includes('activeModules') ||
+      changes.includes('modules') ||
+      changes.includes('loadout') ||
+      changes.includes('modes.diagnostics')
+    ) {
+      renderComponentsFromModel(model);
+    }
+  });
+  renderComponentsFromModel(getSuitModel());
+
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
-      const componentType = item.dataset.component;
-      const wasSelected = item.classList.contains('selected');
-
-      if (wasSelected) {
-        setSelectedComponent(null, {
-          changedComponent: componentType,
-          emitEvent: true,
-          telemetry: true,
-          announce: true
-        });
-      } else {
-        setSelectedComponent(componentType, {
-          emitEvent: true,
-          telemetry: true,
-          announce: true
-        });
+      if (clearDiagnosticFindings({ resetStatuses: true })) {
+        events.emit(EventTypes.DIAGNOSTICS_RESET, { reason: 'module reconfiguration' });
       }
+
+      const componentType = item.dataset.component;
+      const componentName = item.querySelector('.component-name').textContent;
+      const wasSelected = Boolean(getSuitModel().modules[componentType]?.selected);
+      const isSelected = !wasSelected;
+      const model = setSuitComponentSelection(componentType, isSelected, { source: 'component-list' });
+      const summary = model.loadout;
+      const statusText = isSelected ? 'online' : 'offline';
+
+      addTelemetryEntry(`${componentName} ${statusText} - Loadout ${summary.activeCount}/${summary.totalModules}`);
+      if (summary.overLimit) {
+        addTelemetryEntry(`Warning: loadout arc draw ${summary.powerDraw}% exceeds stable budget`);
+      }
+      announceComponentChange(componentType, isSelected);
     });
 
     item.addEventListener('mouseenter', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.5))';
       }
@@ -37,7 +52,7 @@ export function setupComponentSelection() {
 
     item.addEventListener('mouseleave', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = '';
       }
@@ -45,63 +60,51 @@ export function setupComponentSelection() {
   });
 }
 
-export function setSelectedComponent(componentType, options = {}) {
-  const { changedComponent = componentType, emitEvent = false, telemetry = false, announce = false } = options;
-  const item = componentType ? findComponentItem(componentType) : null;
-  const selectedComponent = item ? componentType : null;
-  const eventComponent = changedComponent || selectedComponent;
+function renderComponentsFromModel(model) {
+  const diagnosticsRunning = isSuitModeActive('diagnostics');
 
-  dom.componentItems.forEach(comp => {
-    comp.classList.remove('selected');
-    if (!state.isDiagnosticsRunning) {
-      const compStatus = comp.querySelector('.component-status');
-      compStatus.textContent = 'OFFLINE';
-      compStatus.className = 'component-status offline';
+  dom.componentItems.forEach(item => {
+    const componentType = item.dataset.component;
+    const moduleState = model.modules[componentType];
+    const isSelected = Boolean(moduleState?.selected);
+    const isOnline = Boolean(moduleState?.online);
+
+    item.classList.toggle('selected', isSelected);
+
+    if (!diagnosticsRunning) {
+      const statusElement = item.querySelector('.component-status');
+      statusElement.textContent = isOnline ? 'ONLINE' : 'OFFLINE';
+      statusElement.className = `component-status ${isOnline ? 'online' : 'offline'}`;
     }
   });
 
-  dom.schematicParts.forEach(part => part.classList.remove('highlighted'));
+  dom.schematicParts.forEach(part => {
+    const componentType = Object.keys(componentMapping).find(key => componentMapping[key] === part.dataset.part);
+    const moduleState = componentType ? model.modules[componentType] : null;
+    part.classList.toggle('highlighted', Boolean(moduleState?.selected));
+  });
 
-  if (item) {
-    item.classList.add('selected');
-
-    if (!state.isDiagnosticsRunning) {
-      const statusElement = item.querySelector('.component-status');
-      statusElement.textContent = 'ONLINE';
-      statusElement.className = 'component-status online';
-    }
-
-    const correspondingPart = document.querySelector(`[data-part="${componentMapping[selectedComponent]}"]`);
-    if (correspondingPart) {
-      correspondingPart.classList.add('highlighted');
-    }
-  }
-
-  if (telemetry && eventComponent) {
-    const eventItem = findComponentItem(eventComponent);
-    const componentName = eventItem?.querySelector('.component-name')?.textContent || eventComponent;
-    addTelemetryEntry(
-      selectedComponent ? `${componentName} selected for configuration` : `${componentName} deselected`
-    );
-  }
-
-  if (announce && eventComponent) {
-    announceComponentChange(eventComponent, Boolean(selectedComponent));
-  }
-
-  if (emitEvent && eventComponent) {
-    const selected = Boolean(selectedComponent);
-    events.emit('component:selection', { component: eventComponent, selected });
-    events.emit(selected ? 'component:selected' : 'component:deselected', { component: eventComponent });
-  }
-
-  return selectedComponent;
+  updateLoadoutSummary(model.loadout);
 }
 
-export function getSelectedComponent() {
-  return document.querySelector('.component-item.selected')?.dataset.component || null;
-}
+function updateLoadoutSummary(summary) {
+  if (!summary) return;
 
-function findComponentItem(componentType) {
-  return Array.from(dom.componentItems).find(item => item.dataset.component === componentType) || null;
+  if (dom.loadoutActiveCount) {
+    dom.loadoutActiveCount.textContent = `${summary.activeCount}/${summary.totalModules}`;
+  }
+
+  if (dom.loadoutPowerDraw) {
+    dom.loadoutPowerDraw.textContent = `${summary.powerDraw}%`;
+  }
+
+  if (dom.loadoutPowerFill) {
+    dom.loadoutPowerFill.style.width = `${summary.powerPercent}%`;
+    dom.loadoutPowerFill.classList.toggle('overdraw', summary.overLimit);
+  }
+
+  if (dom.loadoutStatus) {
+    dom.loadoutStatus.textContent = summary.overLimit ? 'ARC OVERDRAW' : 'STABLE';
+    dom.loadoutStatus.classList.toggle('overdraw', summary.overLimit);
+  }
 }

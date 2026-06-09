@@ -1,12 +1,20 @@
 import { dom } from './dom.js';
-import { state } from './state.js';
-import { setPowerLevel, setSuitColorLevel, setSuitZoomLevel } from './config.js';
 import { stopPartyMode } from './party.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
-import { setSelectedComponent } from './components.js';
-import { DEFAULT_OPERATIONAL_STATE } from './constants.js';
+import { COMMANDS, SUIT_ZOOM } from './constants.js';
+import { coolSuitSystems, resetSuitSystems as resetThermalSystems, setSuitPowerTarget } from './systems.js';
+import { applyDiagnosticResults, clearDiagnosticFindings, runDiagnosticSweep, summarizeDiagnosticResults } from './diagnostics.js';
+import {
+  getSuitModel,
+  isSuitModeActive,
+  resetSuitSystems,
+  setSuitMode,
+  setSuitPower,
+  setSuitStatusLoads
+} from './suit-model.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -18,44 +26,51 @@ function getHoseAudio() {
 
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
-    button.addEventListener('click', e => {
-      const buttonText = e.target.textContent;
+    if (!button.dataset.command) return;
 
-      e.target.style.transform = 'scale(0.95)';
+    button.addEventListener('click', e => {
+      const command = e.currentTarget.dataset.command;
+
+      e.currentTarget.style.transform = 'scale(0.95)';
       setTimeout(() => {
-        e.target.style.transform = '';
+        e.currentTarget.style.transform = '';
       }, 150);
 
-      switch (buttonText) {
-        case 'INITIALIZE SYSTEMS':
-          executeInitializeSystems();
-          break;
-        case 'RUN DIAGNOSTICS':
-          executeRunDiagnostics();
-          break;
-        case 'EMERGENCY SHUTDOWN':
-          executeEmergencyShutdown();
-          break;
-      }
+      executeCommand(command);
     });
   });
 }
 
+export function executeCommand(command) {
+  switch (command) {
+    case COMMANDS.INITIALIZE:
+      executeInitializeSystems();
+      break;
+    case COMMANDS.DIAGNOSTICS:
+      executeRunDiagnostics();
+      break;
+    case COMMANDS.SHUTDOWN:
+      executeEmergencyShutdown();
+      break;
+    default:
+      console.warn(`Unknown suit command: ${command}`);
+  }
+}
+
 export function executeInitializeSystems() {
-  events.emit('system:initialize:start');
+  events.emit(EventTypes.INITIALIZE_START);
 
   performSystemInitialization();
-  events.emit('system:initialize:reset-persistence');
 
   setTimeout(() => {
-    events.emit('system:initialize:power', { value: 50 });
-    events.emit('system:initialize:cpu', { value: 20 });
-    events.emit('system:initialize:memory', { value: 20 });
-    events.emit('system:initialize:integrity', { value: 100 });
-    events.emit('system:initialize:color');
-    events.emit('system:initialize:zoom', { value: 100 });
-    events.emit('system:initialize:modules');
-    events.emit('system:initialize:complete');
+    events.emit(EventTypes.INITIALIZE_POWER, { value: 50 });
+    events.emit(EventTypes.INITIALIZE_CPU, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_MEMORY, { value: 20 });
+    events.emit(EventTypes.INITIALIZE_INTEGRITY, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_COLOR);
+    events.emit(EventTypes.INITIALIZE_ZOOM, { value: SUIT_ZOOM.DEFAULT });
+    events.emit(EventTypes.INITIALIZE_MODULES);
+    events.emit(EventTypes.INITIALIZE_COMPLETE);
   }, 2000);
 }
 
@@ -64,98 +79,76 @@ export function executeInitializeSystemsQuiet() {
 }
 
 function performSystemInitialization() {
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode();
   }
 
+  const clearedDiagnosticFindings = clearDiagnosticFindings({ resetStatuses: true });
+
   dom.backgroundMusic.currentTime = 0;
+  resetSuitSystems({ source: 'initialize' });
+  resetThermalSystems({ power: 50, heat: 34, cpuLoad: 20, memoryUsage: 20, integrity: 100 });
 
-  setSuitColorLevel(DEFAULT_OPERATIONAL_STATE.color);
-  setSuitZoomLevel(DEFAULT_OPERATIONAL_STATE.zoom);
-  setPowerLevel(DEFAULT_OPERATIONAL_STATE.power);
-
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  if (progressBars.length >= 4 && statusTexts.length >= 4) {
-    progressBars[0].style.width = '20%';
-    statusTexts[0].textContent = '20%';
-
-    progressBars[1].style.width = '20%';
-    statusTexts[1].textContent = '20%';
-
-    progressBars[2].style.width = '50%';
-    statusTexts[2].textContent = '50%';
-
-    progressBars[3].style.width = '100%';
-    statusTexts[3].textContent = '100%';
+  if (clearedDiagnosticFindings) {
+    events.emit(EventTypes.DIAGNOSTICS_RESET, { reason: 'initialization recalibration' });
   }
-
-  setSelectedComponent(DEFAULT_OPERATIONAL_STATE.selectedComponent);
 }
 
 function executeRunDiagnostics() {
-  if (state.isDiagnosticsRunning) {
+  if (isSuitModeActive('diagnostics')) {
     addTelemetryEntry('Diagnostics already running - scan request ignored');
     return;
   }
 
-  state.isDiagnosticsRunning = true;
+  const originalModel = getSuitModel();
+  setSuitMode('diagnostics', true, { source: 'diagnostics' });
+  events.emit(EventTypes.DIAGNOSTICS_START);
 
-  events.emit('diagnostics:start');
-
-  const progressBars = dom.progressBars;
-  const statusTexts = dom.statusTexts;
-
-  const originalCpuWidth = progressBars[0].style.width;
-  const originalMemoryWidth = progressBars[1].style.width;
-  const originalCpuText = statusTexts[0].textContent;
-  const originalMemoryText = statusTexts[1].textContent;
-
-  const originalStatuses = [];
   dom.componentItems.forEach(item => {
     const statusElement = item.querySelector('.component-status');
-    originalStatuses.push({
-      element: statusElement,
-      text: statusElement.textContent,
-      className: statusElement.className
-    });
     statusElement.textContent = 'DIAG';
     statusElement.className = 'component-status diag';
   });
 
-  progressBars[0].style.width = '100%';
-  progressBars[1].style.width = '100%';
-  statusTexts[0].textContent = '100%';
-  statusTexts[1].textContent = '100%';
+  setSuitStatusLoads(
+    {
+      cpuLoad: 100,
+      memoryLoad: 100
+    },
+    { source: 'diagnostics' }
+  );
 
   dom.suitSchematic.classList.add('diagnostic-scan');
 
-  events.emit('diagnostics:boost');
+  events.emit(EventTypes.DIAGNOSTICS_BOOST);
 
   setTimeout(() => {
-    state.isDiagnosticsRunning = false;
-
-    progressBars[0].style.width = originalCpuWidth;
-    progressBars[1].style.width = originalMemoryWidth;
-    statusTexts[0].textContent = originalCpuText;
-    statusTexts[1].textContent = originalMemoryText;
-
-    originalStatuses.forEach(status => {
-      status.element.textContent = status.text;
-      status.element.className = status.className;
-    });
+    setSuitStatusLoads(
+      {
+        cpuLoad: originalModel.cpuLoad,
+        memoryLoad: originalModel.memoryLoad,
+        integrity: originalModel.integrity
+      },
+      { source: 'diagnostics' }
+    );
+    setSuitMode('diagnostics', false, { source: 'diagnostics' });
 
     dom.suitSchematic.classList.remove('diagnostic-scan');
 
-    events.emit('diagnostics:complete');
+    const results = runDiagnosticSweep();
+    const summary = summarizeDiagnosticResults(results);
+
+    applyDiagnosticResults(results);
+    results.forEach(result => events.emit(EventTypes.DIAGNOSTICS_MODULE, result));
+    events.emit(EventTypes.DIAGNOSTICS_COMPLETE, { results, summary });
   }, 15000);
 }
 
 function executeEmergencyShutdown() {
-  events.emit('shutdown:start');
+  setSuitMode('emergency', true, { source: 'shutdown' });
+  events.emit(EventTypes.SHUTDOWN_START);
 
-  if (state.isPartyMode) {
+  if (isSuitModeActive('party')) {
     stopPartyMode('shutdown');
   }
 
@@ -172,10 +165,12 @@ function executeEmergencyShutdown() {
   }
 
   triggerEmergencyShutdownEffect(dom);
+  coolSuitSystems(24);
 
   setTimeout(() => {
-    setPowerLevel(0);
+    setSuitPowerTarget(0);
+    setSuitPower(0, { source: 'shutdown', deriveStatus: false });
 
-    events.emit('shutdown:complete');
+    events.emit(EventTypes.SHUTDOWN_COMPLETE);
   }, 2000);
 }

@@ -1,6 +1,8 @@
-import { dom } from './dom.js';
+import { dom, getCommandButton, getComponentItem } from './dom.js';
+import { COMMANDS } from './constants.js';
 import { addTelemetryEntry } from './telemetry.js';
 import { events } from './events.js';
+import { EventTypes } from './event-types.js';
 
 let synthesis = null;
 let recognition = null;
@@ -170,7 +172,7 @@ export function announcePowerLevel(level) {
 
 export function toggleJarvis() {
   jarvisActive = !jarvisActive;
-  events.emit('jarvis:changed', { enabled: jarvisActive });
+  events.emit(EventTypes.JARVIS_CHANGED, { enabled: jarvisActive });
 
   if (dom.jarvisToggle) {
     dom.jarvisToggle.textContent = `J.A.R.V.I.S.: ${jarvisActive ? 'ONLINE' : 'OFFLINE'}`;
@@ -213,13 +215,13 @@ function handleVoiceCommand(event) {
   addTelemetryEntry(`Voice command: "${command}"`);
 
   if (command.includes('initialize') || command.includes('start')) {
-    document.querySelector('.command-btn.primary')?.click();
+    getCommandButton(COMMANDS.INITIALIZE)?.click();
     speak(getRandomPhrase('initialization'));
   } else if (command.includes('diagnostic') || command.includes('scan')) {
-    document.querySelector('.command-btn.secondary')?.click();
+    getCommandButton(COMMANDS.DIAGNOSTICS)?.click();
     speak(getRandomPhrase('diagnostics'));
   } else if (command.includes('emergency') || command.includes('shutdown')) {
-    document.querySelector('.command-btn.danger')?.click();
+    getCommandButton(COMMANDS.SHUTDOWN)?.click();
     speak(jarvisPhrases.emergency[0], true);
   } else if (command.includes('party mode')) {
     dom.musicToggle?.click();
@@ -241,7 +243,7 @@ function handleVoiceCommand(event) {
 }
 
 function selectComponent(componentName) {
-  const component = document.querySelector(`[data-component="${componentName}"]`);
+  const component = getComponentItem(componentName);
   component?.click();
 }
 

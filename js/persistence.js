@@ -1,10 +1,18 @@
 import { dom } from './dom.js';
 import { events } from './events.js';
-import { DEFAULT_OPERATIONAL_STATE, componentMapping } from './constants.js';
-import { setPowerLevel, setSuitColorLevel, setSuitZoomLevel } from './config.js';
-import { getSelectedComponent, setSelectedComponent } from './components.js';
+import { EventTypes } from './event-types.js';
+import { DEFAULT_OPERATIONAL_STATE, componentMapping, SUIT_ZOOM } from './constants.js';
+import { setSuitPowerTarget } from './systems.js';
+import {
+  getSuitModel,
+  isSuitModeActive,
+  setSuitColor,
+  setSuitComponentSelection,
+  setSuitPower,
+  setSuitZoom,
+  subscribeSuitModel
+} from './suit-model.js';
 import { activateHudMode, deactivateHudMode } from './hud.js';
-import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
 
 const STORAGE_KEY = 'ironman.suitDesigner.v1';
@@ -25,6 +33,7 @@ const DEFAULT_STORAGE_STATE = {
 };
 
 let storageAvailable = false;
+let restoring = false;
 
 export function setupPersistence() {
   storageAvailable = canUseLocalStorage();
@@ -36,48 +45,41 @@ export function setupPersistence() {
   const storedState = loadStoredState();
   const sessionCount = incrementSessionCounter(storedState);
 
+  setupPersistenceListeners();
   restoreOperationalState(storedState.operational);
   restorePreferences(storedState.preferences);
   persistOperationalState();
-  setupPersistenceListeners();
 
   addTelemetryEntry(`Suit memory restored - session ${sessionCount}`);
 }
 
 function setupPersistenceListeners() {
-  events.on('power:changed', ({ value }) => {
-    saveOperationalPatch({ power: value });
+  subscribeSuitModel(({ state: model, changes }) => {
+    if (restoring) return;
+
+    const operationalChanges = ['power', 'color', 'zoom', 'activeModules', 'modules'];
+    if (changes.some(change => operationalChanges.includes(change))) {
+      saveOperationalPatch(modelToOperationalState(model));
+    }
   });
 
-  events.on('color:changed', ({ value }) => {
-    saveOperationalPatch({ color: value });
-  });
-
-  events.on('zoom:changed', ({ value }) => {
-    saveOperationalPatch({ zoom: value });
-  });
-
-  events.on('component:selection', ({ component, selected }) => {
-    saveOperationalPatch({ selectedComponent: selected ? component : null });
-  });
-
-  events.on('hud:activated', () => {
+  events.on(EventTypes.HUD_ACTIVATED, () => {
     savePreferencePatch({ hudMode: true });
   });
 
-  events.on('hud:deactivated', () => {
+  events.on(EventTypes.HUD_DEACTIVATED, () => {
     savePreferencePatch({ hudMode: false });
   });
 
-  events.on('jarvis:changed', ({ enabled }) => {
+  events.on(EventTypes.JARVIS_CHANGED, ({ enabled }) => {
     savePreferencePatch({ jarvisEnabled: Boolean(enabled) });
   });
 
-  events.on('shutdown:complete', () => {
-    saveOperationalPatch({ power: readCurrentPower() });
+  events.on(EventTypes.SHUTDOWN_COMPLETE, () => {
+    saveOperationalPatch({ power: getSuitModel().power });
   });
 
-  events.on('system:initialize:reset-persistence', () => {
+  events.on(EventTypes.INITIALIZE_COMPLETE, () => {
     resetPersistedOperationalState();
   });
 }
@@ -85,19 +87,28 @@ function setupPersistenceListeners() {
 function restoreOperationalState(operational) {
   const restored = normalizeOperationalState(operational);
 
-  setSuitColorLevel(restored.color);
-  setSuitZoomLevel(restored.zoom);
-  setPowerLevel(restored.power);
-  setSelectedComponent(restored.selectedComponent);
+  restoring = true;
+  setSuitColor(restored.color, { source: 'persistence' });
+  setSuitZoom(restored.zoom, { source: 'persistence' });
+  setSuitPowerTarget(restored.power);
+  setSuitPower(restored.power, { source: 'persistence', deriveStatus: false });
+
+  Object.keys(componentMapping).forEach(component => {
+    const shouldBeActive = restored.activeModules.includes(component);
+    if (getSuitModel().modules[component]?.selected !== shouldBeActive) {
+      setSuitComponentSelection(component, shouldBeActive, { source: 'persistence' });
+    }
+  });
+  restoring = false;
 }
 
 function restorePreferences(preferences) {
   const restoredPreferences = normalizePreferences(preferences);
 
   if (dom.hudToggle) {
-    if (restoredPreferences.hudMode) {
+    if (restoredPreferences.hudMode && !isSuitModeActive('hud')) {
       activateHudMode();
-    } else if (state.isHudMode) {
+    } else if (!restoredPreferences.hudMode && isSuitModeActive('hud')) {
       deactivateHudMode();
     }
   }
@@ -108,12 +119,7 @@ function restorePreferences(preferences) {
 }
 
 function persistOperationalState() {
-  saveOperationalPatch({
-    color: readCurrentColor(),
-    power: readCurrentPower(),
-    zoom: readCurrentZoom(),
-    selectedComponent: getSelectedComponent()
-  });
+  saveOperationalPatch(modelToOperationalState(getSuitModel()));
 }
 
 function resetPersistedOperationalState() {
@@ -216,8 +222,8 @@ function normalizeOperationalState(operational) {
   return {
     color: clampNumber(operational?.color, 0, 100, DEFAULT_OPERATIONAL_STATE.color),
     power: clampNumber(operational?.power, 0, 100, DEFAULT_OPERATIONAL_STATE.power),
-    zoom: clampNumber(operational?.zoom, 25, 200, DEFAULT_OPERATIONAL_STATE.zoom),
-    selectedComponent: normalizeComponent(operational?.selectedComponent)
+    zoom: clampNumber(operational?.zoom, SUIT_ZOOM.MIN, SUIT_ZOOM.MAX, DEFAULT_OPERATIONAL_STATE.zoom),
+    activeModules: normalizeComponents(operational?.activeModules)
   };
 }
 
@@ -237,24 +243,22 @@ function normalizeStats(stats) {
   };
 }
 
-function normalizeComponent(component) {
-  return Object.prototype.hasOwnProperty.call(componentMapping, component) ? component : null;
+function modelToOperationalState(model) {
+  return {
+    color: model.color,
+    power: model.power,
+    zoom: model.zoom,
+    activeModules: model.activeModules
+  };
+}
+
+function normalizeComponents(components) {
+  if (!Array.isArray(components)) return [...DEFAULT_OPERATIONAL_STATE.activeModules];
+  return components.filter(component => Object.prototype.hasOwnProperty.call(componentMapping, component));
 }
 
 function normalizeTimestamp(timestamp) {
   return typeof timestamp === 'string' ? timestamp : null;
-}
-
-function readCurrentColor() {
-  return clampNumber(dom.colorSlider?.value, 0, 100, DEFAULT_OPERATIONAL_STATE.color);
-}
-
-function readCurrentPower() {
-  return clampNumber(dom.powerSlider?.value, 0, 100, DEFAULT_OPERATIONAL_STATE.power);
-}
-
-function readCurrentZoom() {
-  return clampNumber(dom.zoomSlider?.value, 25, 200, DEFAULT_OPERATIONAL_STATE.zoom);
 }
 
 function clampNumber(value, min, max, fallback) {
