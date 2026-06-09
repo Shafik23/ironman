@@ -1,7 +1,7 @@
 // Flight Controls - HUD flight input and heading management
 // Handles flight keys during HUD mode only.
 
-import { state } from '../state.js';
+import { isSuitModeActive } from '../suit-model.js';
 
 // Flight state
 const flightState = {
@@ -118,7 +118,7 @@ export function getFlightInput() {
  */
 function handleKeyDown(e) {
   // Only process in HUD mode
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   switch (e.key) {
     case 'ArrowLeft':
@@ -216,7 +216,7 @@ function updateFlightInput() {
  * Main flight update loop - called at ~60fps
  */
 function updateFlight() {
-  if (!state.isHudMode) return;
+  if (!isSuitModeActive('hud')) return;
 
   const deltaTime = UPDATE_RATE / 1000; // Convert to seconds
 

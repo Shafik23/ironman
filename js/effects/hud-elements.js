@@ -2,6 +2,7 @@
 // Handles dynamic HUD element updates (altitude, speed, radar, etc.)
 
 import { dom } from '../dom.js';
+import { getSuitSystemStats } from '../systems.js';
 import {
   initFlightControls,
   startFlightControls,
@@ -315,7 +316,8 @@ function updateRadarThreats() {
 }
 
 export function updateHudPower(value) {
-  const percentage = parseInt(value, 10);
+  const stats = getSuitSystemStats();
+  const percentage = Math.round(parseFloat(value));
   simState.power = percentage;
 
   // Update power value display
@@ -347,15 +349,24 @@ export function updateHudPower(value) {
 function renderHudWarnings() {
   if (!dom.hudWarnings) return;
 
-  let powerWarning = '';
-  if (simState.power < 20) {
-    powerWarning = 'WARNING: CRITICAL POWER LEVEL';
-  } else if (simState.power < 40) {
-    powerWarning = 'CAUTION: LOW POWER';
-  }
+  const stats = getSuitSystemStats();
+  const systemWarning = stats.warnings.length > 0
+    ? `WARNING: ${stats.warnings.slice(0, 2).join(' / ').toUpperCase()}`
+    : '';
+  const powerWarning = !systemWarning && simState.power < 20
+    ? 'WARNING: CRITICAL POWER LEVEL'
+    : !systemWarning && simState.power < 40
+      ? 'CAUTION: LOW POWER'
+      : '';
+  const warnings = [systemWarning, powerWarning, simState.flightWarning].filter(Boolean);
 
-  dom.hudWarnings.textContent = [powerWarning, simState.flightWarning].filter(Boolean).join(' | ');
-  dom.hudWarnings.classList.toggle('hud-warning-active', simState.power < 20 || Boolean(simState.flightWarning));
+  dom.hudWarnings.textContent = warnings.join(' | ');
+  dom.hudWarnings.classList.toggle(
+    'hud-warning-active',
+    Boolean(simState.flightWarning) ||
+      simState.power < 20 ||
+      stats.warnings.some(warning => /critical|overheat|integrity/i.test(warning))
+  );
 }
 
 export function updateHudSystemStatus(component, isOnline) {
