@@ -6,6 +6,7 @@ import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 import { triggerEmergencyShutdownEffect } from './effects/shutdown.js';
 import { addTelemetryEntry } from './telemetry.js';
+import { COMMANDS, SUIT_ZOOM } from './constants.js';
 
 let hoseAudio = null;
 function getHoseAudio() {
@@ -18,26 +19,32 @@ function getHoseAudio() {
 export function setupCommandButtons() {
   dom.commandButtons.forEach(button => {
     button.addEventListener('click', e => {
-      const buttonText = e.target.textContent;
+      const command = e.currentTarget.dataset.command;
 
-      e.target.style.transform = 'scale(0.95)';
+      e.currentTarget.style.transform = 'scale(0.95)';
       setTimeout(() => {
-        e.target.style.transform = '';
+        e.currentTarget.style.transform = '';
       }, 150);
 
-      switch (buttonText) {
-        case 'INITIALIZE SYSTEMS':
-          executeInitializeSystems();
-          break;
-        case 'RUN DIAGNOSTICS':
-          executeRunDiagnostics();
-          break;
-        case 'EMERGENCY SHUTDOWN':
-          executeEmergencyShutdown();
-          break;
-      }
+      executeCommand(command);
     });
   });
+}
+
+export function executeCommand(command) {
+  switch (command) {
+    case COMMANDS.INITIALIZE:
+      executeInitializeSystems();
+      break;
+    case COMMANDS.DIAGNOSTICS:
+      executeRunDiagnostics();
+      break;
+    case COMMANDS.SHUTDOWN:
+      executeEmergencyShutdown();
+      break;
+    default:
+      console.warn(`Unknown suit command: ${command}`);
+  }
 }
 
 export function executeInitializeSystems() {
@@ -51,7 +58,7 @@ export function executeInitializeSystems() {
     events.emit(EventTypes.INITIALIZE_MEMORY, { value: 20 });
     events.emit(EventTypes.INITIALIZE_INTEGRITY, { value: 100 });
     events.emit(EventTypes.INITIALIZE_COLOR);
-    events.emit(EventTypes.INITIALIZE_ZOOM, { value: 100 });
+    events.emit(EventTypes.INITIALIZE_ZOOM, { value: SUIT_ZOOM.DEFAULT });
     events.emit(EventTypes.INITIALIZE_MODULES);
     events.emit(EventTypes.INITIALIZE_COMPLETE);
   }, 2000);
@@ -72,9 +79,9 @@ function performSystemInitialization() {
   dom.colorValue.textContent = '0%';
   updateSuitColor(0);
 
-  dom.zoomSlider.value = 100;
-  dom.zoomValue.textContent = '100%';
-  updateSuitZoom(100);
+  dom.zoomSlider.value = SUIT_ZOOM.DEFAULT;
+  dom.zoomValue.textContent = `${SUIT_ZOOM.DEFAULT}%`;
+  updateSuitZoom(SUIT_ZOOM.DEFAULT);
 
   dom.powerSlider.value = 50;
   dom.powerValue.textContent = '50%';

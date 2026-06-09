@@ -5,6 +5,7 @@ import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 import { debounce } from './utils/timing.js';
 import { state } from './state.js';
+import { SUIT_ZOOM } from './constants.js';
 import {
   calculateFrameColor,
   calculateReactorFromSuitColor,
@@ -17,6 +18,9 @@ const STATUS_BAR_COUNT = 4;
 
 export function setupConfigurationSliders() {
   const debouncedAnnounce = debounce(value => announcePowerLevel(parseInt(value)), 500);
+
+  dom.zoomSlider.min = SUIT_ZOOM.MIN;
+  dom.zoomSlider.max = SUIT_ZOOM.MAX;
 
   dom.powerSlider.addEventListener('input', e => {
     dom.powerValue.textContent = e.target.value + '%';

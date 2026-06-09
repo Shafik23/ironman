@@ -1,3 +1,5 @@
+import { SUIT_ZOOM } from './constants.js';
+
 const COLOR_STOPS = [
   { max: 14, from: [0, 255, 255], to: [0, 80, 255] },
   { max: 28, from: [0, 80, 255], to: [128, 0, 255] },
@@ -7,13 +9,6 @@ const COLOR_STOPS = [
   { max: 85, from: [255, 165, 0], to: [255, 255, 0] },
   { max: 100, from: [255, 255, 0], to: [0, 255, 128] }
 ];
-
-const SUIT_BOUNDS = {
-  left: 95,
-  right: 305,
-  top: 25,
-  bottom: 485
-};
 
 function clampPercent(value) {
   return Math.max(0, Math.min(100, parseInt(value)));
@@ -68,12 +63,13 @@ export function calculateStatusValues(powerLevel) {
 }
 
 export function calculateSuitViewBox(zoomValue) {
-  const suitWidth = SUIT_BOUNDS.right - SUIT_BOUNDS.left;
-  const suitHeight = SUIT_BOUNDS.bottom - SUIT_BOUNDS.top;
-  const suitCenterX = (SUIT_BOUNDS.left + SUIT_BOUNDS.right) / 2;
-  const suitCenterY = (SUIT_BOUNDS.top + SUIT_BOUNDS.bottom) / 2;
+  const suitBounds = SUIT_ZOOM.BOUNDS;
+  const suitWidth = suitBounds.right - suitBounds.left;
+  const suitHeight = suitBounds.bottom - suitBounds.top;
+  const suitCenterX = (suitBounds.left + suitBounds.right) / 2;
+  const suitCenterY = (suitBounds.top + suitBounds.bottom) / 2;
 
-  const zoomFactor = (parseInt(zoomValue) / 100) * 0.8;
+  const zoomFactor = (parseInt(zoomValue) / SUIT_ZOOM.DEFAULT) * SUIT_ZOOM.VIEWBOX_SCALE;
   const viewWidth = suitWidth / zoomFactor;
   const viewHeight = suitHeight / zoomFactor;
   const viewX = suitCenterX - viewWidth / 2;

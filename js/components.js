@@ -1,4 +1,4 @@
-import { dom } from './dom.js';
+import { dom, getSchematicPart } from './dom.js';
 import { componentMapping } from './constants.js';
 import { state } from './state.js';
 import { addTelemetryEntry } from './telemetry.js';
@@ -10,7 +10,7 @@ export function setupComponentSelection() {
   dom.componentItems.forEach(item => {
     item.addEventListener('click', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       const componentName = item.querySelector('.component-name').textContent;
 
       const wasSelected = item.classList.contains('selected');
@@ -61,7 +61,7 @@ export function setupComponentSelection() {
 
     item.addEventListener('mouseenter', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = 'drop-shadow(0 0 10px rgba(255, 215, 0, 0.5))';
       }
@@ -69,7 +69,7 @@ export function setupComponentSelection() {
 
     item.addEventListener('mouseleave', () => {
       const componentType = item.dataset.component;
-      const correspondingPart = document.querySelector(`[data-part="${componentMapping[componentType]}"]`);
+      const correspondingPart = getSchematicPart(componentMapping[componentType]);
       if (correspondingPart && !correspondingPart.classList.contains('highlighted')) {
         correspondingPart.style.filter = '';
       }
