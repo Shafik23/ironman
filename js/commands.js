@@ -29,11 +29,12 @@ export function setupCommandButtons() {
     if (!button.dataset.command) return;
 
     button.addEventListener('click', e => {
-      const command = e.currentTarget.dataset.command;
+      const button = e.currentTarget;
+      const command = button.dataset.command;
 
-      e.currentTarget.style.transform = 'scale(0.95)';
+      button.style.transform = 'scale(0.95)';
       setTimeout(() => {
-        e.currentTarget.style.transform = '';
+        button.style.transform = '';
       }, 150);
 
       executeCommand(command);

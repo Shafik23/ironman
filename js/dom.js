@@ -37,7 +37,6 @@ export const dom = {
   hudChestStatus: null,
   hudArmsStatus: null,
   hudLegsStatus: null,
-  missionStartBtn: null,
   hudMissionPanel: null,
   hudMissionState: null,
   hudMissionTimer: null,
@@ -91,7 +90,6 @@ export function initializeDOMReferences() {
   dom.hudChestStatus = document.getElementById('hudChestStatus');
   dom.hudArmsStatus = document.getElementById('hudArmsStatus');
   dom.hudLegsStatus = document.getElementById('hudLegsStatus');
-  dom.missionStartBtn = document.getElementById('missionStartBtn');
   dom.hudMissionPanel = document.getElementById('hudMissionPanel');
   dom.hudMissionState = document.getElementById('hudMissionState');
   dom.hudMissionTimer = document.getElementById('hudMissionTimer');

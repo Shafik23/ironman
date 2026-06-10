@@ -19,7 +19,6 @@ const LOCK_RADIUS = 18;
 let threatSequence = 0;
 
 export function setupMissionLoop() {
-  dom.missionStartBtn?.addEventListener('click', startMission);
   dom.hudMissionAction?.addEventListener('click', handleMissionAction);
 
   document.addEventListener('keydown', event => {
@@ -320,10 +319,6 @@ function updateMissionUI(reason = '') {
 
   if (dom.hudMissionAction) {
     dom.hudMissionAction.textContent = mission.status === 'active' ? 'REPULSOR FIRE' : 'ENGAGE';
-  }
-
-  if (dom.missionStartBtn) {
-    dom.missionStartBtn.textContent = mission.status === 'active' ? 'MISSION ACTIVE' : 'START HUD MISSION';
   }
 
   if (dom.hudMissionPanel) {
