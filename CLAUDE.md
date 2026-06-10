@@ -56,7 +56,15 @@ This is an Iron Man suit designer web application that creates an interactive, r
 ```bash
 # Start development server with live reload (auto-installs dependencies)
 ./dev.sh
+
+# Run the full local verification pass before committing or deploying
+npm run verify
+
+# Run only the Node test suite
+npm test
 ```
+
+`npm run verify` is the canonical pre-commit/pre-deploy check. It runs JavaScript syntax checks, the Node test suite, and `git diff --check`.
 
 ### Deployment Commands
 
@@ -67,6 +75,8 @@ This is an Iron Man suit designer web application that creates an interactive, r
 # Quick git commit and push workflow
 ./push_all_changes.sh "commit message"
 ```
+
+Production should be verified at `https://ironman.pollamin.com/`. Plain HTTP should redirect to HTTPS.
 
 ## Architecture & Key Patterns
 
