@@ -1,4 +1,4 @@
-import { componentMapping, LOADOUT_POWER_LIMIT, modulePowerDraw } from './constants.js';
+import { componentMapping, LOADOUT_POWER_LIMIT, modulePowerDraw, SUIT_ZOOM } from './constants.js';
 import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 
@@ -12,6 +12,12 @@ function clampPercent(value) {
   const parsed = Number.parseInt(value, 10);
   if (Number.isNaN(parsed)) return PERCENT_MIN;
   return Math.max(PERCENT_MIN, Math.min(PERCENT_MAX, parsed));
+}
+
+function clampZoom(value) {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return SUIT_ZOOM.DEFAULT;
+  return Math.max(SUIT_ZOOM.MIN, Math.min(SUIT_ZOOM.MAX, parsed));
 }
 
 function createModuleState(activeModules = []) {
@@ -129,7 +135,7 @@ function normalizeSuitModel(model) {
   return {
     power: clampPercent(model.power),
     color: clampPercent(model.color),
-    zoom: clampPercent(model.zoom),
+    zoom: clampZoom(model.zoom),
     cpuLoad: clampPercent(model.cpuLoad),
     memoryLoad: clampPercent(model.memoryLoad),
     integrity: clampPercent(model.integrity),
@@ -192,7 +198,7 @@ export function setSuitZoom(value, { source = 'config' } = {}) {
   const state = commitSuitModel(
     {
       ...suitModel,
-      zoom: clampPercent(value)
+      zoom: clampZoom(value)
     },
     { source, changes: ['zoom'] }
   );
