@@ -1,6 +1,10 @@
 import { dom, getCommandButton } from './dom.js';
 import { COMMANDS } from './constants.js';
-import { isSuitModeActive } from './suit-model.js';
+import { getSuitModel, isSuitModeActive, setSuitPower } from './suit-model.js';
+import { setSuitPowerTarget } from './systems.js';
+import { addTelemetryEntry } from './telemetry.js';
+
+const POWER_STEP = 15;
 
 function shouldIgnoreShortcut(event) {
   if (event.altKey || event.ctrlKey || event.metaKey) {
@@ -15,13 +19,20 @@ function shouldIgnoreShortcut(event) {
   return Boolean(target.closest('input, textarea, select, button, [contenteditable="true"], [role="textbox"]'));
 }
 
+function adjustPower(delta) {
+  const next = Math.max(0, Math.min(100, getSuitModel().power + delta));
+  setSuitPowerTarget(next);
+  setSuitPower(next, { source: 'keyboard', deriveStatus: false });
+  addTelemetryEntry(`Power output adjusted to ${next}%`);
+}
+
 export function setupKeyboardShortcuts() {
   document.addEventListener('keydown', e => {
     if (shouldIgnoreShortcut(e)) {
       return;
     }
 
-    if (isSuitModeActive('hud') && !['Escape', 'h', 'H'].includes(e.key)) {
+    if (isSuitModeActive('hud') && !['Escape', 'h', 'H', 'q', 'Q', 'e', 'E'].includes(e.key)) {
       return;
     }
 
@@ -52,6 +63,16 @@ export function setupKeyboardShortcuts() {
       case 'H':
         e.preventDefault();
         dom.hudToggle?.click();
+        break;
+      case 'e':
+      case 'E':
+        e.preventDefault();
+        adjustPower(POWER_STEP);
+        break;
+      case 'q':
+      case 'Q':
+        e.preventDefault();
+        adjustPower(-POWER_STEP);
         break;
       case 'i':
       case 'I':
