@@ -1,4 +1,4 @@
-/* HUD Overlay Mode - Main Container and Visor Effect */
+/* HUD Overlay Mode - Container, 3D viewport shell and full-screen effects */
 
 .hud-overlay {
     position: fixed;
@@ -30,6 +30,16 @@
         opacity: 1;
         filter: blur(0) brightness(1);
     }
+}
+
+/* three.js viewport */
+.hud-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
 }
 
 /* Visor Edge Effects - Creates curved helmet viewport illusion */
@@ -141,7 +151,67 @@
     pointer-events: none;
 }
 
-/* Scan lines effect for HUD (optional enhancement) */
+/* Boost vignette - blue rush around the edges while boosting */
+.hud-boost-vignette {
+    position: absolute;
+    inset: 0;
+    z-index: 97;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        transparent 52%,
+        rgba(60, 180, 255, 0.14) 82%,
+        rgba(120, 220, 255, 0.28) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+.hud-boost-vignette.active {
+    opacity: 1;
+}
+
+/* Damage flash on collisions */
+.hud-damage-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 98;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(255, 40, 40, 0.12) 40%,
+        rgba(255, 40, 40, 0.45) 100%
+    );
+    opacity: 0;
+}
+
+.hud-damage-flash.active {
+    animation: hud-damage 0.7s ease-out forwards;
+}
+
+@keyframes hud-damage {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* WebGL fallback message */
+.hud-render-fallback {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 150;
+    color: var(--accent-gold);
+    font-size: 1.1rem;
+    letter-spacing: 3px;
+    text-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.hud-render-fallback.hidden {
+    display: none;
+}
+
+/* Scan lines effect for HUD */
 .hud-overlay::after {
     content: '';
     position: absolute;

@@ -467,8 +467,11 @@
         <!-- Local music file for Ironman interface -->
     </audio>
 
-    <!-- HUD Overlay Mode -->
+    <!-- HUD Overlay Mode - three.js first-person flight -->
     <div id="hudOverlay" class="hud-overlay">
+        <!-- 3D viewport -->
+        <canvas id="hudCanvas" class="hud-canvas"></canvas>
+
         <!-- Back to Schematic Button -->
         <button id="hudBackBtn" class="hud-back-btn">← SCHEMATIC VIEW</button>
 
@@ -478,43 +481,35 @@
         <div class="visor-edge visor-edge-left"></div>
         <div class="visor-edge visor-edge-right"></div>
 
-        <!-- Cityscape Background Layers (parallax) -->
-        <div class="cityscape-container">
-            <div class="cityscape-layer stars"></div>
-            <div class="cityscape-layer clouds clouds-far"></div>
-            <div class="cityscape-layer clouds clouds-near"></div>
-            <div class="cityscape-layer buildings buildings-far"></div>
-            <div class="cityscape-layer buildings buildings-mid"></div>
-            <div class="cityscape-layer buildings buildings-near"></div>
-            <div class="cityscape-layer city-lights"></div>
-            <!-- Street/Road Elements -->
-            <div class="street-surface"></div>
-            <div class="street-grid"></div>
-        </div>
-
         <!-- HUD Elements Container -->
-        <div class="hud-elements">
-            <!-- Top Bar: Heading/Compass, Altitude, Speed -->
+        <div class="hud-elements" id="hudElements">
+            <!-- Top Bar: Altitude, Compass, Speed -->
             <div class="hud-top-bar">
-                <div class="hud-altitude">
+                <div class="hud-readout hud-altitude">
                     <span class="label">ALT</span>
-                    <span class="value" id="hudAltitude">10,000</span>
+                    <span class="value" id="hudAltitude">820</span>
                     <span class="unit">FT</span>
                 </div>
                 <div class="hud-compass">
                     <div class="compass-track" id="compassTrack"></div>
                     <div class="compass-indicator">▼</div>
-                    <div class="compass-heading" id="compassHeading">042°</div>
+                    <div class="compass-heading" id="compassHeading">335°</div>
                 </div>
-                <div class="hud-speed">
+                <div class="hud-readout hud-speed">
                     <span class="label">SPD</span>
-                    <span class="value" id="hudSpeed">750</span>
+                    <span class="value" id="hudSpeed">230</span>
                     <span class="unit">KTS</span>
                 </div>
             </div>
 
-            <!-- Center: Targeting Reticle -->
+            <!-- Wave announcements -->
+            <div class="hud-wave-banner" id="hudWaveBanner"></div>
+
+            <!-- Center: Pitch Ladder + Targeting Reticle -->
             <div class="hud-center">
+                <div class="pitch-ladder-window">
+                    <div class="pitch-ladder" id="hudPitchLadder"></div>
+                </div>
                 <svg class="targeting-reticle" viewBox="0 0 200 200">
                     <circle class="reticle-outer" cx="100" cy="100" r="80" />
                     <circle class="reticle-inner" cx="100" cy="100" r="40" />
@@ -529,36 +524,16 @@
                     <path class="reticle-bracket" d="M30,170 L30,150 M30,170 L50,170" />
                     <path class="reticle-bracket" d="M170,170 L170,150 M170,170 L150,170" />
                 </svg>
+                <div class="threat-arrow" id="hudThreatArrow"></div>
                 <div class="target-lock-indicator hidden" id="targetLock">
                     <span>TARGET LOCKED</span>
                 </div>
             </div>
 
-            <!-- Mission Control -->
-            <div class="hud-mission-panel" id="hudMissionPanel">
-                <div class="mission-kicker">MISSION</div>
-                <div class="mission-title">DRONE INTERCEPT</div>
-                <div class="mission-readouts">
-                    <div class="mission-readout">
-                        <span>STATE</span>
-                        <strong id="hudMissionState">STANDBY</strong>
-                    </div>
-                    <div class="mission-readout">
-                        <span>TIMER</span>
-                        <strong id="hudMissionTimer">00:45</strong>
-                    </div>
-                    <div class="mission-readout">
-                        <span>THREATS</span>
-                        <strong id="hudMissionCount">0/0</strong>
-                    </div>
-                </div>
-                <div class="mission-progress-track">
-                    <div class="mission-progress-fill" id="hudMissionProgress"></div>
-                </div>
-                <button class="hud-mission-action" id="hudMissionAction">ENGAGE</button>
-            </div>
+            <!-- Target brackets projected over drones -->
+            <div class="hud-targets" id="hudTargets"></div>
 
-            <!-- Left Side: Power Gauges -->
+            <!-- Left Side: Power & Thrust Gauges -->
             <div class="hud-left-panel">
                 <div class="hud-gauge power-gauge">
                     <div class="gauge-label">POWER</div>
@@ -572,34 +547,25 @@
                 </div>
                 <div class="hud-gauge repulsor-gauge">
                     <div class="gauge-label">REPULSOR</div>
-                    <div class="gauge-bar">
-                        <div class="gauge-fill-bar" id="hudRepulsorBar"></div>
-                    </div>
-                    <div class="gauge-value">READY</div>
+                    <div class="gauge-value" id="hudRepulsorStatus">READY</div>
                 </div>
                 <div class="hud-gauge thruster-gauge">
                     <div class="gauge-label">THRUSTER</div>
                     <div class="gauge-bar">
                         <div class="gauge-fill-bar" id="hudThrusterBar"></div>
                     </div>
-                    <div class="gauge-value" id="hudThrusterStatus">ONLINE</div>
+                    <div class="gauge-value" id="hudThrusterStatus">CRUISE</div>
                 </div>
             </div>
 
-            <!-- Right Side: Systems Status & Radar -->
+            <!-- Right Side: Radar, Wave Status & Systems -->
             <div class="hud-right-panel">
                 <div class="hud-radar">
-                    <svg class="radar-display" viewBox="0 0 120 120">
-                        <circle class="radar-bg" cx="60" cy="60" r="55" />
-                        <circle class="radar-ring" cx="60" cy="60" r="40" />
-                        <circle class="radar-ring" cx="60" cy="60" r="25" />
-                        <line class="radar-line" x1="60" y1="5" x2="60" y2="115" />
-                        <line class="radar-line" x1="5" y1="60" x2="115" y2="60" />
-                        <line class="radar-sweep" x1="60" y1="60" x2="60" y2="5" />
-                        <!-- Threat indicators added dynamically -->
-                        <g class="radar-threats" id="radarThreats"></g>
-                        <circle class="radar-center" cx="60" cy="60" r="3" />
-                    </svg>
+                    <canvas id="hudRadarCanvas" width="150" height="150"></canvas>
+                </div>
+                <div class="hud-wave-info">
+                    <span id="hudWave">PATROL</span>
+                    <span id="hudThreats">HOSTILES 0/0</span>
                 </div>
                 <div class="hud-system-status">
                     <div class="status-item">
@@ -621,15 +587,35 @@
                 </div>
             </div>
 
-            <!-- Bottom Bar: Warnings & Mode Indicator -->
+            <!-- Score -->
+            <div class="hud-score-panel">
+                <span class="score-label">SCORE</span>
+                <span class="score-value" id="hudScore">0</span>
+            </div>
+
+            <!-- Bottom Bar: Warnings & Controls -->
             <div class="hud-bottom-bar">
                 <div class="hud-warnings" id="hudWarnings"></div>
                 <div class="hud-flight-controls-hint">
                     <span class="hint-key">W</span>/<span class="hint-key">S</span> CLIMB/DIVE
-                    <span class="hint-key">A</span>/<span class="hint-key">D</span> YAW
+                    <span class="hint-key">A</span>/<span class="hint-key">D</span> TURN
                     <span class="hint-key">SHIFT</span> BOOST
+                    <span class="hint-key">SPACE</span> FIRE
                 </div>
             </div>
+
+            <!-- Gauntlet repulsor glows -->
+            <div class="gauntlet gauntlet-left" id="gauntletLeft"></div>
+            <div class="gauntlet gauntlet-right" id="gauntletRight"></div>
+        </div>
+
+        <!-- Full-screen effect layers -->
+        <div class="hud-boost-vignette" id="hudBoostVignette"></div>
+        <div class="hud-damage-flash" id="hudDamageFlash"></div>
+
+        <!-- Fallback message if WebGL is unavailable -->
+        <div class="hud-render-fallback hidden" id="hudRenderFallback">
+            VISOR RENDER OFFLINE — WEBGL UNAVAILABLE
         </div>
 
         <!-- Visor HUD Frame Overlay -->

@@ -28,6 +28,8 @@ This is an Iron Man suit designer web application that creates an interactive, r
 - `components.css` - Buttons, toggles, component list, status bars
 - `schematic.css` - SVG schematic and tooltip styling
 - `animations.css` - All keyframe animations (reactor, party, diagnostics, emergency)
+- `hud.css` - HUD mode shell: overlay, 3D viewport, visor frame, full-screen effects
+- `hud-elements.css` - HUD instrumentation: compass, pitch ladder, targets, radar, gauges
 
 ### JavaScript Modules (`js/`)
 **Core:**
@@ -46,6 +48,21 @@ This is an Iron Man suit designer web application that creates an interactive, r
 - `telemetry.js` - Event-driven telemetry logging system
 - `keyboard.js` - Keyboard shortcuts
 - `jarvis.js` - J.A.R.V.I.S. voice assistant (disabled, needs work)
+- `hud.js` - HUD mode toggle, lazy flight-engine loading, suit-model integration
+
+**HUD flight sim (`js/flight/`)** - three.js first-person flight game (HUD mode):
+- `engine.js` - Orchestrator: renderer, game loop, lock-on combat, drone waves, world wrap
+- `physics.js` - Pure flight model (no DOM/three.js deps; unit-tested)
+- `input.js` - Flight keyboard state (WASD/arrows, Shift boost, Space fire)
+- `city.js` - Procedural night city: instanced buildings, traffic, Stark Tower, collision grid
+- `sky.js` - Star dome, moon, clouds, night lighting
+- `drones.js` - Hostile drone entities: spawning, patrol/evade AI
+- `effects.js` - Repulsor bolts, explosions, boost streaks
+- `audio.js` - WebAudio-synthesized sounds (thruster, repulsor, explosion, lock)
+- `hud-overlay.js` - Drives the DOM HUD (compass, pitch ladder, radar, target brackets)
+
+**Vendored (`js/vendor/`)**:
+- `three.module.min.js` + `three.core.min.js` - three.js (pinned; loaded lazily on first HUD activation)
 
 **Subdirectories:**
 - `effects/shutdown.js` - Emergency shutdown visual effects (fire extinguisher animation)
@@ -121,18 +138,36 @@ The application uses a pub/sub event bus (`events.js`) for decoupled communicati
 - Real-time telemetry log with automatic event-driven updates
 - Configuration sliders affecting system status bars
 - Arc reactor power dynamics (color/glow intensity based on power level)
+- HUD Mode: three.js first-person flight game over a procedural night city (see below)
 - Party Mode toggle with background music, color cycling, and dancing animations
 - Emergency shutdown with physics-based fire extinguisher animation
 - Diagnostic mode with system scanning animation
 - J.A.R.V.I.S. voice assistant with speech synthesis/recognition (disabled)
 
+### HUD Mode (first-person flight)
+- Toggled with the HUD button or **H**; renders into `#hudCanvas` inside `#hudOverlay`
+- three.js loads lazily on first activation (dynamic import in `hud.js`), so the schematic view pays no 3D cost
+- Infinite city illusion: one deterministic 2.2km tile rendered as a 3x3 clone grid; the engine wraps the player (and drones/bolts) across tile boundaries
+- Gameplay: hostile drone waves; center a drone in the reticle to lock (gold ring), Space/click fires homing repulsor bolts; score, crash penalties, wave banners
+- Suit-model integration: arc power (`SYSTEMS_TICK` effectivePower) scales cruise speed and gates boost (needs >= 30%); repulsors/thrusters/helmet modules affect firing, top speed, and HUD degradation; J.A.R.V.I.S. auto-arms helmet/repulsors/thrusters on activation
+- Emits `MISSION_START` / `MISSION_THREAT_NEUTRALIZED` / `MISSION_SUCCESS` on the event bus for telemetry
+- Flight physics (`js/flight/physics.js`) is pure and covered by `test/flight-physics.test.js`
+- Audio is WebAudio-synthesized at runtime; no audio assets
+
 ### Keyboard Shortcuts
 - **1-6**: Select components by index
 - **M**: Toggle music (party mode)
 - **J**: Toggle J.A.R.V.I.S.
+- **H**: Toggle HUD Mode
 - **I**: Initialize Systems
 - **D**: Run Diagnostics
-- **Esc**: Emergency Shutdown
+- **Esc**: Emergency Shutdown (also exits HUD mode)
+
+### HUD Flight Controls (while HUD mode is active)
+- **W/S or ↑/↓**: Climb / dive
+- **A/D or ←/→**: Banked turns
+- **Shift**: Boost (requires >= 30% arc power)
+- **Space or click**: Fire repulsors (homing when locked)
 
 ## Design System
 

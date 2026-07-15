@@ -26,24 +26,35 @@ export const dom = {
   hudToggle: null,
   hudOverlay: null,
   hudBackBtn: null,
+  hudCanvas: null,
+  hudElements: null,
   hudAltitude: null,
   hudSpeed: null,
   hudPowerValue: null,
   hudPowerArc: null,
   hudWarnings: null,
-  hudLat: null,
-  hudLon: null,
   hudHelmetStatus: null,
   hudChestStatus: null,
   hudArmsStatus: null,
   hudLegsStatus: null,
-  hudMissionPanel: null,
-  hudMissionState: null,
-  hudMissionTimer: null,
-  hudMissionProgress: null,
-  hudMissionCount: null,
-  hudMissionAction: null,
-  radarThreats: null,
+  compassTrack: null,
+  compassHeading: null,
+  hudPitchLadder: null,
+  hudTargets: null,
+  hudThreatArrow: null,
+  hudRadarCanvas: null,
+  hudScore: null,
+  hudWave: null,
+  hudThreats: null,
+  hudWaveBanner: null,
+  hudThrusterBar: null,
+  hudThrusterStatus: null,
+  hudRepulsorStatus: null,
+  hudBoostVignette: null,
+  hudDamageFlash: null,
+  hudRenderFallback: null,
+  gauntletLeft: null,
+  gauntletRight: null,
   targetLock: null,
   commandButtonsByCommand: null,
   componentItemsByType: null,
@@ -79,24 +90,35 @@ export function initializeDOMReferences() {
   dom.hudToggle = document.getElementById('hudToggle');
   dom.hudOverlay = document.getElementById('hudOverlay');
   dom.hudBackBtn = document.getElementById('hudBackBtn');
+  dom.hudCanvas = document.getElementById('hudCanvas');
+  dom.hudElements = document.getElementById('hudElements');
   dom.hudAltitude = document.getElementById('hudAltitude');
   dom.hudSpeed = document.getElementById('hudSpeed');
   dom.hudPowerValue = document.getElementById('hudPowerValue');
   dom.hudPowerArc = document.getElementById('hudPowerArc');
   dom.hudWarnings = document.getElementById('hudWarnings');
-  dom.hudLat = document.getElementById('hudLat');
-  dom.hudLon = document.getElementById('hudLon');
   dom.hudHelmetStatus = document.getElementById('hudHelmetStatus');
   dom.hudChestStatus = document.getElementById('hudChestStatus');
   dom.hudArmsStatus = document.getElementById('hudArmsStatus');
   dom.hudLegsStatus = document.getElementById('hudLegsStatus');
-  dom.hudMissionPanel = document.getElementById('hudMissionPanel');
-  dom.hudMissionState = document.getElementById('hudMissionState');
-  dom.hudMissionTimer = document.getElementById('hudMissionTimer');
-  dom.hudMissionProgress = document.getElementById('hudMissionProgress');
-  dom.hudMissionCount = document.getElementById('hudMissionCount');
-  dom.hudMissionAction = document.getElementById('hudMissionAction');
-  dom.radarThreats = document.getElementById('radarThreats');
+  dom.compassTrack = document.getElementById('compassTrack');
+  dom.compassHeading = document.getElementById('compassHeading');
+  dom.hudPitchLadder = document.getElementById('hudPitchLadder');
+  dom.hudTargets = document.getElementById('hudTargets');
+  dom.hudThreatArrow = document.getElementById('hudThreatArrow');
+  dom.hudRadarCanvas = document.getElementById('hudRadarCanvas');
+  dom.hudScore = document.getElementById('hudScore');
+  dom.hudWave = document.getElementById('hudWave');
+  dom.hudThreats = document.getElementById('hudThreats');
+  dom.hudWaveBanner = document.getElementById('hudWaveBanner');
+  dom.hudThrusterBar = document.getElementById('hudThrusterBar');
+  dom.hudThrusterStatus = document.getElementById('hudThrusterStatus');
+  dom.hudRepulsorStatus = document.getElementById('hudRepulsorStatus');
+  dom.hudBoostVignette = document.getElementById('hudBoostVignette');
+  dom.hudDamageFlash = document.getElementById('hudDamageFlash');
+  dom.hudRenderFallback = document.getElementById('hudRenderFallback');
+  dom.gauntletLeft = document.getElementById('gauntletLeft');
+  dom.gauntletRight = document.getElementById('gauntletRight');
   dom.targetLock = document.getElementById('targetLock');
 
   dom.componentItemsByType = mapElementsByDataset(dom.componentItems, 'component');

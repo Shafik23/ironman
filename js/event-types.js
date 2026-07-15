@@ -47,7 +47,6 @@ export const EventTypes = Object.freeze({
   MISSION_START: 'mission:start',
   MISSION_THREAT_NEUTRALIZED: 'mission:threat:neutralized',
   MISSION_SUCCESS: 'mission:success',
-  MISSION_FAILURE: 'mission:failure',
 
   JARVIS_CHANGED: 'jarvis:changed'
 });

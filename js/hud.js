@@ -1,37 +1,41 @@
-// HUD Overlay Mode - Main Module
-// Handles toggle logic, state management, and event integration
+// HUD Mode - first-person flight over the city (three.js)
+// Handles toggle logic, lazy engine loading and suit-model integration.
 
 import { dom } from './dom.js';
 import { events } from './events.js';
 import { EventTypes } from './event-types.js';
 import { addTelemetryEntry } from './telemetry.js';
-import { getSuitModel, isSuitModeActive, setSuitMode, subscribeSuitModel } from './suit-model.js';
-import { startCityscapeAnimation, stopCityscapeAnimation } from './effects/cityscape.js';
+import {
+  getSuitModel,
+  isSuitModeActive,
+  setSuitComponentSelection,
+  setSuitMode,
+  subscribeSuitModel
+} from './suit-model.js';
 import { getSuitSystemStats } from './systems.js';
 import {
-  initializeHudElements,
-  startHudSimulation,
-  stopHudSimulation,
+  initializeHudOverlay,
+  updateHudOverlay,
   updateHudPower,
   updateHudSystemStatus,
-  resetHudSimulation
-} from './effects/hud-elements.js';
+  setRepulsorStatus
+} from './flight/hud-overlay.js';
+
+let engine = null;
+let enginePromise = null;
 
 export function setupHudMode() {
-  // Initialize HUD elements
-  initializeHudElements();
+  initializeHudOverlay();
 
-  // Setup toggle button listener
   if (dom.hudToggle) {
     dom.hudToggle.addEventListener('click', toggleHudMode);
   }
 
-  // Setup back button listener
   if (dom.hudBackBtn) {
     dom.hudBackBtn.addEventListener('click', deactivateHudMode);
   }
 
-  // Subscribe to canonical model changes to sync HUD subsystem states.
+  // Sync HUD gauges and the flight engine with the canonical suit model.
   subscribeSuitModel(({ state: model, changes }) => {
     if (isSuitModeActive('hud') && shouldRefreshHud(changes)) {
       updateHudFromModel(model);
@@ -41,6 +45,7 @@ export function setupHudMode() {
   events.on(EventTypes.SYSTEMS_TICK, ({ stats }) => {
     if (isSuitModeActive('hud')) {
       updateHudPower(stats.effectivePower);
+      engine?.setEnvironment({ power: stats.effectivePower });
     }
   });
 
@@ -52,7 +57,6 @@ export function setupHudMode() {
     }
   });
 
-  // Sync HUD activation from the canonical suit model.
   events.on(EventTypes.HUD_ACTIVATED, () => {
     updateHudFromModel(getSuitModel());
   });
@@ -69,69 +73,101 @@ function toggleHudMode() {
 export function activateHudMode() {
   setSuitMode('hud', true, { source: 'hud' });
 
-  // Show HUD overlay
   if (dom.hudOverlay) {
     dom.hudOverlay.classList.add('active');
   }
 
-  // Hide main interface
   const container = document.querySelector('.container');
   if (container) {
     container.classList.add('hud-active');
   }
 
-  // Update toggle button
   if (dom.hudToggle) {
     dom.hudToggle.textContent = 'HUD Mode: ON';
     dom.hudToggle.classList.add('active');
   }
 
-  // Start animations
-  startCityscapeAnimation();
-  startHudSimulation();
+  // Drop button focus so Space fires repulsors instead of re-clicking the toggle
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
 
-  // Emit event for telemetry
+  armFlightSystems();
+
+  ensureEngine().then(loadedEngine => {
+    if (loadedEngine && isSuitModeActive('hud')) {
+      loadedEngine.start();
+    }
+  });
+
   events.emit(EventTypes.HUD_ACTIVATED);
-  addTelemetryEntry('HUD Overlay Mode activated - First-person view engaged');
+  addTelemetryEntry('HUD Mode engaged - First-person flight systems online');
 }
 
 export function deactivateHudMode() {
   setSuitMode('hud', false, { source: 'hud' });
 
-  // Hide HUD overlay
   if (dom.hudOverlay) {
     dom.hudOverlay.classList.remove('active');
   }
 
-  // Show main interface
   const container = document.querySelector('.container');
   if (container) {
     container.classList.remove('hud-active');
   }
 
-  // Update toggle button
   if (dom.hudToggle) {
     dom.hudToggle.textContent = 'HUD Mode: OFF';
     dom.hudToggle.classList.remove('active');
   }
 
-  // Stop animations
-  stopCityscapeAnimation();
-  stopHudSimulation();
+  engine?.stop();
 
-  // Reset simulation for next activation
-  resetHudSimulation();
-
-  // Emit event for telemetry
   events.emit(EventTypes.HUD_DEACTIVATED);
-  addTelemetryEntry('HUD Overlay Mode deactivated - Returning to schematic view');
+  addTelemetryEntry('HUD Mode disengaged - Returning to schematic view');
 }
 
-// Export for keyboard shortcut
-export function toggleHud() {
-  if (dom.hudToggle) {
-    dom.hudToggle.click();
+/** J.A.R.V.I.S. arms the helmet, combat and flight systems automatically on takeoff. */
+function armFlightSystems() {
+  const model = getSuitModel();
+  const armed = [];
+
+  ['helmet', 'repulsors', 'thrusters'].forEach(component => {
+    if (!model.modules[component]?.online) {
+      setSuitComponentSelection(component, true, { source: 'hud' });
+      armed.push(component);
+    }
+  });
+
+  if (armed.length > 0) {
+    addTelemetryEntry(`Flight ops auto-armed: ${armed.join(', ')}`);
   }
+}
+
+/**
+ * Lazily import three.js and build the engine the first time HUD mode is used,
+ * so the schematic view never pays the 3D startup cost.
+ */
+function ensureEngine() {
+  if (enginePromise) return enginePromise;
+
+  enginePromise = import('./flight/engine.js')
+    .then(module => {
+      engine = module.createFlightEngine({
+        canvas: dom.hudCanvas,
+        onFrame: updateHudOverlay
+      });
+      updateHudFromModel(getSuitModel());
+      return engine;
+    })
+    .catch(error => {
+      console.error('Flight engine failed to start:', error);
+      dom.hudRenderFallback?.classList.remove('hidden');
+      addTelemetryEntry('Visor render offline - WebGL unavailable');
+      return null;
+    });
+
+  return enginePromise;
 }
 
 function shouldRefreshHud(changes) {
@@ -145,5 +181,15 @@ function updateHudFromModel(model) {
 
   ['helmet', 'chest', 'arms', 'legs'].forEach(component => {
     updateHudSystemStatus(component, Boolean(model.modules[component]?.online));
+  });
+
+  const repulsorsOnline = Boolean(model.modules.repulsors?.online);
+  setRepulsorStatus(repulsorsOnline);
+
+  engine?.setEnvironment({
+    power: getSuitSystemStats().effectivePower,
+    repulsorsOnline,
+    thrustersOnline: Boolean(model.modules.thrusters?.online),
+    helmetOnline: Boolean(model.modules.helmet?.online)
   });
 }
