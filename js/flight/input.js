@@ -14,13 +14,15 @@ const keys = {
 let firePressed = false;
 let listenersAttached = false;
 
+// Aircraft-style pitch: push the yoke forward (W/up) to dive,
+// pull back (S/down) to raise the nose.
 const KEY_MAP = {
-  ArrowUp: 'climb',
-  w: 'climb',
-  W: 'climb',
-  ArrowDown: 'dive',
-  s: 'dive',
-  S: 'dive',
+  ArrowUp: 'dive',
+  w: 'dive',
+  W: 'dive',
+  ArrowDown: 'climb',
+  s: 'climb',
+  S: 'climb',
   ArrowLeft: 'left',
   a: 'left',
   A: 'left',
