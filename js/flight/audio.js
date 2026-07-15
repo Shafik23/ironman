@@ -13,7 +13,7 @@ function initFlightAudio() {
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     ctx = new AudioContextClass();
     master = ctx.createGain();
-    master.gain.value = 0.22;
+    master.gain.value = 0.275;
     master.connect(ctx.destination);
     createThruster();
   } catch (error) {
