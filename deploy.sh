@@ -28,6 +28,7 @@ echo "------ DEPLOYING Iron Man Suit Designer to $remote ------"
 # -z: compress during transfer
 # -P: show progress and keep partial transfers
 rsync --delete -azP -e ssh index.html $remote:$app_dir/
+rsync --delete -azP -e ssh how-it-works.html $remote:$app_dir/
 rsync --delete -azP -e ssh style.css $remote:$app_dir/
 rsync --delete -azP -e ssh ironman.mp3 $remote:$app_dir/
 rsync --delete -azP -e ssh hose.mp3 $remote:$app_dir/

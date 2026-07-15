@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A visual engineering tour of the Iron Man Suit Designer's Three.js HUD flight mode.">
+    <title>HUD Mode: How It Works | Ironman Suit Designer</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+    <link rel="apple-touch-icon" sizes="128x128" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+    <link rel="stylesheet" href="css/how-it-works.css?v=20260714222408">
+</head>
+
+<body>
+    <a class="skip-link" href="#main-content">Skip to the engineering tour</a>
+
+    <header class="briefing-header">
+        <a class="wordmark" href="index.html" aria-label="Ironman Suit Designer home">
+            <span class="wordmark-mark" aria-hidden="true">◈</span>
+            <span>STARK SYSTEMS</span>
+        </a>
+        <nav class="briefing-nav" aria-label="How it works navigation">
+            <a href="#architecture">Architecture</a>
+            <a href="#world">World</a>
+            <a href="#flight-model">Flight model</a>
+            <a href="#combat">Combat</a>
+        </nav>
+        <a class="return-link" href="index.html">Enter suit designer <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main-content">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-copy">
+                <p class="eyebrow"><span>ENGINEERING LOG</span> HUD–07 / DECLASSIFIED</p>
+                <h1 id="page-title">A flight simulator<br>behind the <em>faceplate.</em></h1>
+                <p class="hero-lede">HUD Mode turns the suit configurator into a first-person night flight. Three.js renders the world; regular browser elements render the visor; a small, testable flight model keeps both in agreement.</p>
+                <div class="hero-actions">
+                    <a class="primary-action" href="index.html">Try HUD Mode <span aria-hidden="true">→</span></a>
+                    <a class="text-action" href="#architecture">Open the technical brief</a>
+                </div>
+                <dl class="hero-facts" aria-label="HUD Mode key facts">
+                    <div><dt>68°</dt><dd>base field of view</dd></div>
+                    <div><dt>2.2 km</dt><dd>deterministic city tile</dd></div>
+                    <div><dt>0.75 s</dt><dd>target lock time</dd></div>
+                </dl>
+            </div>
+
+            <figure class="cutaway" aria-labelledby="cutaway-caption">
+                <div class="viewport-shell">
+                    <canvas id="cutawayWorld" class="cutaway-world" aria-hidden="true"></canvas>
+                    <div id="cutawayHud" class="cutaway-hud" aria-hidden="true">
+                        <div class="demo-compass"><span>330</span><strong>N</strong><span>030</span></div>
+                        <div class="demo-reticle"><i></i></div>
+                        <div class="demo-target"><span>DRN–03</span><b>412m</b></div>
+                        <div class="demo-altitude"><span>ALT</span><strong>0250</strong><small>m</small></div>
+                        <div class="demo-power"><span>ARC</span><strong>85%</strong></div>
+                        <div class="demo-horizon"></div>
+                    </div>
+                    <div class="viewport-vignette" aria-hidden="true"></div>
+                    <p class="viewport-label">SIMULATED SYSTEM CUTAWAY // NOT GAMEPLAY</p>
+                </div>
+                <div class="layer-console" aria-label="Viewport layer controls">
+                    <p>Inspect the render stack</p>
+                    <button class="layer-toggle" type="button" data-layer="world" aria-pressed="true"><i class="cyan-dot"></i> WebGL world</button>
+                    <button class="layer-toggle" type="button" data-layer="hud" aria-pressed="true"><i class="gold-dot"></i> DOM visor</button>
+                </div>
+                <figcaption id="cutaway-caption">Two synchronized layers produce one view. Turn either layer off to see the seam.</figcaption>
+            </figure>
+        </section>
+
+        <aside class="tour-strip" aria-label="Tour outline">
+            <span>FOLLOW THE FRAME</span>
+            <ol>
+                <li><a href="#architecture">Boot</a></li>
+                <li><a href="#frame-loop">Simulate</a></li>
+                <li><a href="#world">Build the world</a></li>
+                <li><a href="#combat">Project targets</a></li>
+                <li><a href="#integration">Drive the visor</a></li>
+            </ol>
+        </aside>
+
+        <section id="architecture" class="chapter architecture-chapter" aria-labelledby="architecture-title">
+            <header class="chapter-header">
+                <p class="chapter-index">CHAPTER 01 / BOOT SEQUENCE</p>
+                <h2 id="architecture-title">The 3D engine does not exist<br>until you ask for it.</h2>
+                <p>The main suit schematic stays lightweight. The first time HUD Mode is activated, <code>hud.js</code> dynamically imports the flight engine, creates it once, then reuses it on later flights.</p>
+            </header>
+
+            <div class="boot-sequence" role="list" aria-label="HUD activation sequence">
+                <article role="listitem">
+                    <span class="sequence-number">01</span>
+                    <div>
+                        <p class="mono-label">USER INTENT</p>
+                        <h3>HUD toggled on</h3>
+                        <p>The app reveals the visor overlay and marks HUD mode active in the shared suit model.</p>
+                    </div>
+                </article>
+                <article role="listitem">
+                    <span class="sequence-number">02</span>
+                    <div>
+                        <p class="mono-label">SUIT INTEGRATION</p>
+                        <h3>Flight systems armed</h3>
+                        <p>Helmet, repulsors, and thrusters come online automatically if the operator left them off.</p>
+                    </div>
+                </article>
+                <article role="listitem">
+                    <span class="sequence-number">03</span>
+                    <div>
+                        <p class="mono-label">LAZY BOUNDARY</p>
+                        <h3>Engine imported</h3>
+                        <p><code>import('./flight/engine.js')</code> loads Three.js and the flight modules only now.</p>
+                    </div>
+                </article>
+                <article role="listitem">
+                    <span class="sequence-number">04</span>
+                    <div>
+                        <p class="mono-label">FIRST FRAME</p>
+                        <h3>Renderer started</h3>
+                        <p>The engine sizes its canvas, resumes synthesized audio, and enters the animation loop.</p>
+                    </div>
+                </article>
+            </div>
+
+            <aside class="code-note">
+                <span class="code-note-icon" aria-hidden="true">⌁</span>
+                <div>
+                    <p class="mono-label">WHY LAZY-LOAD?</p>
+                    <p>Most visitors begin at the 2D suit designer. Deferring the 3D code means that view does not pay the cost of parsing the renderer or building a city it may never show.</p>
+                </div>
+                <a href="js/hud.js">Inspect <code>hud.js</code> <span aria-hidden="true">↗</span></a>
+            </aside>
+        </section>
+
+        <section id="frame-loop" class="chapter dark-chapter" aria-labelledby="frame-title">
+            <header class="chapter-header compact">
+                <p class="chapter-index">CHAPTER 02 / THE FRAME</p>
+                <h2 id="frame-title">Every frame is a handoff.</h2>
+                <p>The renderer asks the browser for the next frame, measures elapsed time, advances every system, draws the scene, then publishes a compact snapshot to the visor.</p>
+            </header>
+
+            <div class="frame-rail" aria-label="Order of operations in each rendered frame">
+                <article class="frame-card accent">
+                    <span>INPUT</span>
+                    <strong>Read controls</strong>
+                    <p>WASD/arrows, Shift, Space, or pointer.</p>
+                </article>
+                <article class="frame-card">
+                    <span>SIMULATE</span>
+                    <strong>Advance flight</strong>
+                    <p>Attitude, thrust, position, collisions, world wrap.</p>
+                </article>
+                <article class="frame-card">
+                    <span>ACT</span>
+                    <strong>Update systems</strong>
+                    <p>City, drones, locks, bolts, effects, audio.</p>
+                </article>
+                <article class="frame-card">
+                    <span>DRAW</span>
+                    <strong>Render Three.js</strong>
+                    <p>Scene + perspective camera → WebGL canvas.</p>
+                </article>
+                <article class="frame-card gold">
+                    <span>REPORT</span>
+                    <strong>Drive the visor</strong>
+                    <p>Snapshot → compass, radar, warnings, targets.</p>
+                </article>
+            </div>
+
+            <div class="dt-explainer">
+                <div class="dt-dial" aria-hidden="true"><span>Δt</span><i></i></div>
+                <div>
+                    <p class="mono-label">FRAME-RATE INDEPENDENCE</p>
+                    <h3>Motion is measured in seconds, not frames.</h3>
+                    <p>The loop computes <code>dt</code> from timestamps and caps it at <code>0.05</code> seconds. Speed is multiplied by that elapsed time, so the same suit travels roughly the same distance on fast and slow displays—and a stalled tab cannot inject one giant physics step.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="world" class="chapter world-chapter" aria-labelledby="world-title">
+            <header class="chapter-header">
+                <p class="chapter-index">CHAPTER 03 / PROCEDURAL CITY</p>
+                <h2 id="world-title">One city tile.<br>Nine views. No edge.</h2>
+                <p>A seeded generator builds one 2.2 km square of streets, buildings, traffic, and Stark Tower. Three.js displays a 3×3 grid of cloned tiles around the player.</p>
+            </header>
+
+            <div class="world-demo">
+                <div class="tile-map" id="tileMap" aria-label="Animated diagram of the repeating city tile">
+                    <div class="tile"><span>–1,–1</span></div><div class="tile"><span>0,–1</span></div><div class="tile"><span>1,–1</span></div>
+                    <div class="tile"><span>–1,0</span></div><div class="tile origin"><span>0,0</span></div><div class="tile"><span>1,0</span></div>
+                    <div class="tile"><span>–1,1</span></div><div class="tile"><span>0,1</span></div><div class="tile"><span>1,1</span></div>
+                    <div id="tilePilot" class="tile-pilot" aria-hidden="true">▲</div>
+                    <div class="tile-axis x">x</div><div class="tile-axis z">z</div>
+                </div>
+                <div class="world-demo-copy">
+                    <p class="mono-label">WORLD-WRAP TEST</p>
+                    <h3>The player crosses the boundary. The coordinates come home.</h3>
+                    <p>At ±1,100 m, the engine shifts the suit by exactly one tile. Active drones, bolts, and explosions shift by the same amount, so their relative positions do not jump.</p>
+                    <div class="coordinate-readout"><span>WORLD X</span><output id="worldCoordinate">+0840 m</output></div>
+                    <button id="runWorldWrap" class="console-button" type="button">Run boundary crossing <span aria-hidden="true">→</span></button>
+                </div>
+            </div>
+
+            <div class="world-tech-grid">
+                <article>
+                    <div class="tech-illustration instances" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <p class="mono-label">INSTANCING</p>
+                    <h3>Many buildings, shared geometry</h3>
+                    <p>Buildings are grouped into three <code>InstancedMesh</code> batches. Each instance supplies its own transform and tint while sharing geometry and material.</p>
+                </article>
+                <article>
+                    <div class="tech-illustration texture" aria-hidden="true"></div>
+                    <p class="mono-label">GENERATED TEXTURES</p>
+                    <h3>Windows painted at runtime</h3>
+                    <p>Small 2D canvases paint lit and unlit windows, roads, glow sprites, clouds, and the moon—then become GPU textures.</p>
+                </article>
+                <article>
+                    <div class="tech-illustration collision" aria-hidden="true"><i></i><span></span></div>
+                    <p class="mono-label">COLLISION GRID</p>
+                    <h3>Ask only the local block</h3>
+                    <p>A 20×20 spatial grid stores building footprints. Height checks inspect one cell instead of every tower in the scene.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="flight-model" class="chapter lab-chapter" aria-labelledby="flight-title">
+            <header class="chapter-header compact">
+                <p class="chapter-index">CHAPTER 04 / FLIGHT MODEL</p>
+                <h2 id="flight-title">Small equations.<br>Convincing weight.</h2>
+                <p>The flight model has no DOM and no Three.js dependency. It accepts input, suit power, thruster status, and elapsed seconds; then mutates a plain state object. That separation makes the behavior easy to test.</p>
+            </header>
+
+            <div class="flight-lab">
+                <div class="attitude-display" aria-label="Live visualization of the production flight model">
+                    <div id="labHorizon" class="lab-horizon"><span></span></div>
+                    <div class="lab-reticle" aria-hidden="true">·</div>
+                    <dl class="lab-readouts">
+                        <div><dt>SPEED</dt><dd><output id="labSpeed">120</output> <small>m/s</small></dd></div>
+                        <div><dt>PITCH</dt><dd><output id="labPitch">0</output><small>°</small></dd></div>
+                        <div><dt>ALT</dt><dd><output id="labAltitude">300</output> <small>m</small></dd></div>
+                    </dl>
+                    <div id="labWarning" class="lab-warning" aria-live="polite">NOMINAL</div>
+                </div>
+
+                <form class="flight-controls" onsubmit="return false;">
+                    <div class="control-heading">
+                        <p class="mono-label">LIVE PRODUCTION MODEL</p>
+                        <p>This instrument imports and runs the same <code>stepFlight()</code> function as HUD Mode.</p>
+                    </div>
+                    <label for="powerControl"><span>Arc power</span><output id="powerControlValue">85%</output></label>
+                    <input id="powerControl" type="range" min="0" max="100" value="85">
+
+                    <label for="pitchControl"><span>Pitch input</span><output id="pitchControlValue">LEVEL</output></label>
+                    <input id="pitchControl" type="range" min="-100" max="100" value="0">
+
+                    <div class="toggle-row">
+                        <label class="switch-control"><input id="thrusterControl" type="checkbox" checked><span></span> Thrusters online</label>
+                        <label class="switch-control"><input id="boostControl" type="checkbox"><span></span> Boost held</label>
+                    </div>
+                    <p class="control-footnote">Boost engages only at 30% power or above with thrusters online. Climbing trades speed for altitude; diving adds speed.</p>
+                </form>
+            </div>
+
+            <div class="equation-strip" aria-label="Simplified flight speed equation">
+                <span>TARGET SPEED</span>
+                <strong>(46 + normalized power × 130)</strong>
+                <i>×</i>
+                <strong>thruster factor</strong>
+                <i>×</i>
+                <strong>boost</strong>
+                <small>then adjusted for climb or dive</small>
+            </div>
+        </section>
+
+        <section id="combat" class="chapter combat-chapter" aria-labelledby="combat-title">
+            <header class="chapter-header">
+                <p class="chapter-index">CHAPTER 05 / TARGETING</p>
+                <h2 id="combat-title">A 3D point becomes<br>a bracket on glass.</h2>
+                <p>Combat joins vector math in the scene with ordinary HTML in the visor. Move the contact through the lock envelope to see the same timing rules used by the engine.</p>
+            </header>
+
+            <div class="targeting-lab">
+                <div class="target-scope" aria-label="Target lock envelope visualization">
+                    <div class="scope-cone" aria-hidden="true"></div>
+                    <div class="scope-crosshair" aria-hidden="true"></div>
+                    <div id="scopeContact" class="scope-contact"><span>DRN</span><i id="scopeLockRing"></i></div>
+                    <div class="scope-label left">–9°</div><div class="scope-label right">+9°</div>
+                    <output id="lockState" class="lock-state">NO LOCK</output>
+                </div>
+                <form class="target-controls" onsubmit="return false;">
+                    <p class="mono-label">LOCK ENVELOPE</p>
+                    <label for="bearingControl"><span>Angle from center</span><output id="bearingValue">14°</output></label>
+                    <input id="bearingControl" type="range" min="-24" max="24" value="14">
+                    <label for="distanceControl"><span>Target distance</span><output id="distanceValue">620 m</output></label>
+                    <input id="distanceControl" type="range" min="100" max="1100" value="620">
+                    <dl class="lock-specs">
+                        <div><dt>CONE</dt><dd>9°</dd></div>
+                        <div><dt>RANGE</dt><dd>850 m</dd></div>
+                        <div><dt>ACQUIRE</dt><dd>0.75 s</dd></div>
+                        <div><dt>DECAY</dt><dd>0.35 s</dd></div>
+                    </dl>
+                </form>
+            </div>
+
+            <div class="projection-steps">
+                <article><span>1</span><div><h3>Measure</h3><p>Subtract suit position from drone position to get an offset vector.</p></div></article>
+                <article><span>2</span><div><h3>Qualify</h3><p>Compare its angle to the camera’s forward vector and reject contacts past 850 m.</p></div></article>
+                <article><span>3</span><div><h3>Project</h3><p>Three.js maps the 3D position into normalized device coordinates from –1 to +1.</p></div></article>
+                <article><span>4</span><div><h3>Overlay</h3><p>The engine converts those coordinates to pixels; the DOM target bracket moves there.</p></div></article>
+            </div>
+        </section>
+
+        <section id="integration" class="chapter integration-chapter" aria-labelledby="integration-title">
+            <header class="chapter-header compact">
+                <p class="chapter-index">CHAPTER 06 / SUIT INTEGRATION</p>
+                <h2 id="integration-title">The game listens to the suit.</h2>
+                <p>HUD Mode is not a separate demo pasted over the app. The selected modules and simulated power supply actively change what the flight engine can do.</p>
+            </header>
+
+            <div class="systems-diagram" aria-label="Data flow between suit configuration, flight engine, and HUD">
+                <article class="system-node source">
+                    <span>01</span><p class="mono-label">SUIT MODEL</p><h3>Configuration</h3><p>Modules + reactor power</p>
+                </article>
+                <div class="data-link"><span>SYSTEMS_TICK</span><i></i></div>
+                <article class="system-node engine">
+                    <span>02</span><p class="mono-label">FLIGHT ENV</p><h3>Simulation</h3><p>Speed + abilities + status</p>
+                </article>
+                <div class="data-link"><span>SNAPSHOT</span><i></i></div>
+                <article class="system-node output">
+                    <span>03</span><p class="mono-label">DOM HUD</p><h3>Feedback</h3><p>Gauges + warnings + radar</p>
+                </article>
+            </div>
+
+            <div class="system-effects">
+                <article><span class="system-icon">◈</span><div><h3>Arc power</h3><p>Raises cruise speed and must reach 30% before boost can engage.</p></div></article>
+                <article><span class="system-icon">▲</span><div><h3>Thrusters</h3><p>Offline thrusters reduce the speed target to 45% and disable boost.</p></div></article>
+                <article><span class="system-icon">◎</span><div><h3>Repulsors</h3><p>Offline repulsors reject fire input and trigger a visor warning.</p></div></article>
+                <article><span class="system-icon">◇</span><div><h3>Helmet</h3><p>An offline helmet degrades the HUD overlay while the 3D world keeps running.</p></div></article>
+            </div>
+        </section>
+
+        <section class="chapter performance-chapter" aria-labelledby="performance-title">
+            <header class="chapter-header">
+                <p class="chapter-index">CHAPTER 07 / KEEPING IT FAST</p>
+                <h2 id="performance-title">Spend frames on flight,<br>not housekeeping.</h2>
+            </header>
+            <div class="performance-grid">
+                <article><strong>2×</strong><h3>Pixel-ratio ceiling</h3><p>The renderer caps device pixel ratio at two, limiting GPU work on very dense screens.</p></article>
+                <article><strong>10</strong><h3>Pooled bolts</h3><p>Repulsor shots reuse a fixed set of objects instead of allocating during combat.</p></article>
+                <article><strong>6</strong><h3>Pooled explosions</h3><p>Particle bursts are reset and recycled after each one-second effect.</p></article>
+                <article><strong>1×</strong><h3>Shader warm-up</h3><p>A hidden drone, bolt, and explosion are rendered at boot to avoid a first-shot compilation hitch.</p></article>
+            </div>
+            <div class="audio-note">
+                <div class="waveform" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div><p class="mono-label">NO FLIGHT AUDIO FILES</p><h3>The suit makes its own sound.</h3><p>Web Audio oscillators, filtered noise, and gain envelopes synthesize the thruster hum, repulsor discharge, lock tone, impact, and explosions at runtime.</p></div>
+            </div>
+        </section>
+
+        <section class="closing-brief">
+            <p class="eyebrow"><span>END OF FILE</span> READY FOR FIELD TEST</p>
+            <h2>Now put on the faceplate.</h2>
+            <p>Open the suit designer, select <strong>HUD Mode</strong>, and watch these systems meet in the same frame.</p>
+            <a class="primary-action" href="index.html">Launch suit designer <span aria-hidden="true">→</span></a>
+        </section>
+    </main>
+
+    <footer class="briefing-footer">
+        <a class="wordmark" href="index.html"><span class="wordmark-mark" aria-hidden="true">◈</span><span>STARK SYSTEMS</span></a>
+        <p>HUD Mode engineering brief / MK–VII prototype</p>
+        <a href="#main-content">Return to top ↑</a>
+    </footer>
+
+    <script type="module" src="js/how-it-works.js?v=20260714222408"></script>
+</body>
+
+</html>
