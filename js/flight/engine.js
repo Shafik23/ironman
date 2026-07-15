@@ -81,6 +81,7 @@ export function createFlightEngine({ canvas, onFrame }) {
   let repulsorDeniedTimer = 0;
 
   resetFlightPose();
+  warmupRender();
 
   // --- Public API ------------------------------------------------------------------
   function start() {
@@ -122,6 +123,35 @@ export function createFlightEngine({ canvas, onFrame }) {
   }
 
   // --- Internals ---------------------------------------------------------------------
+
+  /**
+   * Draw one of everything once during boot: compile all shaders (hidden pool
+   * objects included) and render a live bolt, explosion and drone so the first
+   * real shot doesn't stall on shader compilation or first-draw pipeline setup.
+   */
+  function warmupRender() {
+    rig.position.set(flight.x, flight.y, flight.z);
+    rig.rotation.set(0, -THREE.MathUtils.degToRad(flight.heading), 0);
+    resize();
+    renderer.compile(scene, camera);
+
+    const forward = getForward();
+    const warmPos = rig.position.clone().addScaledVector(forward, 60);
+    effects.fireBolt(warmPos, forward, null);
+    effects.spawnExplosion(warmPos);
+
+    const warmDrone = droneSystem.warmupGroup;
+    const dronePos = warmDrone.position.clone();
+    warmDrone.position.copy(warmPos);
+    warmDrone.visible = true;
+
+    renderer.render(scene, camera);
+
+    warmDrone.visible = false;
+    warmDrone.position.copy(dronePos);
+    effects.reset();
+  }
+
   function resetFlightPose() {
     // Spawn on approach to Stark Tower so the landmark frames the boot view
     flight.x = 420;

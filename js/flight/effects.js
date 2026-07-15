@@ -19,6 +19,13 @@ export function createEffects(scene, rig) {
   const explosions = createExplosionPool(scene);
   const streaks = createBoostStreaks(rig);
 
+  // Two permanent lights shared by all bolts/explosions. Keeping the scene's
+  // light count constant avoids a full shader recompile (a visible frame
+  // freeze) the first time a shot or blast would otherwise add a new light.
+  const boltLight = new THREE.PointLight(0x66e0ff, 0, 130, 1.8);
+  const blastLight = new THREE.PointLight(0xffa040, 0, 260, 1.6);
+  scene.add(boltLight, blastLight);
+
   function fireBolt(origin, direction, target) {
     const bolt = bolts.find(b => !b.active);
     if (!bolt) return false;
@@ -36,6 +43,7 @@ export function createEffects(scene, rig) {
   /** Advances bolts and returns [{drone}] hits; hit bolts despawn. */
   function updateBolts(dt, drones) {
     const hits = [];
+    let litBolt = null;
 
     bolts.forEach(bolt => {
       if (!bolt.active) return;
@@ -57,8 +65,19 @@ export function createEffects(scene, rig) {
       if (hit) {
         hits.push({ drone: hit });
         deactivateBolt(bolt);
+        return;
       }
+
+      litBolt = litBolt || bolt;
     });
+
+    // Shared light rides on the most recently fired active bolt
+    if (litBolt) {
+      boltLight.position.copy(litBolt.group.position);
+      boltLight.intensity = 12;
+    } else {
+      boltLight.intensity = 0;
+    }
 
     return hits;
   }
@@ -71,7 +90,8 @@ export function createEffects(scene, rig) {
     explosion.life = EXPLOSION_LIFE;
     explosion.group.position.copy(position);
     explosion.group.visible = true;
-    explosion.light.intensity = 60;
+    blastLight.position.copy(position);
+    blastLight.intensity = 60;
     explosion.flash.material.opacity = 1;
     explosion.flash.scale.setScalar(10);
 
@@ -90,6 +110,8 @@ export function createEffects(scene, rig) {
   }
 
   function updateExplosions(dt) {
+    blastLight.intensity = Math.max(0, blastLight.intensity - 150 * dt);
+
     explosions.forEach(explosion => {
       if (!explosion.active) return;
 
@@ -113,7 +135,6 @@ export function createEffects(scene, rig) {
       positions.needsUpdate = true;
 
       explosion.points.material.opacity = 1 - progress;
-      explosion.light.intensity = 60 * Math.max(0, 1 - progress * 2.5);
       explosion.flash.material.opacity = Math.max(0, 1 - progress * 3);
       explosion.flash.scale.setScalar(10 + progress * 45);
     });
@@ -144,6 +165,8 @@ export function createEffects(scene, rig) {
       explosion.active = false;
       explosion.group.visible = false;
     });
+    boltLight.intensity = 0;
+    blastLight.intensity = 0;
   }
 
   return { fireBolt, updateBolts, spawnExplosion, updateExplosions, updateStreaks, shiftWorld, reset };
@@ -207,9 +230,6 @@ function createBoltPool(scene) {
     glow.scale.setScalar(9);
     group.add(glow);
 
-    const light = new THREE.PointLight(0x66e0ff, 12, 110, 1.8);
-    group.add(light);
-
     group.visible = false;
     scene.add(group);
 
@@ -249,9 +269,6 @@ function createExplosionPool(scene) {
     );
     group.add(flash);
 
-    const light = new THREE.PointLight(0xffa040, 0, 260, 1.6);
-    group.add(light);
-
     group.visible = false;
     scene.add(group);
 
@@ -259,7 +276,6 @@ function createExplosionPool(scene) {
       group,
       points,
       flash,
-      light,
       velocities: new Float32Array(EXPLOSION_PARTICLES * 3),
       life: 0,
       active: false

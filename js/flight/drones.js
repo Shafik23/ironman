@@ -17,6 +17,12 @@ let sharedAssets = null;
 export function createDroneSystem(scene) {
   const drones = [];
 
+  // Hidden warm-up drone so drone materials are in the scene graph when the
+  // engine pre-compiles shaders, instead of stalling a frame at wave spawn.
+  const warmup = createDrone(0, -1000, 0);
+  warmup.group.visible = false;
+  scene.add(warmup.group);
+
   function spawnWave(count, playerPos, sampleHeight) {
     for (let i = 0; i < count; i += 1) {
       const bearing = Math.random() * Math.PI * 2;
@@ -78,7 +84,7 @@ export function createDroneSystem(scene) {
     });
   }
 
-  return { drones, spawnWave, update, remove, clear, shiftWorld };
+  return { drones, spawnWave, update, remove, clear, shiftWorld, warmupGroup: warmup.group };
 }
 
 function pickPatrolTarget(drone, playerPos, sampleHeight) {
