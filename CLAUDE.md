@@ -163,11 +163,8 @@ The application uses a pub/sub event bus (`events.js`) for decoupled communicati
 - **D**: Run Diagnostics
 - **Esc**: Emergency Shutdown (also exits HUD mode)
 
-### HUD Flight Controls (while HUD mode is active)
-- **W/S or ↑/↓**: Dive / climb (aircraft-style yoke: pull back to raise the nose)
-- **A/D or ←/→**: Banked turns
-- **Shift**: Boost (requires >= 30% arc power)
-- **Space or click**: Fire repulsors (homing when locked)
+Flight controls are shown in the on-screen legend while HUD mode is active
+(defined in the `.hud-controls-legend` block in `index.html`).
 
 ## Design System
 

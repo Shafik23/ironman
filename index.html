@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
     <link rel="apple-touch-icon" sizes="128x128" href="apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
-    <link rel="stylesheet" href="style.css?v=20260714183152">
+    <link rel="stylesheet" href="style.css?v=20260714183514">
 </head>
 
 <body>
@@ -593,15 +593,18 @@
                 <span class="score-value" id="hudScore">0</span>
             </div>
 
-            <!-- Bottom Bar: Warnings & Controls -->
+            <!-- Bottom Bar: Warnings -->
             <div class="hud-bottom-bar">
                 <div class="hud-warnings" id="hudWarnings"></div>
-                <div class="hud-flight-controls-hint">
-                    <span class="hint-key">W</span>/<span class="hint-key">S</span> DIVE/CLIMB
-                    <span class="hint-key">A</span>/<span class="hint-key">D</span> TURN
-                    <span class="hint-key">SHIFT</span> BOOST
-                    <span class="hint-key">SPACE</span> FIRE
-                </div>
+            </div>
+
+            <!-- Controls legend -->
+            <div class="hud-controls-legend">
+                <div class="legend-row"><span><span class="hint-key">W</span>/<span class="hint-key">S</span></span><em>DIVE / CLIMB</em></div>
+                <div class="legend-row"><span><span class="hint-key">A</span>/<span class="hint-key">D</span></span><em>TURN</em></div>
+                <div class="legend-row"><span><span class="hint-key">SHIFT</span></span><em>BOOST</em></div>
+                <div class="legend-row"><span><span class="hint-key">SPACE</span></span><em>FIRE</em></div>
+                <div class="legend-row"><span><span class="hint-key">H</span></span><em>EXIT HUD</em></div>
             </div>
 
             <!-- Gauntlet repulsor glows -->
@@ -622,7 +625,7 @@
         <div class="visor-frame"></div>
     </div>
 
-    <script type="module" src="js/app.js?v=20260714183152"></script>
+    <script type="module" src="js/app.js?v=20260714183514"></script>
 </body>
 
 </html>

@@ -643,16 +643,43 @@
     50% { opacity: 0.35; }
 }
 
-.hud-flight-controls-hint {
-    font-size: 0.58rem;
-    color: var(--text-secondary);
+/* Controls legend - bottom-left quick reference */
+
+.hud-controls-legend {
+    position: absolute;
+    left: 32px;
+    bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 9px 12px;
+    border: 1px solid rgba(0, 255, 255, 0.25);
+    border-radius: 4px;
+    background: rgba(2, 12, 24, 0.55);
+    font-size: 0.55rem;
     letter-spacing: 1px;
+    color: var(--text-secondary);
+}
+
+.legend-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-row > span {
+    min-width: 58px;
+    white-space: nowrap;
+}
+
+.legend-row em {
+    font-style: normal;
 }
 
 .hint-key {
     display: inline-block;
     padding: 1px 6px;
-    margin: 0 2px;
+    margin: 0 1px;
     border: 1px solid rgba(255, 215, 0, 0.4);
     border-radius: 3px;
     color: var(--accent-gold);
@@ -709,6 +736,7 @@
 @media (max-width: 900px) {
     .hud-left-panel,
     .hud-right-panel,
+    .hud-controls-legend,
     .gauntlet {
         display: none;
     }
