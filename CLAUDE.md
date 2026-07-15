@@ -202,6 +202,7 @@ To enable, uncomment the J.A.R.V.I.S. toggle and indicator in `index.html` (line
 ## Development Guidelines
 
 - Whatever you do, always make sure it's "ironman" themed
+- For GitHub operations, use the authenticated `gh` CLI directly.
 - Module imports must use relative paths (e.g., `./dom.js`)
 - All DOM references should go through `dom.js` to avoid duplication
 - Component mappings are centralized in `constants.js`
