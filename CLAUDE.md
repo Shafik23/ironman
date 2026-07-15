@@ -145,6 +145,7 @@ The application uses a pub/sub event bus (`events.js`) for decoupled communicati
 - J.A.R.V.I.S. voice assistant with speech synthesis/recognition (disabled)
 
 ### HUD Mode (first-person flight)
+- Detailed architecture guide: [`docs/flight-hud-architecture.md`](docs/flight-hud-architecture.md)
 - Toggled with the HUD button or **H**; renders into `#hudCanvas` inside `#hudOverlay`
 - three.js loads lazily on first activation (dynamic import in `hud.js`), so the schematic view pays no 3D cost
 - Infinite city illusion: one deterministic 2.2km tile rendered as a 3x3 clone grid; the engine wraps the player (and drones/bolts) across tile boundaries
